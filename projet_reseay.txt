@@ -2,7 +2,7 @@ class Server -> divides in two threads one for config and one for http requests
 
 thread config -> use the same as before 
 thread http's -> 
- 	* create a new thread for dealing withan incoming connection
+ 	* create a new thread for dealing with an incoming connection
 
 thread http   -> 
 	* decode the http request
