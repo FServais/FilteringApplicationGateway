@@ -1,0 +1,50 @@
+class Server -> divides in two threads one for config and one for http requests
+
+thread config -> use the same as before 
+thread http's -> 
+ 	* create a new thread for dealing withan incoming connection
+
+thread http   -> 
+	* decode the http request
+	* if "url is ok"
+		- look up in the cache
+		- if "page exists in the cache" & "timeout isn't reached" & "flag "forceRefresh" isn't set"
+			* get page from the cache
+			// depends on what we do for caching
+		- else
+			* get page from remote 
+			* checks http response
+			* if "ok (200)"
+				- check page conformity
+				- if "page is not accepted"
+					* generate error
+				- else 
+					* replace the page in the cache (according what technique is used)
+					* parse it
+					* check page
+					* if "page needs modif"
+						- change page
+			* else 
+				- ????
+		- create HTTP to answer request (error or success) and send result to the client
+	* else 
+		- return error about request encoding
+
+
+Question ??? cache => page modifiée ou normale??? (cas ou la liste change depuis la dernière update du cache)
+	- either : invalidate cache at each update of the list 
+	- or : store unchanged page and reparse at each call
+	- or : store changed page and decision algo to decide of the page must refreshed with the timeout
+	- or : store oject representing the unhashed page which allow efficient replacement and checking
+
+parser une page html :
+	* creer un arbre dom 
+	* arbre N-aire : 
+		- chaque noeud est étiquetté
+		- chaque noeud est un "élément HTML"
+		- un élément HTML est (vérifier formatage des balises) :	
+			* soit une balise unique (<[...]>, <[...]/>, <[...] />,...)
+			* soit une balise paire (<[...]> CONTENT </[...]>, <[...]> CONTENT </ [...]>,...)
+			* soit un contenu (texte)
+		- les feuilles sont soit des contenus ou des balise uniques
+		- les noeuds internes sont des balises paires
