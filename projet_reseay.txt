@@ -40,7 +40,7 @@ Question ??? cache => page modifiée ou normale??? (cas ou la liste change depuis
 parser une page html :
 	* creer un arbre dom 
 	* arbre N-aire : 
-		- chaque noeud est étiquetté
+		- hacque noeud est étiquetté
 		- chaque noeud est un "élément HTML"
 		- un élément HTML est (vérifier formatage des balises) :	
 			* soit une balise unique (<[...]>, <[...]/>, <[...] />,...)
@@ -48,3 +48,5 @@ parser une page html :
 			* soit un contenu (texte)
 		- les feuilles sont soit des contenus ou des balise uniques
 		- les noeuds internes sont des balises paires
+
+	* classe HTMLElement -> HTMLContent, HTMLPairTag (stocke les attributs dans un tableau), HTMLUniqueTag
