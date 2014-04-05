@@ -1,7 +1,19 @@
+
+
+import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
+
 import datastructures.WordList;
 import displayer.Displayer;
+import configuration.ConfigurationServer;
+import configuration.exceptions.HttpServerException;
+import http.HttpServer;
 
+/**
+ * Class representing the server of the Gateway
+ * @author Romain Mormont
+ *
+ */
 public class Server
 {
 	private WordList wordlist;
@@ -10,7 +22,14 @@ public class Server
 	private ConfigurationServer configThread = null;
 	private HttpServer httpServer = null;
 
-	public Server()
+	/**
+	 * Constructs a server object
+	 * @param maxThreadsHttp max number of threads for http connections
+	 * @param maxThreadConfig max number of threads for configuration connections
+	 * @throws IOException 
+	 */
+	public Server(int maxThreadsHttp, int maxThreadConfig) 
+			throws IOException
 	{
 		wordlist = new WordList();
 
@@ -22,19 +41,34 @@ public class Server
 		displayerThread.start();
 
 		// initalize thread for dealing with http connection
-		httpServer = new HttpServer(wordlist, msgQueue);
+		httpServer = new HttpServer(wordlist, msgQueue, maxThreadsHttp);
 		httpServer.setDaemon(true);
-		httpServer.start();
+		httpServer.start();			
+
 
 		// initalize thread for dealing with connection to the configuration platform
-		configThread = new ConfigurationServer(wordlist, msgQueue);
+		configThread = new ConfigurationServer(msgQueue, wordlist, maxThreadConfig);
 		configThread.setDaemon(true);
-		configThread.start();
-
+		configThread.start();	
 	}
 
 	public static void main(String args[])
 	{
-
+		if(args.length != 1)
+		{
+			System.err.println("USAGE : java Server <maxThread>");
+			return;
+		}
+		
+		int maxThreadsConfig = 5;
+		
+		try
+		{
+			Server server = new Server(Integer.parseInt(args[0]), maxThreadsConfig);
+		}
+		catch(Exception e)
+		{
+			
+		}
 	}
 }
