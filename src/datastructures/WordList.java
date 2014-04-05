@@ -1,4 +1,4 @@
-package be.mormont.romain.icn.project1.server.datastructures;
+package datastructures;
 /**
  * 
  */
