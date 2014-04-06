@@ -100,4 +100,24 @@ public class Node<K> {
 		
 		return desc + nbChildren();
 	}
+	
+	/**
+	 * Adds a child node containing the data to the current node 
+	 * @param data the data to store in the new node
+	 */
+	public void addChild(K data)
+	{
+		Node<K> new_child = new Node<K>(data);
+		
+		children.add(new_child);
+	}
+	
+	/**
+	 * Adds a child node to the current node
+	 * @param new_child the node to be added
+	 */
+	public void addChild(Node<K> new_child)
+	{
+		children.add(new_child);
+	}
 }
