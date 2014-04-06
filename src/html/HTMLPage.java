@@ -33,6 +33,10 @@ public class HTMLPage {
 		while(begin < s.length()-1){
 			// Reach tag
 			while(code[begin] != '<' && begin < s.length()-1){++begin;}
+			
+			// Take content if there is
+			if(begin - end > 1)
+				currentNode.addChild(new HTMLContent(s.substring(end+1, begin)));
 
 			// Take name
 			if(begin >= s.length()-1)
@@ -40,15 +44,6 @@ public class HTMLPage {
 			else
 				end = begin+1;
 			while(code[end] != ' ' && code[end] != '>' && end < s.length()-1){++end;}
-			
-			// Begin = '<'
-			// End = either '>' or ' '
-			/*
-			if(end+1 >= code.length)
-				System.out.println(s.substring(begin+1));
-			else
-				System.out.println(s.substring(begin+1, end));
-			*/
 			
 			// Closing tag
 			if(code[begin+1] == '/')

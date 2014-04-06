@@ -158,10 +158,13 @@ public class Node<K> {
 		System.out.print("-> ");
 		this.display();
 		System.out.println("");
-		for(int i = 0 ; i < this.nbChildren()  ; ++i){
-			System.out.print("-> ");
-			this.getNthChild(i).displaySubtree();
-			System.out.println("");
+		
+		if(this.nbChildren() > 0){
+			for(int i = 0 ; i < this.nbChildren()  ; ++i){
+				System.out.print("-> ");
+				this.getNthChild(i).displaySubtree();
+				System.out.println("");
+			}
 		}
 	}
 }
