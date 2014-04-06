@@ -28,7 +28,6 @@ public class Node<K> {
 	 */
 	public Node()
 	{
-		System.out.println("Node created");
 		children = new Vector<Node<K>>();
 		this.parent = null;
 	}
@@ -98,14 +97,14 @@ public class Node<K> {
 	
 	/**
 	 * Returns the nth child of the node
-	 * @param n the number of the node (in [1, # child])
+	 * @param n the number of the node (in [0, # child])
 	 * @return the nth child if n was ok, null otherwise
 	 */
 	public Node<K> getNthChild(int n)
 	{
-		if(n <= 0 || n > children.size())
+		if(n < 0 || n > children.size())
 			return null;
-		
+
 		return children.elementAt(n);
 	}
 	
@@ -147,10 +146,21 @@ public class Node<K> {
 	 */
 	public void display()
 	{
-		System.out.print(data.toString());
-		for(int i = 1 ; i <= this.nbChildren()  ; ++i){
+		if(data != null)
+			System.out.print(data.toString());
+	}
+	
+	/**
+	 * Display the subtree starting from this node.
+	 */
+	public void displaySubtree()
+	{
+		System.out.print("-> ");
+		this.display();
+		System.out.println("");
+		for(int i = 0 ; i < this.nbChildren()  ; ++i){
 			System.out.print("-> ");
-			this.getNthChild(i).display();
+			this.getNthChild(i).displaySubtree();
 			System.out.println("");
 		}
 	}

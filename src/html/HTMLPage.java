@@ -49,16 +49,20 @@ public class HTMLPage {
 			else
 				System.out.println(s.substring(begin+1, end));
 			*/
-			// If new tag -> new Node
-			// If closing tag -> goes up in the tree
+			
+			// Closing tag
 			if(code[begin+1] == '/')
 				currentNode = currentNode.getParent();
+			
+			// Single tag
 			else if(code[end-1] == '\\'){
 				Node<HTMLElement> newNode = new Node<HTMLElement>(new HTMLTag(s.substring(begin+1, end), false));
 				newNode.setParent(currentNode);
 				
 				currentNode.addChild(newNode);
-			}	
+			}
+			
+			// New pair tag
 			else{
 				Node<HTMLElement> newNode = new Node<HTMLElement>(new HTMLTag(s.substring(begin+1, end), true));
 				newNode.setParent(currentNode);

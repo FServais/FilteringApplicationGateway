@@ -73,6 +73,6 @@ public class Tree<K> {
 	 */
 	public void display()
 	{
-		root.display();
+		root.displaySubtree();
 	}
 }
