@@ -67,4 +67,12 @@ public class Tree<K> {
 		
 		return 1 + root.countDescendant();
 	}
+	
+	/**
+	 * Display the tree.
+	 */
+	public void display()
+	{
+		root.display();
+	}
 }

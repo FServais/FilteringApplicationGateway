@@ -12,5 +12,26 @@ public class HTMLTag extends HTMLElement {
 	protected boolean pair; // If pair tag (e.g <p>...</p>)
 	protected Vector<String> attributes;
 	
+	/**
+	 * Constructors
+	 * @param _tagName
+	 * @param _pair
+	 * @param _attributes
+	 */
+	public HTMLTag(String _tagName, boolean _pair, Vector<String> _attributes){
+		tagName = _tagName;
+		pair = _pair;
+		attributes = _attributes;
+	}
 	
+	public HTMLTag(String _tagName, boolean _pair){
+		this(_tagName, _pair, new Vector<String>());
+	}
+	
+	/**
+	 * toString
+	 */
+	public String toString(){
+		return tagName;
+	}
 }

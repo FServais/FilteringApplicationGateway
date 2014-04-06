@@ -34,6 +34,7 @@ public class Test {
 			"</html>\n";
 		
 		HTMLPage hp = new HTMLPage(response);
+		hp.displayTree();
 		
 	}
 

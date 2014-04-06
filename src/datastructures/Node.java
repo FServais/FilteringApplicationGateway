@@ -11,6 +11,7 @@ import java.util.Vector;
 public class Node<K> {
 	private K data = null;
 	private Vector<Node<K>> children;
+	private Node<K> parent;
 	
 	/**
 	 * Constructs a node containing the given data
@@ -27,7 +28,9 @@ public class Node<K> {
 	 */
 	public Node()
 	{
+		System.out.println("Node created");
 		children = new Vector<Node<K>>();
+		this.parent = null;
 	}
 	
 	/**
@@ -37,6 +40,24 @@ public class Node<K> {
 	public K getData()
 	{
 		return data;
+	}
+	
+	/**
+	 * Set the parent of the node.
+	 * @param _parent Parent node.
+	 */
+	public void setParent(Node<K> _parent)
+	{
+		this.parent = _parent;
+	}
+	
+	/**
+	 * Get the parent of the node.
+	 * @return The parent of the node.
+	 */
+	public Node<K> getParent()
+	{
+		return parent;
 	}
 	
 	/**
@@ -119,5 +140,18 @@ public class Node<K> {
 	public void addChild(Node<K> new_child)
 	{
 		children.add(new_child);
+	}
+	
+	/**
+	 * Display the data.
+	 */
+	public void display()
+	{
+		System.out.print(data.toString());
+		for(int i = 1 ; i <= this.nbChildren()  ; ++i){
+			System.out.print("-> ");
+			this.getNthChild(i).display();
+			System.out.println("");
+		}
 	}
 }
