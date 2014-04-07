@@ -39,6 +39,36 @@ public class Cache<K,V>
 	}
 	
 	/**
+	 * Check if a key is contained in the cache.
+	 * @param key Key of the element.
+	 * @return True if key is contained.
+	 */
+	public synchronized boolean isContained(K key)
+	{
+		return cache.containsKey(key);
+	}
+	
+	/**
+	 * Get the data of an entry (given by its key).
+	 * @param key Key of the entry.
+	 * @return Data associated to the key.
+	 */
+	public synchronized V getData(K key)
+	{
+		return cache.get(key).getData();
+	}
+	
+	/**
+	 * Get the entry of a key.
+	 * @param key Key of the entry.
+	 * @return Entry associated to the key.
+	 */
+	public synchronized CacheEntry<V> getEntry(K key)
+	{
+		return cache.get(key);
+	}
+	
+	/**
 	 * Return a representation of the cache.
 	 * @return Representation of the cache.
 	 */

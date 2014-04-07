@@ -8,7 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-
+import http.html.HTMLPage;
+import datastructures.Cache;
 import displayer.Displayer;
 
 /**
@@ -18,18 +19,21 @@ import displayer.Displayer;
  */
 public class HTTPClientRequest extends Thread {
 	
-	Socket socket;
+	private Socket socket;
+	private Cache<String, HTMLPage> cache;
 	//Displayer display = Displayer.getInstance();
 	
 	public HTTPClientRequest(Socket socket)
 	{
 		this.socket = socket;
+		cache = new Cache<String, HTMLPage>();
 	}
 	
 	public void run()
 	{
 		// Wait for the request
 		InputStream is = null;
+		String URL = new String();
 		try 
 		{
 			is = socket.getInputStream();
@@ -37,32 +41,36 @@ public class HTTPClientRequest extends Thread {
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
 			
 			// Read the request
-			String line, URL = new String();
+			String line;
 			while((line = br.readLine()) != null)
 			{
 				if(line.length() >= "GET /?s=".length())
 				{
 					if(line.substring(0, "GET /?s=".length()).equals("GET /?s="))
 					{
-						URL = line.substring("GET /?s=".length(), line.length()-(" HTTP/1.1".length()));
+						URL = decodeURL(line.substring("GET /?s=".length(), line.length()-(" HTTP/1.1".length())));
 						break;
 					}
 				}
 			}
-			
-			
-			
-			System.out.println("URL : ");
-			System.out.println(decodeURL(URL));
-			
 		} 
 		catch (IOException e) 
 		{
 			System.err.println("Error while getting request"); // Use Displayer instead...
 		}
 		
-		
+		// If already in cache and don't need to be refreshed
+		if(cache.isContained(URL) && cache.getEntry(URL).isValid())
+		{
+			/* Return the page */
+		}
+		else
+		{
+			/* Get the page and update cache */
+		}
+
 	}
+
 	
 	// QUELLE CLASSE ?
 	/**
