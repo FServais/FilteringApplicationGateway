@@ -8,6 +8,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import datastructures.WordList;
 
+/**
+ * Class that handle the connections of the Gateway.
+ * @author Fabs
+ *
+ */
 public class HttpServer extends Thread 
 {
 	private static int PORT = 8000;
@@ -24,6 +29,9 @@ public class HttpServer extends Thread
 		
 		// create server socket
 		this.ss = new ServerSocket(PORT);
+		
+		this.wordlist = wordlist;
+		this.msgQueue = msgQueue;
 	}
 	
 	public void run()
