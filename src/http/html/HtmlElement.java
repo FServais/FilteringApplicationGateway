@@ -1,6 +1,6 @@
 package http.html;
 
-public abstract class HtmlElement 
+public abstract class HTMLElement 
 {
 	
 }
