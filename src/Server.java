@@ -7,7 +7,7 @@ import datastructures.WordList;
 import displayer.Displayer;
 import configuration.ConfigurationServer;
 import configuration.exceptions.HttpServerException;
-import http.HttpServer;
+import http.HTTPServer;
 
 /**
  * Class representing the server of the Gateway
@@ -20,7 +20,7 @@ public class Server
 	private LinkedBlockingQueue<String> msgQueue = null;// Queue for outputting threads messages in std ouput
 	private Displayer displayerThread = null;
 	private ConfigurationServer configThread = null;
-	private HttpServer httpServer = null;
+	private HTTPServer httpServer = null;
 
 	/**
 	 * Constructs a server object
@@ -41,8 +41,8 @@ public class Server
 		displayerThread.start();
 
 		// initalize thread for dealing with http connection
-		httpServer = new HttpServer(wordlist, msgQueue, maxThreadsHttp);
-		httpServer.setDaemon(true);
+		httpServer = new HTTPServer(wordlist, msgQueue, maxThreadsHttp);
+		//httpServer.setDaemon(true);
 		httpServer.start();			
 
 
