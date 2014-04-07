@@ -1,12 +1,11 @@
-package html;
+package http.html;
 
 public class HTMLContent extends HTMLElement {
 	String data; // Content
 	
-	public HTMLContent(String _data)
+	public HTMLContent(String data)
 	{
-		System.out.println("New Content");
-		data = _data;
+		this.data = data;
 	}
 	
 	/**

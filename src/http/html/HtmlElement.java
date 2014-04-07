@@ -1,6 +1,12 @@
 package http.html;
 
-public abstract class HtmlElement 
-{
+
+/**
+ * Class representing the content of an HTML page (e.g tag or content).
+ * 
+ * @author Fabrice Servais
+ * 
+ */
+public abstract class HTMLElement {
 	
 }
