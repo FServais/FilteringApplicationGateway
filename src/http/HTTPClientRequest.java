@@ -59,8 +59,11 @@ public class HTTPClientRequest extends Thread {
 			System.err.println("Error while getting request"); // Use Displayer instead...
 		}
 		
-		// If already in cache and don't need to be refreshed
-		if(cache.isContained(URL) && cache.getEntry(URL).isValid())
+		// Analysis of "forceRefresh" flag
+		boolean forceRefresh = false;
+		
+		// If already in cache and don't need to be refreshed and don't have "forceRefresh" flag
+		if(cache.isContained(URL) && cache.getEntry(URL).isValid() && !forceRefresh)
 		{
 			/* Return the page */
 		}
