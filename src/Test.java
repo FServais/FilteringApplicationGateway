@@ -1,4 +1,4 @@
-import html.HTMLPage;
+import http.html.HTMLPage;
 
 
 public class Test {
@@ -34,7 +34,7 @@ public class Test {
 			"</html>\n";
 		
 		HTMLPage hp = new HTMLPage(response);
-		hp.displayTree();
+		//hp.displayTree();
 		
 	}
 

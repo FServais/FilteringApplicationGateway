@@ -7,6 +7,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import datastructures.WordList;
+
 /**
  * Class that handle the connections of the Gateway.
  * @author Fabs

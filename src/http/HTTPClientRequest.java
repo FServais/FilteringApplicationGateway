@@ -3,10 +3,13 @@ package http;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 
 import http.html.HTMLPage;
 import datastructures.Cache;
@@ -23,6 +26,12 @@ public class HTTPClientRequest extends Thread {
 	private Cache<String, HTMLPage> cache;
 	//Displayer display = Displayer.getInstance();
 	
+	private static final String OUTPUT = "<html><head><title>Example</title></head><body><p>Worked!!!</p></body></html>";
+	private static final String OUTPUT_HEADERS = "HTTP/1.1 200 OK\r\n" +
+	    "Content-Type: text/html\r\n" + 
+	    "Content-Length: ";
+	private static final String OUTPUT_END_OF_HEADERS = "\r\n\r\n";
+	
 	public HTTPClientRequest(Socket socket)
 	{
 		this.socket = socket;
@@ -31,9 +40,10 @@ public class HTTPClientRequest extends Thread {
 	
 	public void run()
 	{
+		System.out.println("New request");
 		// Wait for the request
 		InputStream is = null;
-		String URL = new String();
+		String URL = new String(), request = new String();
 		try 
 		{
 			is = socket.getInputStream();
@@ -44,14 +54,7 @@ public class HTTPClientRequest extends Thread {
 			String line;
 			while((line = br.readLine()) != null)
 			{
-				if(line.length() >= "GET /?s=".length())
-				{
-					if(line.substring(0, "GET /?s=".length()).equals("GET /?s="))
-					{
-						URL = decodeURL(line.substring("GET /?s=".length(), line.length()-(" HTTP/1.1".length())));
-						break;
-					}
-				}
+				request += (line + "\n");
 			}
 		} 
 		catch (IOException e) 
@@ -59,37 +62,43 @@ public class HTTPClientRequest extends Thread {
 			System.err.println("Error while getting request"); // Use Displayer instead...
 		}
 		
-		// Analysis of "forceRefresh" flag
-		boolean forceRefresh = false;
+		DecodeClientRequest dcr = new DecodeClientRequest(request);
+		URL = dcr.getPath();
+		System.out.println("URL = " + URL);
 		
-		// If already in cache and don't need to be refreshed and don't have "forceRefresh" flag
-		if(cache.isContained(URL) && cache.getEntry(URL).isValid() && !forceRefresh)
-		{
-			/* Return the page */
-		}
-		else
-		{
-			/* Get the page and update cache */
-		}
+		// Analysis of "forceRefresh" flag
+		boolean forceRefresh = dcr.forceRefresh();
+		
+		if(URL == null)
+			System.out.println("Null URL.");
+		
+		else{
+			// If already in cache and don't need to be refreshed (timeout) and don't have "forceRefresh" flag
+			if(cache.isContained(URL) && cache.getEntry(URL).isValid() && !forceRefresh)
+			{
+				/* Return the page */
+			}
+			else
+			{
+				/* Get the page and update cache */
+				try 
+				{
+					System.out.println("Try to write");
+					BufferedWriter out = new BufferedWriter(
+							new OutputStreamWriter(
+									new BufferedOutputStream(socket.getOutputStream())));
+					out.write(OUTPUT_HEADERS + OUTPUT.length() + OUTPUT_END_OF_HEADERS + OUTPUT);
+					out.flush();
+					out.close();
+					socket.close();
+				} 
+				catch (IOException e) 
+				{
 
-	}
-
-	
-	// QUELLE CLASSE ?
-	/**
-	 * Percent decoding for an URL.
-	 * @param URL URL to decode.
-	 * @return URL decoded.
-	 */
-	private String decodeURL(String URL)
-	{ 
-		try 
-		{
-			return new URI(URL).getPath();
-		} 
-		catch (URISyntaxException e) 
-		{
-			return null;
+					System.err.println("Error while writing response");
+				}
+			}
 		}
+		
 	}
 }
