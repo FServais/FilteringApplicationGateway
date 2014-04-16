@@ -26,7 +26,7 @@ public class HTTPClientRequest extends Thread {
 	private Cache<String, HTMLPage> cache;
 	//Displayer display = Displayer.getInstance();
 	
-	private static final String OUTPUT = "<html><head><title>Example</title></head><body><p>Worked!!!</p></body></html>";
+	private static final String OUTPUT = "<html><head><title>Example</title></head><body><p>Worked!!!</p></body></html>\n";
 	private static final String OUTPUT_HEADERS = "HTTP/1.1 200 OK\r\n" +
 	    "Content-Type: text/html\r\n" + 
 	    "Content-Length: ";
@@ -42,20 +42,20 @@ public class HTTPClientRequest extends Thread {
 	{
 		System.out.println("New request");
 		// Wait for the request
-		InputStream is = null;
 		String URL = new String(), request = new String();
 		try 
 		{
-			is = socket.getInputStream();
-			
-			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+			BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			
 			// Read the request
 			String line;
-			while((line = br.readLine()) != null)
+			while((line = br.readLine()) != null && !line.equals(""))
 			{
+				System.out.println(line);
 				request += (line + "\n");
 			}
+			
+			br.close();
 		} 
 		catch (IOException e) 
 		{
