@@ -19,7 +19,7 @@ public class Server
 	private WordList wordlist;
 	private LinkedBlockingQueue<DisplayerMessage> msgQueue = null;// Queue for outputting threads messages in std ouput
 	private Displayer displayerThread = null;
-	private ConfigurationServer configThread = null;
+	//private ConfigurationServer configThread = null;
 	private HTTPServer httpServer = null;
 
 	/**
@@ -32,6 +32,8 @@ public class Server
 			throws IOException
 	{
 		wordlist = new WordList();
+		wordlist.insert("Wolper");
+		wordlist.insert("Pierre");
 
 		// initialize displayer thread
 		msgQueue = new LinkedBlockingQueue<DisplayerMessage>(); 
@@ -64,7 +66,7 @@ public class Server
 		
 		try
 		{
-			Server server = new Server(Integer.parseInt(args[0]), maxThreadsConfig);
+			new Server(Integer.parseInt(args[0]), maxThreadsConfig);
 		}
 		catch(Exception e)
 		{
