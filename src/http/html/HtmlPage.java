@@ -300,12 +300,27 @@ public class HTMLPage
 	 */
 	public String toString()
 	{
-		Object[] tagArray = list.toArray();
 		StringBuilder sb = new StringBuilder();
 		
-		for(Object htmlElement : tagArray)
+		for(HTMLElement htmlElement : list)
 			sb.append(((HTMLElement) htmlElement).toString());
 		
 		return sb.toString();
 	}
-}
+	
+	/**
+	 * Returns all the content elements of the page
+	 * @return a Vector of HTMLContent objects containing all the content elements of the page
+	 */
+	public Vector<HTMLContent> getContentElements()
+	{
+		Vector<HTMLContent> vec = new Vector<HTMLContent>();
+		
+		// run through elements of the pages
+		for(HTMLElement htmlElement : list)
+			if(htmlElement instanceof HTMLContent)
+				vec.add((HTMLContent) htmlElement);
+		
+		return vec;
+	}
+ }
