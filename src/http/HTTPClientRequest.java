@@ -2,10 +2,8 @@ package http;
 
 import java.net.Socket;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.io.BufferedOutputStream;
+import java.util.concurrent.LinkedBlockingQueue;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,6 +11,7 @@ import java.io.PrintWriter;
 
 import http.html.HTMLPage;
 import datastructures.Cache;
+import displayer.DisplayerMessage;
 
 /**
  * Class that handle a connection from a client that request a page.
@@ -22,24 +21,24 @@ import datastructures.Cache;
 public class HTTPClientRequest extends Thread {
 	
 	private Socket socket;
-	private Cache<URL, HTMLPage> cache;
-	//Displayer display = Displayer.getInstance();
-	
+	private Cache<String, HTMLPage> cache;
+	private LinkedBlockingQueue<DisplayerMessage> msgQueue = null;
+
 	private static final String OUTPUT_HEADERS = "HTTP/1.1 200 OK\r\n" +
 	    "Content-Type: text/html\r\n" + 
 	    "Content-Length: ";
 	private static final String OUTPUT_END_OF_HEADERS = "\r\n\r\n";
 	
-	public HTTPClientRequest(Socket socket)
+	public HTTPClientRequest(Socket socket, LinkedBlockingQueue<DisplayerMessage> msgQueue)
 	{
 		this.socket = socket;
-		cache = new Cache<URL, HTMLPage>();
+		cache = new Cache<String, HTMLPage>();
+		this.msgQueue = msgQueue;
 	}
 	
 	public void run()
 	{
-		System.out.println("New request");
-		URL urlRequested = null;
+		msgQueue.add(new DisplayerMessage("New request"));
 		// Wait for the request
 
 		StringBuilder sb = new StringBuilder();
@@ -75,11 +74,16 @@ public class HTTPClientRequest extends Thread {
 			urlRequested = dcr.getURL();
 			System.out.println("URL = " + urlRequested.toString());
 		}
+
 		
 		if(urlRequested == null)
-			System.out.println("Null URL");
+			msgQueue.add(new DisplayerMessage("Null URL", true));
 		else
 		{
+			DecodeClientRequest dcr = new DecodeClientRequest(request);
+			URL = dcr.getPath();
+			msgQueue.add(new DisplayerMessage("URL = " + URL));
+			
 			// Analysis of "forceRefresh" flag
 			boolean forceRefresh = dcr.forceRefresh();
 
@@ -98,14 +102,14 @@ public class HTTPClientRequest extends Thread {
 				} 
 				catch (IOException e) 
 				{
-					System.err.println("Error while writing response");
+					msgQueue.add(new DisplayerMessage("Error while writing response", true));
 				}
 				finally
 				{
 					try {
 						socket.close();
 					} catch (IOException e) {
-						System.err.println("Closing socket failed");
+						msgQueue.add(new DisplayerMessage("Closing socket failed", true));
 					}
 				}
 			}

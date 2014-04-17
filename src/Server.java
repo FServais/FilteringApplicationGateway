@@ -5,8 +5,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import datastructures.WordList;
 import displayer.Displayer;
+import displayer.DisplayerMessage;
 import configuration.ConfigurationServer;
-import configuration.exceptions.HttpServerException;
 import http.HTTPServer;
 
 /**
@@ -17,7 +17,7 @@ import http.HTTPServer;
 public class Server
 {
 	private WordList wordlist;
-	private LinkedBlockingQueue<String> msgQueue = null;// Queue for outputting threads messages in std ouput
+	private LinkedBlockingQueue<DisplayerMessage> msgQueue = null;// Queue for outputting threads messages in std ouput
 	private Displayer displayerThread = null;
 	private ConfigurationServer configThread = null;
 	private HTTPServer httpServer = null;
@@ -34,10 +34,10 @@ public class Server
 		wordlist = new WordList();
 
 		// initialize displayer thread
-		msgQueue = new LinkedBlockingQueue<String>(); 
+		msgQueue = new LinkedBlockingQueue<DisplayerMessage>(); 
 		displayerThread = Displayer.getInstance();
 		displayerThread.setQueue(msgQueue);
-		displayerThread.setDaemon(true);
+		//displayerThread.setDaemon(true);
 		displayerThread.start();
 
 		// initalize thread for dealing with http connection
@@ -47,9 +47,9 @@ public class Server
 
 
 		// initalize thread for dealing with connection to the configuration platform
-		configThread = new ConfigurationServer(msgQueue, wordlist, maxThreadConfig);
-		configThread.setDaemon(true);
-		configThread.start();	
+		//configThread = new ConfigurationServer(msgQueue, wordlist, maxThreadConfig);
+		//configThread.setDaemon(true);
+		//configThread.start();	
 	}
 
 	public static void main(String args[])
