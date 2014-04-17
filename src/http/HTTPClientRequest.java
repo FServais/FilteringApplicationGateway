@@ -3,6 +3,7 @@ package http;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -15,6 +16,7 @@ import java.io.PrintWriter;
 import http.html.HTMLPage;
 import datastructures.Cache;
 import displayer.Displayer;
+import displayer.DisplayerMessage;
 
 /**
  * Class that handle a connection from a client that request a page.
@@ -25,7 +27,7 @@ public class HTTPClientRequest extends Thread {
 	
 	private Socket socket;
 	private Cache<String, HTMLPage> cache;
-	//Displayer display = Displayer.getInstance();
+	private LinkedBlockingQueue<DisplayerMessage> msgQueue = null;
 	
 	private static final String OUTPUT = "<html><head><title>Introduction to computer networking</title></head><body><p>Worked!!!</p></body></html>";
 	private static final String OUTPUT_HEADERS = "HTTP/1.1 200 OK\r\n" +
@@ -33,10 +35,11 @@ public class HTTPClientRequest extends Thread {
 	    "Content-Length: ";
 	private static final String OUTPUT_END_OF_HEADERS = "\r\n\r\n";
 	
-	public HTTPClientRequest(Socket socket)
+	public HTTPClientRequest(Socket socket, LinkedBlockingQueue<DisplayerMessage> msgQueue)
 	{
 		this.socket = socket;
 		cache = new Cache<String, HTMLPage>();
+		this.msgQueue = msgQueue;
 	}
 	
 	public void run()

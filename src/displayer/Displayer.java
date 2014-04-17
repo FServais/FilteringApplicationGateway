@@ -8,7 +8,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author Romain
  */
 public class Displayer extends Thread {
-	private LinkedBlockingQueue<String> lbq = null;
+	private LinkedBlockingQueue<DisplayerMessage> lbq = null;
 	private boolean close = false;
 	
 	/** holds the single instance of the Displayer class */
@@ -40,7 +40,7 @@ public class Displayer extends Thread {
 	 * Initialize the queue of Displayer
 	 * @param lbq is the blocking queue in which the messages will come
 	 */
-	public synchronized void setQueue(LinkedBlockingQueue<String> lbq)
+	public synchronized void setQueue(LinkedBlockingQueue<DisplayerMessage> lbq)
 	{
 		this.lbq = lbq;
 	}
@@ -54,7 +54,12 @@ public class Displayer extends Thread {
 		{
 			try 
 			{
-				System.out.println(lbq.take());
+				DisplayerMessage dm = lbq.take();
+				if(dm.isError())
+					System.err.println(dm.getMessage());
+				else
+					System.out.println(dm.getMessage());
+				
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

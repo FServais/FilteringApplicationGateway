@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import datastructures.WordList;
+import displayer.DisplayerMessage;
 
 /**
  * Class that handle the connections of the Gateway.
@@ -18,11 +19,11 @@ public class HTTPServer extends Thread
 {
 	private static int PORT = 8000;
 	private WordList wordlist;
-	private LinkedBlockingQueue<String> msgQueue = null;// Queue for outputting threads messages in std ouput
+	private LinkedBlockingQueue<DisplayerMessage> msgQueue = null;// Queue for outputting threads messages in std ouput
 	private ServerSocket ss = null;
 	private ExecutorService threadPool = null;
 	
-	public HTTPServer(WordList wordlist, LinkedBlockingQueue<String> msgQueue, int maxThreads) 
+	public HTTPServer(WordList wordlist, LinkedBlockingQueue<DisplayerMessage> msgQueue, int maxThreads) 
 			throws IOException 
 	{
 		// create thread pool
@@ -43,11 +44,11 @@ public class HTTPServer extends Thread
 			try
 			{
 				Socket client_gateway = ss.accept();
-				threadPool.execute(new HTTPClientRequest(client_gateway));
+				threadPool.execute(new HTTPClientRequest(client_gateway, msgQueue));
 			}
 			catch(IOException e)
 			{
-				System.err.println("Creation of new Socket failed.");
+				msgQueue.add(new DisplayerMessage("Creation of new Socket failed.", true));
 			}
 		}
 	}
