@@ -24,4 +24,13 @@ public class HTMLContent implements HTMLElement {
 	{
 		return data;
 	}
+	
+	/**
+	 * Returns an array containing the words 
+	 * @return a String array containing the words of the content
+	 */
+	public String[] getWordsArray()
+	{
+		return data.split("\\b+");
+	}
 }
