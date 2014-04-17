@@ -4,7 +4,6 @@ import java.net.Socket;
 import java.net.URL;
 
 import java.util.concurrent.LinkedBlockingQueue;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -17,7 +16,6 @@ import displayer.DisplayerMessage;
 /**
  * Class that handle a connection from a client that request a page.
  * @author Fabs
- *
  */
 public class HTTPClientRequest extends Thread {
 	
@@ -28,7 +26,7 @@ public class HTTPClientRequest extends Thread {
 	private static final String OUTPUT_HEADERS = "HTTP/1.1 200 OK\r\n" +
 	    "Content-Type: text/html\r\n" + 
 	    "Content-Length: ";
-	private static final String OUTPUT_END_OF_HEADERS = "\r\n\r\n";
+	//private static final String OUTPUT_END_OF_HEADERS = "\r\n\r\n";
 	
 	public HTTPClientRequest(Socket socket, LinkedBlockingQueue<DisplayerMessage> msgQueue)
 	{
@@ -40,12 +38,11 @@ public class HTTPClientRequest extends Thread {
 	public void run()
 	{
 		msgQueue.add(new DisplayerMessage("New request"));
-		// Wait for the request
 
 		StringBuilder sb = new StringBuilder();
-		URL urlRequested = null;
 		String request = null;
 
+		// reads the HTTP request
 		try 
 		{
 			InputStreamReader isr = new InputStreamReader(socket.getInputStream());
@@ -59,17 +56,21 @@ public class HTTPClientRequest extends Thread {
 			}
 
 			request = sb.toString();
+			
+			msgQueue.add(new DisplayerMessage(request)); 
 		} 
 		catch (IOException e) 
 		{
-			System.err.println("Error while getting request"); // Use Displayer instead...
+			msgQueue.add(new DisplayerMessage("Error while getting request", true)); 
 			return;
 		}
 		
 		// Decode the request : get URL
 		DecodeClientRequest dcr = null;
+		URL urlRequested = null;
+		
 		if(request == null)
-			System.out.println("Null request.");
+			msgQueue.add(new DisplayerMessage("Null request.", true));
 		else
 		{
 			dcr = new DecodeClientRequest(request);
@@ -80,8 +81,9 @@ public class HTTPClientRequest extends Thread {
 		if(urlRequested == null)
 			msgQueue.add(new DisplayerMessage("Null URL", true));
 		else
-		{	
+		{
 			msgQueue.add(new DisplayerMessage("URL = " + urlRequested.toString()));
+			
 			// Analysis of "forceRefresh" flag
 			boolean forceRefresh = dcr.forceRefresh();
 

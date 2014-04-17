@@ -5,8 +5,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-public class DecodeClientRequest {
-	
+public class DecodeClientRequest 
+{
 	private String request;
 	private String GETLine;
 	

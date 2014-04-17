@@ -1,12 +1,11 @@
-package http.html;
-
-
 /**
- * Class representing the content of an HTML page (e.g tag or content).
- * 
- * @author Fabrice Servais
  * 
  */
-public abstract class HTMLElement {
-	
-}
+package http.html;
+
+/**
+ * @author Romain Mormont
+ * Interface for representing an html element. 
+ * An html element is either a tag (closing or opening) or some content (text, javascript,...)
+ */
+public interface HTMLElement { }
