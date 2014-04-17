@@ -1,15 +1,24 @@
 package http.html;
 
-public class HTMLComment extends HTMLElement {
+/**
+ * @author Romain Mormont
+ * A class for representing an HTML comment
+ */
+public class HTMLComment implements HTMLElement {
 	String comment; // Content
 	
+	/**
+	 * Constructs a HTMLElement based on the comment
+	 * @param comment a String containing the comment
+	 */
 	public HTMLComment(String comment)
 	{
 		this.comment = comment;
 	}
 	
 	/**
-	 * toString
+	 * Returns the comment as a String
+	 * @return a String containing the comment tag with its content
 	 */
 	public String toString()
 	{

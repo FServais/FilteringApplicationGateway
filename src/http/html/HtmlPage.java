@@ -1,27 +1,24 @@
 package http.html;
 
-import java.net.URL;
 import java.util.LinkedList;
 import java.util.Vector;
 
 /**
- * Class that represent a HTML page, stored in a Tree.
- * 
- * @author Fabrice Servais
- *
+ * A class for representing a HTML page 
+ * @author Romain Mormont
  */
-public class HTMLPage {
+public class HTMLPage 
+{
 	private LinkedList<HTMLElement> list;
 	
+	/**
+	 * Constructs a HTMLPage object 
+	 * @param html the html code of the page
+	 */
 	public HTMLPage(String html)
 	{
 		list = new LinkedList<HTMLElement>(); 
-		parse(html);
-	}
-	
-	public HTMLPage(URL u)
-	{
-		
+		parse(html); // parse the page
 	}
 	
 	/*
@@ -57,10 +54,8 @@ public class HTMLPage {
 	 * @param s String containing the HTML code.
 	 * @return The tree.
 	 */
-	private LinkedList<HTMLElement> parse(String s)
+	private void parse(String s)
 	{
-		LinkedList<HTMLElement> list = new LinkedList<HTMLElement>();
-
 		for(int i = 0; i < s.length(); i++)
 		{
 			char c = s.charAt(i);
@@ -70,8 +65,6 @@ public class HTMLPage {
 			else
 				i = parseContent(s, i);
 		}
-
-		return list;
 	}
 	
 	/**
@@ -303,6 +296,7 @@ public class HTMLPage {
 	
 	/**
 	 * Returns the html code of the page
+	 * @return a String containing the html code of the page
 	 */
 	public String toString()
 	{
