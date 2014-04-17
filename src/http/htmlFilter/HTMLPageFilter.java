@@ -1,10 +1,7 @@
 package http.htmlFilter;
 
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Vector;
-
 import datastructures.WordList;
 import http.html.HTMLContent;
 import http.html.HTMLPage;
@@ -12,15 +9,15 @@ import http.html.HTMLPage;
 public class HTMLPageFilter 
 {
 	private FilterStatus status;
-	private WordList wordlist;
 	private HTMLPage page;
 	private String url;
+	private Vector<String> restricted_keywords;
 	
 	public HTMLPageFilter(HTMLPage page, URL url, WordList wordlist)
 	{
 		this.page = page;
-		this.wordlist = wordlist;
 		this.url = url.toString();
+		this.restricted_keywords = wordlist.getVector();
 		
 		determineStatusFromURL(); // checks url
 		if(status != FilterStatus.PAGE_REFUSED)
@@ -35,44 +32,54 @@ public class HTMLPageFilter
 	{
 		// get all content elements of the page
 		Vector<HTMLContent> contents = page.getContentElements();
+		StringBuilder sb = new StringBuilder();
 		
-		// counts occurences of each word in each content elements
-		HashMap<String, Integer> counting_map = new HashMap<String, Integer>();
-		int max_count;
-		
-		// run through html content elements
+		// build a big string containing only the contents of the page
 		for(HTMLContent content : contents)
 		{
-			// TODO Splits word around other types of char than space
-			String[] splitted_content = content.getWordsArray();
+			sb.append(content.toString());
+		}
+		
+		String pageContent = sb.toString();
+		int keyword_in_page = 0;
+		
+		// count occurrences of each restricted keyword in the page
+		for(int i = 0; i < restricted_keywords.size(); i++)
+		{
+			String keyword = restricted_keywords.get(i);
 			
-			// run through words of the current content element
-			for(String s : splitted_content)
-				if(wordlist.contains(s))
-				{
-					if(!counting_map.containsKey(s)) // first occurence of a word
-						counting_map.put(s, 1);
-					else
-					{
-						int curr_count = counting_map.get(s) + 1;
-						if(curr_count >= 4)
-						{
-							status = FilterStatus.PAGE_REFUSED;
-							return;
-						}
-						
-						counting_map.put(s, curr_count);
-					}
-				}
+			int count = countOccurrence(pageContent, keyword);
+			
+			if(count > 0)
+				keyword_in_page++;
+			
+			if(count >= 4 || keyword_in_page >= 3)
+			{	
+				if(count >= 4)
+					System.out.println("Keyword in page : '" + keyword + "' (4 occurences)");
+				if(keyword_in_page >= 3)
+					System.out.println("Third keyword in the page");
+				
+				status = FilterStatus.PAGE_REFUSED;
+				return;
+			}
 		}
 		
 		// checks status criteria
-		if(counting_map.size() >= 3)
-			status = FilterStatus.PAGE_REFUSED;
-		else if(counting_map.size() == 0)
+		if(keyword_in_page == 0)
 			status = FilterStatus.PAGE_OK;
 		else 
 			status = FilterStatus.PAGE_NEED_ALTERATION;
+		
+		// DEBUG
+		String s;
+		if(status == FilterStatus.PAGE_NEED_ALTERATION)
+			s = "alter";
+		else
+			s = "ok";
+		
+		System.out.println(keyword_in_page + " keyword(s) in the page (" + s + ")");
+		// DEBUG
 	}
 	
 	/**
@@ -81,11 +88,11 @@ public class HTMLPageFilter
 	 */
 	private void determineStatusFromURL()
 	{
-		Vector<String> restricted_keywords = wordlist.getVector();
 		
 		for(String keyword : restricted_keywords)
 			if(url.contains(keyword))
 			{	
+				System.out.println("Keyword in url : '" + keyword + "'");
 				status = FilterStatus.PAGE_REFUSED;
 				return;
 			}
@@ -107,6 +114,20 @@ public class HTMLPageFilter
 	
 	public void filterPage()
 	{
-		
+		// TODO implements filter page
+		return;
+	}
+	
+	/**
+	 * Returns the number of occurences of a substring in a string
+	 * @param str a String in which the occurences will be searched
+	 * @param substr a String containing the substring
+	 * @return
+	 */
+	private int countOccurrence(String str, String substr)
+	{
+		int strlen = str.length(),
+			substrlen = substr.length();
+		return (strlen - str.replace(substr, "").length()) / substrlen;
 	}
 }
