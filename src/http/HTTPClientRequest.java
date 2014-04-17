@@ -39,27 +39,36 @@ public class HTTPClientRequest extends Thread {
 	{
 		msgQueue.add(new DisplayerMessage("New request"));
 		// Wait for the request
-		String URL = new String(), request = new String();
+		StringBuilder sb = new StringBuilder();
+		String URL = null, request = null;
+		
 		try 
 		{
-			BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			InputStreamReader isr = new InputStreamReader(socket.getInputStream());
+			BufferedReader br = new BufferedReader(isr);
 			
 			// Read the request
 			String line;
 			while((line = br.readLine()) != null && !line.equals(""))
 			{
-				request += (line + "\n");
+				sb.append(line + "\n");
 			}
 			
+			request = sb.toString();
 			//br.close();
 		} 
 		catch (IOException e) 
 		{
-			msgQueue.add(new DisplayerMessage("Error while getting request", true)); // Use Displayer instead...
+			System.err.println("Error while getting request"); // Use Displayer instead...
+			return;
 		}
 		
 		if(request == null)
-			msgQueue.add(new DisplayerMessage("Null URL."));
+		{
+			System.out.println("Null URL.");
+			return;
+		}
+
 		
 		else
 		{
