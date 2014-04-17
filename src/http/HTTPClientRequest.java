@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 
 import http.html.HTMLPage;
 import datastructures.Cache;
@@ -26,7 +27,7 @@ public class HTTPClientRequest extends Thread {
 	private Cache<String, HTMLPage> cache;
 	//Displayer display = Displayer.getInstance();
 	
-	private static final String OUTPUT = "<html><head><title>Example</title></head><body><p>Worked!!!</p></body></html>\n";
+	private static final String OUTPUT = "<html><head><title>Introduction to computer networking</title></head><body><p>Worked!!!</p></body></html>";
 	private static final String OUTPUT_HEADERS = "HTTP/1.1 200 OK\r\n" +
 	    "Content-Type: text/html\r\n" + 
 	    "Content-Length: ";
@@ -51,28 +52,27 @@ public class HTTPClientRequest extends Thread {
 			String line;
 			while((line = br.readLine()) != null && !line.equals(""))
 			{
-				System.out.println(line);
 				request += (line + "\n");
 			}
 			
-			br.close();
+			//br.close();
 		} 
 		catch (IOException e) 
 		{
 			System.err.println("Error while getting request"); // Use Displayer instead...
 		}
 		
-		DecodeClientRequest dcr = new DecodeClientRequest(request);
-		URL = dcr.getPath();
-		System.out.println("URL = " + URL);
-		
-		// Analysis of "forceRefresh" flag
-		boolean forceRefresh = dcr.forceRefresh();
-		
-		if(URL == null)
+		if(request == null)
 			System.out.println("Null URL.");
-		
-		else{
+		else
+		{
+			DecodeClientRequest dcr = new DecodeClientRequest(request);
+			URL = dcr.getPath();
+			System.out.println("URL = " + URL);
+			
+			// Analysis of "forceRefresh" flag
+			boolean forceRefresh = dcr.forceRefresh();
+
 			// If already in cache and don't need to be refreshed (timeout) and don't have "forceRefresh" flag
 			if(cache.isContained(URL) && cache.getEntry(URL).isValid() && !forceRefresh)
 			{
@@ -83,19 +83,25 @@ public class HTTPClientRequest extends Thread {
 				/* Get the page and update cache */
 				try 
 				{
-					System.out.println("Try to write");
-					BufferedWriter out = new BufferedWriter(
-							new OutputStreamWriter(
-									new BufferedOutputStream(socket.getOutputStream())));
-					out.write(OUTPUT_HEADERS + OUTPUT.length() + OUTPUT_END_OF_HEADERS + OUTPUT);
+					PrintWriter out = new PrintWriter(socket.getOutputStream()); 
+					
+					out.println(OUTPUT_HEADERS + OUTPUT.length());
+					out.println();
+					out.println(OUTPUT);
 					out.flush();
 					out.close();
-					socket.close();
 				} 
 				catch (IOException e) 
 				{
-
 					System.err.println("Error while writing response");
+				}
+				finally
+				{
+					try {
+						socket.close();
+					} catch (IOException e) {
+						System.err.println("Closing socket failed");
+					}
 				}
 			}
 		}
