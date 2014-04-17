@@ -74,7 +74,7 @@ public class HTTPClientRequest extends Thread {
 
 
 			if(urlRequested == null)
-				msgQueue.add(new DisplayerMessage("Null URL", true));
+				msgQueue.add(new DisplayerMessage("Null URL : " + request, true));
 			else
 			{
 				msgQueue.add(new DisplayerMessage("URL = " + urlRequested.toString()));
@@ -94,9 +94,14 @@ public class HTTPClientRequest extends Thread {
 					response_page = getPageFromRemote(urlRequested);
 					// add entry to the cache
 					cache.addEntry(urlRequested, response_page);
-					
 				}	
+				
+				writeResponse(HTTP.OK_HEADERS, response_page.toString());
 			}
+		}
+		catch (RemoteConnectionException e)
+		{
+			msgQueue.add(new DisplayerMessage(e.getMessage(), true));
 		}
 		catch (IOException e) 
 		{
@@ -125,9 +130,14 @@ public class HTTPClientRequest extends Thread {
 	{
 		PrintWriter out = new PrintWriter(socket.getOutputStream()); 
 		
-		out.print(headers + content.length());
+		if(headers.equals(HTTP.OK_HEADERS))
+			out.print(headers + content.length());
+		else
+			out.print(headers);
+		
 		out.print(HTTP.END_OF_HEADERS);
 		out.print(content);
+		out.print(HTTP.LINEBREAK);
 		
 		out.flush();
 		out.close();
@@ -167,12 +177,7 @@ public class HTTPClientRequest extends Thread {
 		}
 		catch(IOException e)
 		{
-			throw new RemoteConnectionException("Cannot get targeted page from remote website");
+			throw new RemoteConnectionException("Cannot get targeted page from remote website : " + e.getMessage());
 		}
-	}
-	
-	private void filterPage(HTMLPage htmlpage)
-	{
-		
 	}
 }

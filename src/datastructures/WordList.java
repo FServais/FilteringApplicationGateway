@@ -4,6 +4,7 @@ package datastructures;
  */
 import java.util.Hashtable;
 import java.util.Arrays;
+import java.util.Vector;
 /**
  * A class for storing words guaranteeing an almost constant access for :
  * <ul>
@@ -99,6 +100,15 @@ public class WordList
 			sb.append(sep + (String) wordArray[i]);
 
 		return sb.toString();
+	}
+	
+	/**
+	 * Returns an array containing all the restricted keywords
+	 * @return a String array containing the restricted keywords
+	 */
+	public synchronized Vector<String> getVector()
+	{
+		return new Vector<String>(stringTable.values());
 	}
 	
 	/**

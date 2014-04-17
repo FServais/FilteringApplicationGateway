@@ -8,5 +8,5 @@ public enum FilterStatus
 {
 	PAGE_OK,
 	PAGE_REFUSED,
-	PAGE_NEED_REPLACEMENT;
+	PAGE_NEED_ALTERATION;
 }
