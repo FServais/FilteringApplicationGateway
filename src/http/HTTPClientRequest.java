@@ -3,6 +3,7 @@ package http;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -24,10 +25,9 @@ import displayer.Displayer;
 public class HTTPClientRequest extends Thread {
 	
 	private Socket socket;
-	private Cache<String, HTMLPage> cache;
+	private Cache<URL, HTMLPage> cache;
 	//Displayer display = Displayer.getInstance();
 	
-	private static final String OUTPUT = "<html><head><title>Introduction to computer networking</title></head><body><p>Worked!!!</p></body></html>";
 	private static final String OUTPUT_HEADERS = "HTTP/1.1 200 OK\r\n" +
 	    "Content-Type: text/html\r\n" + 
 	    "Content-Length: ";
@@ -36,14 +36,15 @@ public class HTTPClientRequest extends Thread {
 	public HTTPClientRequest(Socket socket)
 	{
 		this.socket = socket;
-		cache = new Cache<String, HTMLPage>();
+		cache = new Cache<URL, HTMLPage>();
 	}
 	
 	public void run()
 	{
 		System.out.println("New request");
+		URL urlRequested = null;
 		// Wait for the request
-		String URL = new String(), request = new String();
+		String request = new String();
 		try 
 		{
 			BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -54,27 +55,33 @@ public class HTTPClientRequest extends Thread {
 			{
 				request += (line + "\n");
 			}
-			
-			//br.close();
+			System.out.println(request);
 		} 
 		catch (IOException e) 
 		{
 			System.err.println("Error while getting request"); // Use Displayer instead...
 		}
 		
+		// Decode the request : get URL
+		DecodeClientRequest dcr = null;
 		if(request == null)
-			System.out.println("Null URL.");
+			System.out.println("Null request.");
 		else
 		{
-			DecodeClientRequest dcr = new DecodeClientRequest(request);
-			URL = dcr.getPath();
-			System.out.println("URL = " + URL);
-			
+			dcr = new DecodeClientRequest(request);
+			urlRequested = dcr.getURL();
+			System.out.println("URL = " + urlRequested.toString());
+		}
+		
+		if(urlRequested == null)
+			System.out.println("Null URL");
+		else
+		{
 			// Analysis of "forceRefresh" flag
 			boolean forceRefresh = dcr.forceRefresh();
 
 			// If already in cache and don't need to be refreshed (timeout) and don't have "forceRefresh" flag
-			if(cache.isContained(URL) && cache.getEntry(URL).isValid() && !forceRefresh)
+			if(cache.isContained(urlRequested) && cache.getEntry(urlRequested).isValid() && !forceRefresh)
 			{
 				/* Return the page */
 			}
@@ -83,13 +90,8 @@ public class HTTPClientRequest extends Thread {
 				/* Get the page and update cache */
 				try 
 				{
-					PrintWriter out = new PrintWriter(socket.getOutputStream()); 
-					
-					out.println(OUTPUT_HEADERS + OUTPUT.length());
-					out.println();
-					out.println(OUTPUT);
-					out.flush();
-					out.close();
+					String OUTPUT = "<html><head><title>Introduction to computer networking</title></head><body><p>Worked!!!</p></body></html>";
+					writeResponse(OUTPUT);
 				} 
 				catch (IOException e) 
 				{
@@ -104,7 +106,24 @@ public class HTTPClientRequest extends Thread {
 					}
 				}
 			}
-		}
+		}	
+	}// End run
+	
+	/**
+	 * 
+	 * @param outputMessage
+	 * @throws IOException
+	 */
+	private void writeResponse(String outputMessage) throws IOException
+	{
+		PrintWriter out = new PrintWriter(socket.getOutputStream()); 
 		
+		out.println(OUTPUT_HEADERS + outputMessage.length());
+		out.println();
+		out.println(outputMessage);
+		
+		out.flush();
+		out.close();
 	}
+	
 }

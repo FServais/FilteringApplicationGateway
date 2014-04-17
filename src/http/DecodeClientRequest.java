@@ -1,7 +1,9 @@
 package http;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 
 public class DecodeClientRequest {
 	
@@ -18,9 +20,9 @@ public class DecodeClientRequest {
 	 * Get the address requested by a GET request message.
 	 * @return
 	 */
-	public String getPath()
+	public URL getURL()
 	{		
-		int indexOfPath = max(GETLine.indexOf("?s="), GETLine.indexOf("&s=")) + "?s=".length(); // Maybe 's' is not the first argument
+		int indexOfPath = Math.max(GETLine.indexOf("?s="), GETLine.indexOf("&s=")) + "?s=".length(); // Maybe 's' is not the first argument
 		
 		return decodeURL(GETLine.substring(indexOfPath, GETLine.length()-(" HTTP/1.1".length())));
 	}
@@ -32,7 +34,7 @@ public class DecodeClientRequest {
 	 */
 	public boolean forceRefresh()
 	{
-		int indexOfBool = max(GETLine.indexOf("?forceRefresh="), GETLine.indexOf("&forceRefresh=")) + "&forceRefresh=".length();
+		int indexOfBool = Math.max(GETLine.indexOf("?forceRefresh="), GETLine.indexOf("&forceRefresh=")) + "&forceRefresh=".length();
 		
 		if(GETLine.substring(indexOfBool, GETLine.length()).startsWith("true"))
 			return true;
@@ -61,28 +63,20 @@ public class DecodeClientRequest {
 	 * @param URL URL to decode.
 	 * @return URL decoded.
 	 */
-	private String decodeURL(String URL)
+	private URL decodeURL(String URL)
 	{ 
 		try 
 		{
-			return new URI(URL).getPath();
+			return new URL(new URI(URL).getPath());
 		} 
 		catch (URISyntaxException e) 
 		{
 			return null;
 		}
-	}
-	
-	/**
-	 * Choose the maximum value bewteen i and j;
-	 * @param i Integer
-	 * @param j Integer
-	 * @return Maximum of i and j.
-	 */
-	private int max(int i, int j)
-	{
-		if(i >= j)
-			return i;
-		return j;
+		catch (MalformedURLException e) 
+		{
+			System.out.println("LOL");
+			return null;
+		}
 	}
 }
