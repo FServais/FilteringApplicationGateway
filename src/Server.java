@@ -1,12 +1,13 @@
 
 
+
 import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import datastructures.WordList;
 import displayer.Displayer;
-import displayer.DisplayerMessage;
-import configuration.ConfigurationServer;
+import displayer.DisplayerMessage;import configuration.ConfigurationServer;
+
 import http.HTTPServer;
 
 /**
@@ -32,8 +33,7 @@ public class Server
 			throws IOException
 	{
 		wordlist = new WordList();
-		wordlist.insert("Wolper");
-		wordlist.insert("Pierre");
+		wordlist.insert("concurrent");
 
 		// initialize displayer thread
 		msgQueue = new LinkedBlockingQueue<DisplayerMessage>(); 
@@ -46,7 +46,6 @@ public class Server
 		httpServer = new HTTPServer(wordlist, msgQueue, maxThreadsHttp);
 		//httpServer.setDaemon(true);
 		httpServer.start();			
-
 
 		// initalize thread for dealing with connection to the configuration platform
 		//configThread = new ConfigurationServer(msgQueue, wordlist, maxThreadConfig);

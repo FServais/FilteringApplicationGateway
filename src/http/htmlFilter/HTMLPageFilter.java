@@ -53,7 +53,7 @@ public class HTMLPageFilter
 			if(count > 0)
 				keyword_in_page++;
 			
-			if(count >= 4 || keyword_in_page >= 3)
+			if(count >= 4 || keyword_in_page >= 3) // checks "refused" critera
 			{	
 				if(count >= 4)
 					System.out.println("Keyword in page : '" + keyword + "' (4 occurences)");
