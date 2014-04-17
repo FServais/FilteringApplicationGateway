@@ -21,8 +21,14 @@ public class DecodeClientRequest {
 	 * @return
 	 */
 	public URL getURL()
-	{		
-		int indexOfPath = Math.max(GETLine.indexOf("?s="), GETLine.indexOf("&s=")) + "?s=".length(); // Maybe 's' is not the first argument
+	{	
+		int sFirstArgument = GETLine.indexOf("?s="),
+			sOtherArgument = GETLine.indexOf("&s="); // Maybe 's' is not the first argument
+		
+		if(sFirstArgument == -1 && sOtherArgument == -1) // Argument 's' not there
+			return null;
+			
+		int indexOfPath = Math.max(sFirstArgument, sOtherArgument) + "?s=".length(); 
 		
 		return decodeURL(GETLine.substring(indexOfPath, GETLine.length()-(" HTTP/1.1".length())));
 	}
@@ -55,6 +61,7 @@ public class DecodeClientRequest {
 			if(line.length() >= "GET".length() && line.substring(0, "GET".length()).equals("GET"))
 				return line;
 		}
+
 		return null;
 	}
 	

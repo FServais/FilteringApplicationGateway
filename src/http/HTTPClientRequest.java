@@ -1,6 +1,7 @@
 package http;
 
 import java.net.Socket;
+import java.net.URL;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -21,7 +22,7 @@ import displayer.DisplayerMessage;
 public class HTTPClientRequest extends Thread {
 	
 	private Socket socket;
-	private Cache<String, HTMLPage> cache;
+	private Cache<URL, HTMLPage> cache;
 	private LinkedBlockingQueue<DisplayerMessage> msgQueue = null;
 
 	private static final String OUTPUT_HEADERS = "HTTP/1.1 200 OK\r\n" +
@@ -32,7 +33,7 @@ public class HTTPClientRequest extends Thread {
 	public HTTPClientRequest(Socket socket, LinkedBlockingQueue<DisplayerMessage> msgQueue)
 	{
 		this.socket = socket;
-		cache = new Cache<String, HTMLPage>();
+		cache = new Cache<URL, HTMLPage>();
 		this.msgQueue = msgQueue;
 	}
 	
@@ -42,7 +43,8 @@ public class HTTPClientRequest extends Thread {
 		// Wait for the request
 
 		StringBuilder sb = new StringBuilder();
-		String URL = null, request = null;
+		URL urlRequested = null;
+		String request = null;
 
 		try 
 		{
@@ -72,18 +74,14 @@ public class HTTPClientRequest extends Thread {
 		{
 			dcr = new DecodeClientRequest(request);
 			urlRequested = dcr.getURL();
-			System.out.println("URL = " + urlRequested.toString());
 		}
 
 		
 		if(urlRequested == null)
 			msgQueue.add(new DisplayerMessage("Null URL", true));
 		else
-		{
-			DecodeClientRequest dcr = new DecodeClientRequest(request);
-			URL = dcr.getPath();
-			msgQueue.add(new DisplayerMessage("URL = " + URL));
-			
+		{	
+			msgQueue.add(new DisplayerMessage("URL = " + urlRequested.toString()));
 			// Analysis of "forceRefresh" flag
 			boolean forceRefresh = dcr.forceRefresh();
 
