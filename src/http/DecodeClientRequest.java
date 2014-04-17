@@ -12,8 +12,10 @@ public class DecodeClientRequest
 	
 	public DecodeClientRequest(String req)
 	{
+		if(req == null)
+			System.err.println("What???");
 		this.request = req;
-		this.GETLine = GETLineFromRequest(req);
+		this.GETLine = GETLineFromRequest();
 	}
 	
 	/**
@@ -53,7 +55,7 @@ public class DecodeClientRequest
 	 * @param request
 	 * @return Line of "GET request"
 	 */
-	private String GETLineFromRequest(String request)
+	private String GETLineFromRequest()
 	{
 		String[] lines = request.split("\n");
 		for(String line : lines)

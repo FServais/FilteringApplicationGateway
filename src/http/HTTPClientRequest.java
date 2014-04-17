@@ -9,29 +9,31 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
-import javax.swing.text.html.HTML;
-
 import http.exceptions.RemoteConnectionException;
 import http.html.HTMLPage;
+import http.htmlFilter.FilterStatus;
+import http.htmlFilter.HTMLPageFilter;
 import datastructures.Cache;
+import datastructures.WordList;
 import displayer.DisplayerMessage;
 
 /**
  * Class that handle a connection from a client that request a page.
- * @author Fabs
+ * @author Fabs & Romain Mormont
  */
 public class HTTPClientRequest extends Thread {
 	
-	private Socket socket;
-	private Cache<URL, HTMLPage> cache;
+	private Socket socket = null;
+	private Cache<URL, HTMLPage> cache = null;
 	private LinkedBlockingQueue<DisplayerMessage> msgQueue = null;
+	private WordList wordlist = null;
 	
-	
-	public HTTPClientRequest(Socket socket, LinkedBlockingQueue<DisplayerMessage> msgQueue)
+	public HTTPClientRequest(Socket socket, LinkedBlockingQueue<DisplayerMessage> msgQueue, WordList wordlist)
 	{
 		this.socket = socket;
 		cache = new Cache<URL, HTMLPage>();
 		this.msgQueue = msgQueue;
+		this.wordlist = wordlist;
 	}
 	
 	public void run()
@@ -96,7 +98,19 @@ public class HTTPClientRequest extends Thread {
 					cache.addEntry(urlRequested, response_page);
 				}	
 				
-				writeResponse(HTTP.OK_HEADERS, response_page.toString());
+				// filters page 
+				HTMLPageFilter hpl = new HTMLPageFilter(response_page, urlRequested, wordlist);
+				
+				if(hpl.getStatus() == FilterStatus.PAGE_REFUSED)
+					writeResponse(HTTP.OK_HEADERS, "pas bon");/** TODO implements the page for refused access */
+				else
+				{
+					msgQueue.add(new DisplayerMessage("Page not refused : " + urlRequested.toString()));
+					if(hpl.getStatus() == FilterStatus.PAGE_NEED_ALTERATION)
+						hpl.filterPage();
+						
+					writeResponse(HTTP.OK_HEADERS, response_page.toString());
+				}
 			}
 		}
 		catch (RemoteConnectionException e)
@@ -109,6 +123,7 @@ public class HTTPClientRequest extends Thread {
 		}
 		catch (Exception e)
 		{
+			msgQueue.add(new DisplayerMessage("Exception : ", true));
 			e.printStackTrace();
 		}
 		finally
