@@ -1,21 +1,14 @@
 package http;
 
 import java.net.Socket;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
 import http.html.HTMLPage;
 import datastructures.Cache;
-import displayer.Displayer;
 import displayer.DisplayerMessage;
 
 /**
@@ -44,7 +37,7 @@ public class HTTPClientRequest extends Thread {
 	
 	public void run()
 	{
-		System.out.println("New request");
+		msgQueue.add(new DisplayerMessage("New request"));
 		// Wait for the request
 		String URL = new String(), request = new String();
 		try 
@@ -62,16 +55,17 @@ public class HTTPClientRequest extends Thread {
 		} 
 		catch (IOException e) 
 		{
-			System.err.println("Error while getting request"); // Use Displayer instead...
+			msgQueue.add(new DisplayerMessage("Error while getting request", true)); // Use Displayer instead...
 		}
 		
 		if(request == null)
-			System.out.println("Null URL.");
+			msgQueue.add(new DisplayerMessage("Null URL."));
+		
 		else
 		{
 			DecodeClientRequest dcr = new DecodeClientRequest(request);
 			URL = dcr.getPath();
-			System.out.println("URL = " + URL);
+			msgQueue.add(new DisplayerMessage("URL = " + URL));
 			
 			// Analysis of "forceRefresh" flag
 			boolean forceRefresh = dcr.forceRefresh();
@@ -96,14 +90,14 @@ public class HTTPClientRequest extends Thread {
 				} 
 				catch (IOException e) 
 				{
-					System.err.println("Error while writing response");
+					msgQueue.add(new DisplayerMessage("Error while writing response", true));
 				}
 				finally
 				{
 					try {
 						socket.close();
 					} catch (IOException e) {
-						System.err.println("Closing socket failed");
+						msgQueue.add(new DisplayerMessage("Closing socket failed", true));
 					}
 				}
 			}
