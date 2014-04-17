@@ -1,21 +1,18 @@
 package http;
 
 import java.net.Socket;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
 import http.html.HTMLPage;
 import datastructures.Cache;
-import displayer.Displayer;
 
 /**
  * Class that handle a connection from a client that request a page.
@@ -44,22 +41,28 @@ public class HTTPClientRequest extends Thread {
 		System.out.println("New request");
 		URL urlRequested = null;
 		// Wait for the request
-		String request = new String();
+
+		StringBuilder sb = new StringBuilder();
+		String URL = null, request = null;
+
 		try 
 		{
-			BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			InputStreamReader isr = new InputStreamReader(socket.getInputStream());
+			BufferedReader br = new BufferedReader(isr);
 			
 			// Read the request
 			String line;
 			while((line = br.readLine()) != null && !line.equals(""))
 			{
-				request += (line + "\n");
+				sb.append(line + "\n");
 			}
-			System.out.println(request);
+
+			request = sb.toString();
 		} 
 		catch (IOException e) 
 		{
 			System.err.println("Error while getting request"); // Use Displayer instead...
+			return;
 		}
 		
 		// Decode the request : get URL
@@ -90,7 +93,7 @@ public class HTTPClientRequest extends Thread {
 				/* Get the page and update cache */
 				try 
 				{
-					String OUTPUT = "<html><head><title>Introduction to computer networking</title></head><body><p>Worked!!!</p></body></html>";
+					String OUTPUT = "<html><head><title>Introduction to computer networking</title></head><body><p>Works !!!</p></body></html>";
 					writeResponse(OUTPUT);
 				} 
 				catch (IOException e) 
