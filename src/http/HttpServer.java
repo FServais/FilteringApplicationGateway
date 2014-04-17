@@ -17,7 +17,7 @@ import displayer.DisplayerMessage;
  */
 public class HTTPServer extends Thread 
 {
-	private static int PORT = 8000;
+	private static int PORT = 8005;
 	private WordList wordlist;
 	private LinkedBlockingQueue<DisplayerMessage> msgQueue = null;// Queue for outputting threads messages in std ouput
 	private ServerSocket ss = null;
