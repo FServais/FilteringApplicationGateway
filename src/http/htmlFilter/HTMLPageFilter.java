@@ -2,6 +2,7 @@ package http.htmlFilter;
 
 import java.net.URL;
 import java.util.Vector;
+
 import datastructures.WordList;
 import http.html.HTMLContent;
 import http.html.HTMLPage;
@@ -112,17 +113,32 @@ public class HTMLPageFilter
 		return status;
 	}
 	
-	public void filterPage()
+	/**
+	 * Returns the html code of the filtrated page (or not according to the status)
+	 * @return a String containing the html code of the page
+	 */
+	public String getFilteredPage()
 	{
-		// TODO implements filter page
-		return;
+		if(status == FilterStatus.PAGE_REFUSED)
+			return getRefuseAccessPage();
+		else
+		{
+			filterLinks();
+			if(status == FilterStatus.PAGE_OK)
+				return page.toString();
+			else 
+			{
+				filterRestrictedWords();
+				return page.toString();
+			}
+		}
 	}
-	
+
 	/**
 	 * Returns the number of occurences of a substring in a string
 	 * @param str a String in which the occurences will be searched
 	 * @param substr a String containing the substring
-	 * @return
+	 * @return the number of occurrence of the substring in the string
 	 */
 	private int countOccurrence(String str, String substr)
 	{
@@ -130,4 +146,32 @@ public class HTMLPageFilter
 			substrlen = substr.length();
 		return (strlen - str.replace(substr, "").length()) / substrlen;
 	}
+	
+	private void filterLinks()
+	{
+		/*Vector<HTMLOpeningTag> vec = page.getOpeningTagElements("a");
+		
+		for(HTMLOpeningTag tag : vec)
+		{
+			//String attr_val = tag.getAttributeValue("href");
+			// TODO : create the new redirection link
+			//tag.setAttributeValue("href", );
+		}*/
+	}
+	
+	private void filterRestrictedWords()
+	{
+		Vector<HTMLContent> vec = page.getContentElements(false);
+		
+		for(HTMLContent text : vec) // replace keywords
+			for(String word : restricted_keywords)
+				text.replaceWord(word, '*');
+	}
+	
+	
+	private String getRefuseAccessPage() 
+	{
+		return "pas bon";
+	}
+
 }

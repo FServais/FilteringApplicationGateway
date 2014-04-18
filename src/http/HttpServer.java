@@ -12,7 +12,7 @@ import displayer.DisplayerMessage;
 
 /**
  * Class that handle the connections of the Gateway.
- * @author Fabs
+ * @author Fabs & Romain Mormont
  *
  */
 public class HTTPServer extends Thread 

@@ -33,4 +33,36 @@ public class HTMLContent implements HTMLElement {
 	{
 		return data.split("\\b+");
 	}
+	
+	/**
+	 * Replaces every character of every occurrence of the given substring
+	 * in the data of the HTMLContent object by the character rep_char
+	 * @param substr a String containing the word to replace
+	 * @param rep_char a char for replacing the substring
+	 */
+	public void replaceWord(String substr, char rep_char)
+	{
+		String rep = getUnicharString(rep_char, substr.length());
+		
+		System.out.println("Substr = " + substr + " (" + rep + ")");
+		System.out.println(data);
+		data = data.replace(substr, rep);
+		System.out.println(data);
+	}
+	
+	/**
+	 * Returns a String composed of count occurrences of c
+	 * @param c the char to repeat
+	 * @param count the number of occurrences of c
+	 * @return the restulting String
+	 */
+	private String getUnicharString(char c, int count)
+	{
+		StringBuilder sb = new StringBuilder();
+		
+		for(int i = 0; i < count; i++)
+			sb.append(c);
+		
+		return sb.toString();
+	}
 }

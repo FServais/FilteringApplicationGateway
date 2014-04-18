@@ -138,6 +138,7 @@ public class HTMLPage
 	}
 
 	/**
+	 * TODO some attribute values don't have " "
 	 * Parses an opening html tag 
 	 * @param html the String containing the html code
 	 * @param currentCharIndex the index of the first char of the tag '<'
@@ -309,17 +310,56 @@ public class HTMLPage
 	}
 	
 	/**
-	 * Returns all the content elements of the page
+	 * Returns all the content elements of the page (with or without the javascript code)
+	 * @param the content in script tags are added to the vector, they're not otherwise
 	 * @return a Vector of HTMLContent objects containing all the content elements of the page
 	 */
-	public Vector<HTMLContent> getContentElements()
+	public Vector<HTMLContent> getContentElements(boolean add_script)
 	{
 		Vector<HTMLContent> vec = new Vector<HTMLContent>();
+		boolean in_javascript = false;
 		
 		// run through elements of the pages
 		for(HTMLElement htmlElement : list)
-			if(htmlElement instanceof HTMLContent)
+		{
+			if(htmlElement instanceof HTMLOpeningTag // starts script
+					&& ((HTMLOpeningTag) htmlElement).getName().equals("script"))
+				in_javascript = true;
+			else if(htmlElement instanceof HTMLClosingTag // ends script
+					&& ((HTMLClosingTag) htmlElement).getName().equals("script"))
+				in_javascript = false;
+			
+			if(htmlElement instanceof HTMLContent // add content
+					&& (!in_javascript || add_script))
 				vec.add((HTMLContent) htmlElement);
+		}
+		
+		return vec;
+	}
+	
+	/**
+	 * Returns all the content elements of the page without the javascript code
+	 * @return a Vector of HTMLContent objects containing all the content elements of the page (except javascript)
+	 */
+	public Vector<HTMLContent> getContentElements()
+	{
+		return getContentElements(false);
+	}
+	
+	/**
+	 * Returns a vector containing the tags of the given name.
+	 * If name == "*", then all the opening tags are returned in the vector
+	 * @param name a String containing the name of the desired tag or "*"
+	 * @return a Vector of HTMLOpeningTag containing the desired tags
+	 */
+	public Vector<HTMLOpeningTag> getOpeningTagElements(String name)
+	{
+		Vector<HTMLOpeningTag> vec = new Vector<HTMLOpeningTag>();
+		
+		for(HTMLElement element : list)
+			if(element instanceof HTMLOpeningTag 
+					&& (name.equals("*") || ((HTMLOpeningTag) element).getName().equals(name)))
+				vec.add((HTMLOpeningTag) element);
 		
 		return vec;
 	}

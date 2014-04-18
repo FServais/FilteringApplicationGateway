@@ -11,7 +11,6 @@ import java.io.PrintWriter;
 
 import http.exceptions.RemoteConnectionException;
 import http.html.HTMLPage;
-import http.htmlFilter.FilterStatus;
 import http.htmlFilter.HTMLPageFilter;
 import datastructures.Cache;
 import datastructures.WordList;
@@ -101,16 +100,7 @@ public class HTTPClientRequest extends Thread {
 				// filters page 
 				HTMLPageFilter hpl = new HTMLPageFilter(response_page, urlRequested, wordlist);
 				
-				if(hpl.getStatus() == FilterStatus.PAGE_REFUSED)
-					writeResponse(HTTP.OK_HEADERS, "pas bon");/** TODO implements the page for refused access */
-				else
-				{
-					msgQueue.add(new DisplayerMessage("Page not refused : " + urlRequested.toString()));
-					if(hpl.getStatus() == FilterStatus.PAGE_NEED_ALTERATION)
-						hpl.filterPage();
-						
-					writeResponse(HTTP.OK_HEADERS, response_page.toString());
-				}
+				writeResponse(HTTP.OK_HEADERS, hpl.getFilteredPage());
 			}
 		}
 		catch (RemoteConnectionException e)
