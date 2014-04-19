@@ -24,6 +24,9 @@ public class DecodeClientRequest
 	 */
 	public URL getURL()
 	{	
+		if(GETLine == null)
+			return null;
+		
 		int sFirstArgument = GETLine.indexOf("?s="),
 			sOtherArgument = GETLine.indexOf("&s="); // Maybe 's' is not the first argument
 		
@@ -73,7 +76,7 @@ public class DecodeClientRequest
 	 * @return URL decoded.
 	 */
 	private URL decodeURL(String URL)
-	{ 
+	{
 		try 
 		{
 			return new URL(new URI(URL).getPath());
@@ -84,7 +87,16 @@ public class DecodeClientRequest
 		}
 		catch (MalformedURLException e) 
 		{
-			System.out.println("LOL");
+			// If the URL begins with "www" and not the protocol -> MalformedURLException
+			if(URL.startsWith("www."))
+			{
+				try 
+				{
+					return new URL(new URI("http%3A%2F%2F" + URL).getPath());
+				} 
+				catch (MalformedURLException | URISyntaxException e1) { return null; }
+			}
+			
 			return null;
 		}
 	}
