@@ -5,19 +5,21 @@ import java.util.Vector;
 
 import datastructures.WordList;
 import http.html.HTMLContent;
+import http.html.HTMLElement;
+import http.html.HTMLOpeningTag;
 import http.html.HTMLPage;
 
 public class HTMLPageFilter 
 {
 	private FilterStatus status;
 	private HTMLPage page;
-	private String url;
+	private URL url;
 	private Vector<String> restricted_keywords;
 	
 	public HTMLPageFilter(HTMLPage page, URL url, WordList wordlist)
 	{
 		this.page = page;
-		this.url = url.toString();
+		this.url = url;
 		this.restricted_keywords = wordlist.getVector();
 		
 		determineStatusFromURL(); // checks url
@@ -27,7 +29,7 @@ public class HTMLPageFilter
 	
 	/**
 	 * Sets the status variable that specifies if the page is ok, refused or 
-	 * if it must be alterated by analyzing the html content of the page
+	 * if it must be altered by analyzing the html content of the page
 	 */
 	private void determineStatusFromPage()
 	{
@@ -89,9 +91,9 @@ public class HTMLPageFilter
 	 */
 	private void determineStatusFromURL()
 	{
-		
+		String url_string = url.toString();
 		for(String keyword : restricted_keywords)
-			if(url.contains(keyword))
+			if(url_string.contains(keyword))
 			{	
 				System.out.println("Keyword in url : '" + keyword + "'");
 				status = FilterStatus.PAGE_REFUSED;
@@ -119,11 +121,12 @@ public class HTMLPageFilter
 	 */
 	public String getFilteredPage()
 	{
-		if(status == FilterStatus.PAGE_REFUSED)
+		if(status == FilterStatus.PAGE_REFUSED){
 			return getRefuseAccessPage();
+		}
 		else
 		{
-			filterLinks();
+			page.filterLinks(url);
 			if(status == FilterStatus.PAGE_OK)
 				return page.toString();
 			else 
