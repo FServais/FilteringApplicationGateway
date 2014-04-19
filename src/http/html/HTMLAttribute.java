@@ -20,7 +20,7 @@ public class HTMLAttribute
 	 * Returns the value of the attribute
 	 * @return a String containing the value of the attribute
 	 */
-	public String getValue()
+	public String getName()
 	{
 		return name;
 	}
@@ -29,7 +29,7 @@ public class HTMLAttribute
 	 * Returns the name of the attribute
 	 * @return a String containing the name of the attribute
 	 */	
-	public String getName()
+	public String getValue()
 	{
 		return value;
 	}
