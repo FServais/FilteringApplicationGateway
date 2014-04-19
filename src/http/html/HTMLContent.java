@@ -44,10 +44,10 @@ public class HTMLContent implements HTMLElement {
 	{
 		String rep = getUnicharString(rep_char, substr.length());
 		
-		System.out.println("Substr = " + substr + " (" + rep + ")");
-		System.out.println(data);
+		//System.out.println("Substr = " + substr + " (" + rep + ")");
+		//System.out.println(data);
 		data = data.replace(substr, rep);
-		System.out.println(data);
+		//System.out.println(data);
 	}
 	
 	/**
