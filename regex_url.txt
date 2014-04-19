@@ -1,0 +1,44 @@
+regex for checking and splitting url :
+protocol    ^(https?://)? 
+dom name    ([\da-zA-Z\.-]+(?:\.[a-z]{2,6})?(:\d{0,5})?)
+path        ((?:/[\w-\.\*\!]*)*) 
+get args    (\?(?:\w+=[\w-%\.]*)(?:&(?:\w+=[\w-%\.]*))*)?
+#val        (#[\w\+-=']+)?
+
+groups :
+0 : whole url
+1 : protocol                "http://" or "https://"
+2 : domain name (+ port)    "blabla.com:8255", "vlada.cazd.com",...
+3 : port                    ":256", ":8080",...
+4 : path                    "/folder1/folder2/index.php"
+5 : arguments               "?arg1=val1&arg2=val2", "?arg=val",...
+6 : #                       "#someattribute", "#sp=dazd",...
+
+whole regex : 
+^(https?://)?([\da-zA-Z\.-]+(?:\.[a-z]{2,6})?(:\d{0,5})?)((?:/[\w-\.\*\!]*)*)(\?(?:\w+=[\w-%\.]*)(?:&(?:\w+=[\w-%\.]*))*)?(#[\w\+-=']+)?
+
+EXAMPLE 1 :
+URL : https://www.google.be/webhp?sourceid=chrome-instant&ion=1&espv=2&ie=UTF-8#q=i'm+looking+through+you+chords
+
+Splitted in :
+Group(0) = https://www.google.be/webhp?sourceid=chrome-instant&ion=1&espv=2&ie=UTF-8#q=i'm+looking+through+you+chords
+Group(1) = https://
+Group(2) = www.google.be
+Group(3) = null
+Group(4) = /webhp
+Group(5) = ?sourceid=chrome-instant&ion=1&espv=2&ie=UTF-8
+Group(6) = #q=i'm+looking+through+you+chords
+
+
+EXAMPLE 2 :
+URL : http://help.eclipse.org/indigo/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Fguide%2Ffirstplugin_run.htm
+
+Splitted in :
+Group(0) = http://help.eclipse.org/indigo/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Fguide%2Ffirstplugin_run.htm
+Group(1) = http://
+Group(2) = help.eclipse.org
+Group(3) = null
+Group(4) = /indigo/index.jsp
+Group(5) = ?topic=%2Forg.eclipse.platform.doc.isv%2Fguide%2Ffirstplugin_run.htm
+Group(6) = null
+
