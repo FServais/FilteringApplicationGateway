@@ -56,11 +56,11 @@ public class HTMLPage
 	 */
 	private void parse(String s)
 	{
-		for(int i = 0; i < s.length(); i++)
+		for(int i = 0; i < s.length(); i++) // run through the string
 		{
 			char c = s.charAt(i);
 			
-			if(c == '<')
+			if(c == '<') // a tag is reached
 				i = parseTag(s, i);
 			else
 				i = parseContent(s, i);
