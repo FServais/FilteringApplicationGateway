@@ -1,6 +1,7 @@
 package http;
 
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -90,7 +91,7 @@ public class HTTPClientRequest extends Thread {
 				{
 					response_page = cache.getEntry(urlRequested).getData();
 				}
-				else // get page frome remote server
+				else // get page from remote server
 				{
 					response_page = getPageFromRemote(urlRequested);
 					// add entry to the cache
@@ -149,7 +150,7 @@ public class HTTPClientRequest extends Thread {
 	}
 	
 	/**
-	 * Dont take into account bad response from remote server
+	 * Don't take into account bad response from remote server
 	 * @param url
 	 * @return
 	 * @throws RemoteConnectionException
@@ -157,7 +158,7 @@ public class HTTPClientRequest extends Thread {
 	private HTMLPage getPageFromRemote(URL url) throws RemoteConnectionException
 	{
 		try
-		{
+		{			
 			// connect to the remote
 			HttpURLConnection huc = (HttpURLConnection) url.openConnection();
 			
