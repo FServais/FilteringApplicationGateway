@@ -12,7 +12,7 @@ import displayer.DisplayerMessage;
 
 /**
  * Class that handle the connections of the Gateway.
- * @author Fabs
+ * @author Fabs & Romain Mormont
  *
  */
 public class HTTPServer extends Thread 
@@ -44,7 +44,7 @@ public class HTTPServer extends Thread
 			try
 			{
 				Socket client_gateway = ss.accept();
-				threadPool.execute(new HTTPClientRequest(client_gateway, msgQueue));
+				threadPool.execute(new HTTPClientRequest(client_gateway, msgQueue, wordlist));
 			}
 			catch(IOException e)
 			{

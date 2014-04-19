@@ -23,5 +23,14 @@ public class HTMLClosingTag implements HTMLElement {
 	{
 		return "</" + tagName + ">";
 	}
+	
+	/**
+	 * Returns the name of the tag
+	 * @return a String containing the name of the tag
+	 */
+	public String getName()
+	{
+		return tagName;
+	}
 }
 
