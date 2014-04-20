@@ -1,6 +1,6 @@
 package datastructures;
 
-import java.util.Hashtable;
+import java.util.concurrent.ConcurrentHashMap;
 import datastructures.CacheEntry;
 
 /**
@@ -10,12 +10,12 @@ import datastructures.CacheEntry;
  */
 public class Cache<K,V> 
 {
-	private Hashtable<K,CacheEntry<V>> cache;
+	private ConcurrentHashMap<K,CacheEntry<V>> cache;
 	
 	
 	public Cache()
 	{
-		cache = new Hashtable<K,CacheEntry<V>>();
+		cache = new ConcurrentHashMap<K,CacheEntry<V>>();
 	}
 	
 	
@@ -45,6 +45,7 @@ public class Cache<K,V>
 	 */
 	public synchronized boolean isContained(K key)
 	{
+		System.out.println("KEYS = " + cache.keySet().toString());
 		return cache.containsKey(key);
 	}
 	
