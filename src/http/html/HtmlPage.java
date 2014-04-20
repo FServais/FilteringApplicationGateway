@@ -256,7 +256,7 @@ public class HTMLPage
 			else if(inTagName && (c == '>' || c == ' ')) // end of tag name
 			{
 				inTagName = false;
-				tagName = sb.toString();
+				tagName = sb.toString().toLowerCase();
 			}
 			else // in tag name
 				sb.append(c);
