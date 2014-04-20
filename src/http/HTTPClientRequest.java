@@ -24,14 +24,14 @@ import displayer.DisplayerMessage;
 public class HTTPClientRequest extends Thread {
 	
 	private Socket socket = null;
-	private Cache<URL, HTMLPage> cache = null;
+	private Cache<String, HTMLPage> cache = null;
 	private LinkedBlockingQueue<DisplayerMessage> msgQueue = null;
 	private WordList wordlist = null;
 	
 	public HTTPClientRequest(Socket socket, LinkedBlockingQueue<DisplayerMessage> msgQueue, WordList wordlist)
 	{
 		this.socket = socket;
-		cache = new Cache<URL, HTMLPage>();
+		cache = new Cache<String, HTMLPage>();
 		this.msgQueue = msgQueue;
 		this.wordlist = wordlist;
 	}
@@ -85,17 +85,33 @@ public class HTTPClientRequest extends Thread {
 				boolean forceRefresh = dcr.forceRefresh();
 				
 				HTMLPage response_page;
+
+				String url_string = urlRequested.toString();
+
+				if(cache.isContained(url_string)){
+					System.out.println("url is contained");
+
+					if(cache.getEntry(url_string).isValid())
+						System.out.println("Entry still valid");
+				}
+
+				if(forceRefresh)
+					System.out.println("Force to refresh");
 	
 				// If already in cache and don't need to be refreshed (timeout) and don't have "forceRefresh" flag
-				if(cache.isContained(urlRequested) && cache.getEntry(urlRequested).isValid() && !forceRefresh)
+				if(cache.isContained(url_string) && cache.getEntry(url_string).isValid() && !forceRefresh)
 				{
-					response_page = cache.getEntry(urlRequested).getData();
+					System.out.println("°°°°°°°°°°° From cache °°°°°°°°°°°");
+					response_page = cache.getEntry(url_string).getData();
 				}
 				else // get page from remote server
 				{
 					response_page = getPageFromRemote(urlRequested);
 					// add entry to the cache
-					cache.addEntry(urlRequested, response_page);
+					cache.addEntry(url_string, response_page);
+					System.out.println("::::::::::::::::::::: CACHE ::::::::::::::::::::::::");
+					System.out.println(cache.toString());
+					System.out.println("::::::::::::::::::::::::::::::::::::::::::::::::::::");
 				}	
 				
 				// filters page 
