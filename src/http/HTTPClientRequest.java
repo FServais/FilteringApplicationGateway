@@ -78,31 +78,18 @@ public class HTTPClientRequest extends Thread {
 				msgQueue.add(new DisplayerMessage("Null URL : " + request, true));
 			else
 			{
-				msgQueue.add(new DisplayerMessage("URL = " + urlRequested.toString()));
+				msgQueue.add(new DisplayerMessage("URL = \"" + urlRequested.toString() + "\""));
 				
 				// Analysis of "forceRefresh" flag
-				boolean forceRefresh = dcr.forceRefresh();
+				boolean forceRefresh = dcr.getForceRefresh();
 				
 				HTMLPage response_page;
 
 				String url_string = urlRequested.toString();
-
-				System.out.println("////////////// Cache infos \\\\\\\\\\\\\\\\ ");
-				
-				if(cache.isContained(url_string)){
-					System.out.println("url is contained");
-
-					if(cache.getEntry(url_string).isValid())
-						System.out.println("Entry still valid");
-				}
-
-				if(forceRefresh)
-					System.out.println("Force to refresh");
 	
 				// If already in cache and don't need to be refreshed (timeout) and don't have "forceRefresh" flag
 				if(cache.isContained(url_string) && cache.getEntry(url_string).isValid() && !forceRefresh)
 				{
-					System.out.println("------------- From cache ");
 					response_page = cache.getEntry(url_string).getData();
 				}
 				else // get page from remote server
@@ -110,9 +97,6 @@ public class HTTPClientRequest extends Thread {
 					response_page = getPageFromRemote(urlRequested);
 					// add entry to the cache
 					cache.addEntry(url_string, response_page);
-					System.out.println("::::::::::::::::::::: CACHE ::::::::::::::::::::::::");
-					System.out.println(cache.toString());
-					System.out.println("::::::::::::::::::::::::::::::::::::::::::::::::::::");
 				}	
 				
 				// filters page 

@@ -9,6 +9,7 @@ public class DecodeClientRequest
 {
 	private String request;
 	private String GETLine;
+	private boolean forceRefresh;
 	
 	public DecodeClientRequest(String req)
 	{
@@ -16,6 +17,7 @@ public class DecodeClientRequest
 			System.err.println("What???");
 		this.request = req;
 		this.GETLine = GETLineFromRequest();
+		this.forceRefresh = forceRefresh();
 	}
 	
 	/**
@@ -33,9 +35,19 @@ public class DecodeClientRequest
 		if(sFirstArgument == -1 && sOtherArgument == -1) // Argument 's' not there
 			return null;
 			
-		int indexOfPath = Math.max(sFirstArgument, sOtherArgument) + "?s=".length(); 
-		
-		return decodeURL(GETLine.substring(indexOfPath, GETLine.length()-(" HTTP/1.1".length())));
+		int indexOfPath = Math.max(sFirstArgument, sOtherArgument) + "?s=".length(),
+			indexOfAmpersand = GETLine.indexOf("&", indexOfPath),
+			indexEndOfPath = indexOfAmpersand == -1 ? GETLine.indexOf(" HTTP/1.") : Math.min(GETLine.indexOf(" HTTP/1."), indexOfAmpersand);		
+		return decodeURL(GETLine.substring(indexOfPath, indexEndOfPath));
+	}
+	
+	/**
+	 * Get the 'forceRefresh' variable (in the URL)
+	 * @return Value of 'forceRefresh'. False by default.
+	 */
+	public boolean getForceRefresh()
+	{
+		return forceRefresh;
 	}
 	
 	
@@ -43,7 +55,7 @@ public class DecodeClientRequest
 	 * Get the boolean 'forceRefresh' in the URL.
 	 * @return Value of 'forceRefresh'. False by default.
 	 */
-	public boolean forceRefresh()
+	private boolean forceRefresh()
 	{
 		int indexOfBool = Math.max(GETLine.indexOf("?forceRefresh="), GETLine.indexOf("&forceRefresh=")) + "&forceRefresh=".length();
 		
