@@ -326,7 +326,6 @@ public class HTMLPage
 					{
 						e.printStackTrace();
 					} catch (MalformedURLException e) {
-						System.out.println("CATCH : href = \"" + hrefValue + "\"");
 						//System.out.println("------ New hrefValue relative : " + "http://localhost:8005/?s="+URLEncoder.encode(url.getHost() + "/" + hrefValue, "UTF-8"));
 						try {
 							((HTMLOpeningTag) htmlElement).setAttributeValue("href", "http://localhost:8005/?s="+URLEncoder.encode(url.getHost() + "/" + hrefValue, "UTF-8"));
