@@ -53,9 +53,9 @@ public class CacheEntry<K>
 	public boolean isValid()
 	{
 		if(Calendar.getInstance().getTime().compareTo(timeout) <= 0)
-			return false;
-		else
 			return true;
+		else
+			return false;
 	}
 	
 	/**
