@@ -1,5 +1,7 @@
 package http;
 
+import http.html.HTMLPage;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -7,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import datastructures.Cache;
 import datastructures.WordList;
 import displayer.DisplayerMessage;
 
@@ -22,6 +25,7 @@ public class HTTPServer extends Thread
 	private LinkedBlockingQueue<DisplayerMessage> msgQueue = null;// Queue for outputting threads messages in std ouput
 	private ServerSocket ss = null;
 	private ExecutorService threadPool = null;
+	private Cache<String, HTMLPage> cache = null;
 	
 	public HTTPServer(WordList wordlist, LinkedBlockingQueue<DisplayerMessage> msgQueue, int maxThreads) 
 			throws IOException 
@@ -34,6 +38,8 @@ public class HTTPServer extends Thread
 		
 		this.wordlist = wordlist;
 		this.msgQueue = msgQueue;
+		
+		this.cache = new Cache<String, HTMLPage>();
 	}
 	
 	public void run()
@@ -44,7 +50,7 @@ public class HTTPServer extends Thread
 			try
 			{
 				Socket client_gateway = ss.accept();
-				threadPool.execute(new HTTPClientRequest(client_gateway, msgQueue, wordlist));
+				threadPool.execute(new HTTPClientRequest(client_gateway, msgQueue, wordlist, cache));
 			}
 			catch(IOException e)
 			{

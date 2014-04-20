@@ -1,7 +1,6 @@
 package http;
 
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -28,10 +27,10 @@ public class HTTPClientRequest extends Thread {
 	private LinkedBlockingQueue<DisplayerMessage> msgQueue = null;
 	private WordList wordlist = null;
 	
-	public HTTPClientRequest(Socket socket, LinkedBlockingQueue<DisplayerMessage> msgQueue, WordList wordlist)
+	public HTTPClientRequest(Socket socket, LinkedBlockingQueue<DisplayerMessage> msgQueue, WordList wordlist, Cache<String, HTMLPage> cache)
 	{
 		this.socket = socket;
-		cache = new Cache<String, HTMLPage>();
+		this.cache = cache;
 		this.msgQueue = msgQueue;
 		this.wordlist = wordlist;
 	}
@@ -88,6 +87,8 @@ public class HTTPClientRequest extends Thread {
 
 				String url_string = urlRequested.toString();
 
+				System.out.println("////////////// Cache infos \\\\\\\\\\\\\\\\ ");
+				
 				if(cache.isContained(url_string)){
 					System.out.println("url is contained");
 
@@ -101,7 +102,7 @@ public class HTTPClientRequest extends Thread {
 				// If already in cache and don't need to be refreshed (timeout) and don't have "forceRefresh" flag
 				if(cache.isContained(url_string) && cache.getEntry(url_string).isValid() && !forceRefresh)
 				{
-					System.out.println("°°°°°°°°°°° From cache °°°°°°°°°°°");
+					System.out.println("------------- From cache ");
 					response_page = cache.getEntry(url_string).getData();
 				}
 				else // get page from remote server
