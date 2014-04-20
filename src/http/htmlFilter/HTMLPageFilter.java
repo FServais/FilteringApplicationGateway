@@ -5,8 +5,6 @@ import java.util.Vector;
 
 import datastructures.WordList;
 import http.html.HTMLContent;
-import http.html.HTMLElement;
-import http.html.HTMLOpeningTag;
 import http.html.HTMLPage;
 
 public class HTMLPageFilter 
@@ -149,19 +147,7 @@ public class HTMLPageFilter
 			substrlen = substr.length();
 		return (strlen - str.replace(substr, "").length()) / substrlen;
 	}
-	
-	private void filterLinks()
-	{
-		/*Vector<HTMLOpeningTag> vec = page.getOpeningTagElements("a");
-		
-		for(HTMLOpeningTag tag : vec)
-		{
-			//String attr_val = tag.getAttributeValue("href");
-			// TODO : create the new redirection link
-			//tag.setAttributeValue("href", );
-		}*/
-	}
-	
+
 	private void filterRestrictedWords()
 	{
 		Vector<HTMLContent> vec = page.getContentElements(false);
