@@ -1,5 +1,6 @@
 package datastructures;
 
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import datastructures.CacheEntry;
 
@@ -45,7 +46,6 @@ public class Cache<K,V>
 	 */
 	public synchronized boolean isContained(K key)
 	{
-		System.out.println("KEYS = " + cache.keySet().toString());
 		return cache.containsKey(key);
 	}
 	
@@ -75,7 +75,14 @@ public class Cache<K,V>
 	 */
 	public String toString()
 	{
-		return cache.toString();
+		String toReturn = new String();
+		for(Entry<K,CacheEntry<V>> e : cache.entrySet())
+		{
+			String line = "---> KEY = " + e.getKey() + "\n" + "---> VALUE = " + e.getValue() + "\n"; 
+			toReturn += line;
+		}
+		return toReturn;
+		//return cache.toString();
 	}
 	
 }
