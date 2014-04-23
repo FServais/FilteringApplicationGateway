@@ -122,7 +122,7 @@ public class HTMLOpeningTag implements HTMLElement
 	private HTMLAttribute findAttribute(String name)
 	{
 		for(HTMLAttribute attribute : attributes)
-			if(attribute.getName().equals(name))
+			if(attribute.getName().equalsIgnoreCase(name))
 				return attribute;
 		
 		return null;
