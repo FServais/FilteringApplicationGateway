@@ -34,6 +34,8 @@ public class Server
 	{
 		wordlist = new WordList();
 		wordlist.insert("concurrent");
+		wordlist.insert("database");
+		wordlist.insert("member");
 
 		// initialize displayer thread
 		msgQueue = new LinkedBlockingQueue<DisplayerMessage>(); 

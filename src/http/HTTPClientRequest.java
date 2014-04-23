@@ -62,14 +62,14 @@ public class HTTPClientRequest extends Thread {
 
 			
 			// Decode the request : get URL
-			DecodeClientRequest dcr = null;
+			DecodeClientHTTPRequest dcr = null;
 			URL urlRequested = null;
 			
 			if(request == null)
 				msgQueue.add(new DisplayerMessage("Bad request (null pointer)", true));
 			else
 			{
-				dcr = new DecodeClientRequest(request);
+				dcr = new DecodeClientHTTPRequest(request);
 				urlRequested = dcr.getURL();
 			}
 
@@ -100,7 +100,7 @@ public class HTTPClientRequest extends Thread {
 				}	
 				
 				// filters page 
-				HTMLPageFilter hpl = new HTMLPageFilter(response_page, urlRequested, wordlist);
+				HTMLPageFilter hpl = new HTMLPageFilter(response_page/*.clone()*/, urlRequested, wordlist);
 				
 				writeResponse(HTTP.OK_HEADERS, hpl.getFilteredPage());
 			}

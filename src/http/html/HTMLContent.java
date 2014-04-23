@@ -46,7 +46,7 @@ public class HTMLContent implements HTMLElement {
 		
 		//System.out.println("Substr = " + substr + " (" + rep + ")");
 		//System.out.println(data);
-		data = data.replace(substr, rep);
+		data = data.replaceAll("(?i)" + substr, rep);
 		//System.out.println(data);
 	}
 	
@@ -54,7 +54,7 @@ public class HTMLContent implements HTMLElement {
 	 * Returns a String composed of count occurrences of c
 	 * @param c the char to repeat
 	 * @param count the number of occurrences of c
-	 * @return the restulting String
+	 * @return the resulting String
 	 */
 	private String getUnicharString(char c, int count)
 	{
