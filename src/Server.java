@@ -6,7 +6,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import datastructures.WordList;
 import displayer.Displayer;
-import displayer.DisplayerMessage;import configuration.ConfigurationServer;
+import displayer.DisplayerMessage;
+import configuration.ConfigurationServer;
 
 import http.HTTPServer;
 

@@ -8,7 +8,6 @@ import java.util.Vector;
 
 import datastructures.WordList;
 import http.html.HTMLContent;
-import http.html.HTMLElement;
 import http.html.HTMLOpeningTag;
 import http.html.HTMLPage;
 
@@ -155,7 +154,7 @@ public class HTMLPageFilter
 			/* Analyze href */
 			try 
 			{
-				URL temp = new URL(hrefValue); // Check if absolute or not
+				new URL(hrefValue); // Check if absolute or not
 				// Absolute link
 				//System.out.println("------ New hrefValue : " + "http://localhost:8005/?s="+URLEncoder.encode(hrefValue, "UTF-8"));
 				a_tag.setAttributeValue("href", "http://localhost:8005/?s="+URLEncoder.encode(hrefValue, "UTF-8"));
@@ -190,7 +189,7 @@ public class HTMLPageFilter
 			
 			try
 			{
-				URL temp = new URL(srcValue);
+				new URL(srcValue);
 				// If MalformedURLException not caught -> Absolute link -> OK
 			}
 			catch(MalformedURLException e)

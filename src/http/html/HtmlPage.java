@@ -1,11 +1,7 @@
 package http.html;
 
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.LinkedList;
 import java.util.Vector;
-import java.net.URLEncoder;
 
 /**
  * A class for representing a HTML page 
