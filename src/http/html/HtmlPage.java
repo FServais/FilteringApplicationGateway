@@ -176,7 +176,7 @@ public class HTMLPage
 				}
 				else if(inTagName && (c == ' ' || c == '>' || c == '/')) // reach end of tag name (' ', '/' , '>')
 				{
-					tagName = sb.toString().toLowerCase();
+					tagName = sb.toString();
 					sb.setLength(0);
 					inTagName = false; 
 					tagNameOK = true;
@@ -201,7 +201,7 @@ public class HTMLPage
 				else if(inAttrVal && c == '"') // end of attributes with value
 				{
 					sb.append(c);
-					attr.add(sb.toString().toLowerCase());
+					attr.add(sb.toString());
 					sb.setLength(0);
 					inAttr = false;
 					inAttrVal = false;
@@ -256,7 +256,7 @@ public class HTMLPage
 			else if(inTagName && (c == '>' || c == ' ')) // end of tag name
 			{
 				inTagName = false;
-				tagName = sb.toString().toLowerCase();
+				tagName = sb.toString();
 			}
 			else // in tag name
 				sb.append(c);
@@ -298,45 +298,6 @@ public class HTMLPage
 		return i - 1;
 	}
 
-	/**
-	 * Replace all the 'href' attributes of 'a' tags that are relatives to absolutes
-	 */
-	public void filterLinks(URL url)
-	{
-		for(HTMLElement htmlElement : list)
-		{
-			if(htmlElement instanceof HTMLOpeningTag)
-			{
-				//System.out.println("TagName = " + ((HTMLOpeningTag) htmlElement).getName());
-				if(((HTMLOpeningTag) htmlElement).getName().equals("a"))
-				{
-					String hrefValue = ((HTMLOpeningTag) htmlElement).getAttributeValue("href");
-					if(hrefValue == null)
-						continue;
-					
-					/* Analyze href */
-					try 
-					{
-						URL temp = new URL(hrefValue);
-						// Absolute link
-						//System.out.println("------ New hrefValue : " + "http://localhost:8005/?s="+URLEncoder.encode(hrefValue, "UTF-8"));
-						((HTMLOpeningTag) htmlElement).setAttributeValue("href", "http://localhost:8005/?s="+URLEncoder.encode(hrefValue, "UTF-8"));
-					} 
-					catch (UnsupportedEncodingException e) 
-					{
-						e.printStackTrace();
-					} catch (MalformedURLException e) {
-						//System.out.println("------ New hrefValue relative : " + "http://localhost:8005/?s="+URLEncoder.encode(url.getHost() + "/" + hrefValue, "UTF-8"));
-						try {
-							((HTMLOpeningTag) htmlElement).setAttributeValue("href", "http://localhost:8005/?s="+URLEncoder.encode(url.getHost() + "/" + hrefValue, "UTF-8"));
-						} catch (UnsupportedEncodingException e1) {
-							e1.printStackTrace();
-						}
-					}
-				}
-			}
-		}
-	}
 	
 	/**
 	 * Returns the html code of the page
@@ -401,7 +362,7 @@ public class HTMLPage
 		
 		for(HTMLElement element : list)
 			if(element instanceof HTMLOpeningTag 
-					&& (name.equals("*") || ((HTMLOpeningTag) element).getName().equals(name)))
+					&& (name.equals("*") || ((HTMLOpeningTag) element).getName().equalsIgnoreCase(name)))
 				vec.add((HTMLOpeningTag) element);
 		
 		return vec;
