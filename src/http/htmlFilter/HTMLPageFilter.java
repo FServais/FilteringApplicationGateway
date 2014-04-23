@@ -1,10 +1,15 @@
 package http.htmlFilter;
 
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Vector;
 
 import datastructures.WordList;
 import http.html.HTMLContent;
+import http.html.HTMLElement;
+import http.html.HTMLOpeningTag;
 import http.html.HTMLPage;
 
 public class HTMLPageFilter 
@@ -124,7 +129,8 @@ public class HTMLPageFilter
 		}
 		else
 		{
-			page.filterLinks(url);
+			filterLinks();
+			filterImg();
 			if(status == FilterStatus.PAGE_OK)
 				return page.toString();
 			else 
@@ -134,6 +140,71 @@ public class HTMLPageFilter
 			}
 		}
 	}
+	
+	/**
+	 * Replace all the 'href' attributes of 'a' tags that are relatives to absolutes
+	 */
+	private void filterLinks()
+	{
+		for(HTMLOpeningTag a_tag : page.getOpeningTagElements("a"))
+		{
+			String hrefValue = a_tag.getAttributeValue("href");
+			if(hrefValue == null)
+				continue;
+			
+			/* Analyze href */
+			try 
+			{
+				URL temp = new URL(hrefValue); // Check if absolute or not
+				// Absolute link
+				//System.out.println("------ New hrefValue : " + "http://localhost:8005/?s="+URLEncoder.encode(hrefValue, "UTF-8"));
+				a_tag.setAttributeValue("href", "http://localhost:8005/?s="+URLEncoder.encode(hrefValue, "UTF-8"));
+			} 
+			catch (UnsupportedEncodingException e) 
+			{
+				e.printStackTrace();
+			} 
+			catch (MalformedURLException e) 
+			{
+				if(!hrefValue.startsWith("www"))
+				{
+					try 
+					{
+						//System.out.println("------ New hrefValue relative : " + "http://localhost:8005/?s="+URLEncoder.encode(url.getHost() + url.getPath() + ((url.getPath().endsWith("/") == hrefValue.startsWith("/")) && url.getPath().endsWith("/") ? "/" : "") + hrefValue, "UTF-8"));
+						a_tag.setAttributeValue("href", "http://localhost:8005/?s="+URLEncoder.encode(url.getHost() + url.getPath() + ((url.getPath().endsWith("/") == hrefValue.startsWith("/")) && url.getPath().endsWith("/") ? "/" : "") + hrefValue, "UTF-8"));
+					} 
+					catch (UnsupportedEncodingException e1) {e1.printStackTrace();}
+				}
+			}
+		}
+	}
+	
+	
+	private void filterImg()
+	{
+		for(HTMLOpeningTag img_tag : page.getOpeningTagElements("img"))
+		{
+			String srcValue = img_tag.getAttributeValue("src");
+			if(srcValue == null)
+				continue;
+			
+			try
+			{
+				URL temp = new URL(srcValue);
+				// If MalformedURLException not caught -> Absolute link -> OK
+			}
+			catch(MalformedURLException e)
+			{
+				// srcValue is a relative link OR begin with "www"
+				if(!srcValue.startsWith("www"))
+				{
+					//System.out.println("IMAGE : getProtocol : " + url.getProtocol() + " --- getHost : " + url.getHost() + " --- getPath : " + url.getPath() + " --- cond : " + ((url.getPath().endsWith("/") == srcValue.startsWith("/")) && url.getPath().endsWith("/") ? "/" : "") + " --- srcValue : " + srcValue);
+					img_tag.setAttributeValue("src", url.getProtocol() + "://" + url.getHost() + url.getPath() + ((url.getPath().endsWith("/") == srcValue.startsWith("/")) && url.getPath().endsWith("/") ? "/" : "") + srcValue);
+				}
+			}
+		}
+	}
+	
 
 	/**
 	 * Returns the number of occurences of a substring in a string
