@@ -65,4 +65,12 @@ public class HTMLContent implements HTMLElement {
 		
 		return sb.toString();
 	}
+	
+	/**
+	 * Makes a deep copy of the HTMLPage object
+	 */
+	public Object clone() throws CloneNotSupportedException
+	{
+		return super.clone();
+	}
 }

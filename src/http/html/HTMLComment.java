@@ -4,7 +4,7 @@ package http.html;
  * @author Romain Mormont
  * A class for representing an HTML comment
  */
-public class HTMLComment implements HTMLElement {
+public class HTMLComment implements HTMLElement, Cloneable {
 	String comment; // Content
 	
 	/**
@@ -23,5 +23,13 @@ public class HTMLComment implements HTMLElement {
 	public String toString()
 	{
 		return "<!-- " + comment + "-->";
+	}
+	
+	/**
+	 * Makes a deep copy of the HTMLPage object
+	 */
+	public Object clone() throws CloneNotSupportedException
+	{
+		return super.clone();
 	}
 }
