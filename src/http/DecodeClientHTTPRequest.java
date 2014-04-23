@@ -5,13 +5,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-public class DecodeClientRequest 
+public class DecodeClientHTTPRequest 
 {
 	private String request;
 	private String GETLine;
 	private boolean forceRefresh;
 	
-	public DecodeClientRequest(String req)
+	public DecodeClientHTTPRequest(String req)
 	{
 		if(req == null)
 			System.err.println("What???");
@@ -57,6 +57,8 @@ public class DecodeClientRequest
 	 */
 	private boolean forceRefresh()
 	{
+		if(GETLine == null)
+			return false;
 		int indexOfBool = Math.max(GETLine.indexOf("?forceRefresh="), GETLine.indexOf("&forceRefresh=")) + "&forceRefresh=".length();
 		
 		if(GETLine.substring(indexOfBool, GETLine.length()).startsWith("true"))
