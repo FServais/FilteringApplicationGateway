@@ -10,8 +10,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
+import html.HTMLPage;
+import html.exceptions.HTMLParsingException;
 import http.exceptions.RemoteConnectionException;
-import http.html.HTMLPage;
 import http.htmlFilter.HTMLPageFilter;
 import datastructures.Cache;
 import datastructures.WordList;
@@ -195,7 +196,7 @@ public class HTTPClientRequestThread extends Thread {
 			
 			return new HTMLPage(response.toString());
 		}
-		catch(IOException e)
+		catch(IOException | HTMLParsingException e)
 		{
 			throw new RemoteConnectionException("Cannot get targeted page from remote website : " + e.getMessage());
 		}

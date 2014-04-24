@@ -7,9 +7,9 @@ import java.net.URLEncoder;
 import java.util.Vector;
 
 import datastructures.WordList;
-import http.html.HTMLContent;
-import http.html.HTMLOpeningTag;
-import http.html.HTMLPage;
+import html.HTMLContent;
+import html.HTMLOpeningTag;
+import html.HTMLPage;
 
 public class HTMLPageFilter 
 {

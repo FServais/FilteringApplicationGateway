@@ -1,6 +1,6 @@
 package http;
 
-import http.html.HTMLPage;
+import html.HTMLPage;
 
 import java.io.IOException;
 import java.net.ServerSocket;

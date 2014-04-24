@@ -1,4 +1,4 @@
-package http.html;
+package html;
 
 import java.util.Vector;
 
@@ -14,13 +14,12 @@ public class HTMLOpeningTag implements HTMLElement
 	/**
 	 * Constructs an opening html tag 
 	 * @param tagName a String containing the name of the tag
-	 * @param attributes a Vector of String containing every attributes and their values
+	 * @param attributes a Vector of HTMLAttribute containing every attributes and their values
 	 */
-	public HTMLOpeningTag(String tagName,  Vector<String> attributes_raw)
+	public HTMLOpeningTag(String tagName,  Vector<HTMLAttribute> attributes)
 	{
 		this.tagName = tagName;
-		this.attributes = new Vector<HTMLAttribute>();
-		parseAttributes(attributes_raw);
+		this.attributes = attributes;
 	}
 	
 	/**
@@ -29,7 +28,7 @@ public class HTMLOpeningTag implements HTMLElement
 	 */
 	public HTMLOpeningTag(String tagName)
 	{
-		this(tagName, new Vector<String>());
+		this(tagName, new Vector<HTMLAttribute>());
 	}
 	
 	/**
@@ -58,11 +57,11 @@ public class HTMLOpeningTag implements HTMLElement
 	 * 		'name="values"'
 	 * @param attributes_raw a Vector of String containing the attributes 
 	 */
-	private void parseAttributes(Vector<String> attributes_raw)
+/*	private void parseAttributes(Vector<String> attributes_raw)
 	{
 		for(String attribute : attributes_raw)
 			attributes.add(parseAttribute(attribute));
-	}
+	} */
 	
 	/**
 	 * Parses a raw attribute of an html tag. The attribute must have the 
@@ -71,7 +70,7 @@ public class HTMLOpeningTag implements HTMLElement
 	 * @param attribute_raw a String containing the attribute
 	 * @return the corresponding HTMLAttribute object
 	 */
-	private HTMLAttribute parseAttribute(String attribute_raw)
+/*	private HTMLAttribute parseAttribute(String attribute_raw)
 	{
 		int name_last_index = attribute_raw.indexOf('='),
 			value_1st_index = attribute_raw.indexOf('"') + 1,
@@ -85,7 +84,7 @@ public class HTMLOpeningTag implements HTMLElement
 		
 		//System.out.println("raw = " + attribute_raw + " | name : " + name + " | value : " + value);	
 		return new HTMLAttribute(name, value);
-	}
+	} */
 	
 	/**
 	 * Modifies the value of the attribute of given name. Does nothing if no 

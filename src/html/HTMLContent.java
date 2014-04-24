@@ -1,4 +1,4 @@
-package http.html;
+package html;
 
 /**
  * @author Romain Mormont
