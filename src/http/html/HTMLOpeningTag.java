@@ -136,4 +136,16 @@ public class HTMLOpeningTag implements HTMLElement
 	{
 		return tagName;
 	}
+	
+	
+	/**
+	 * Makes a deep copy of the HTMLOpeningTag object
+	 */
+	@SuppressWarnings("unchecked")
+	public Object clone() throws CloneNotSupportedException
+	{
+		HTMLOpeningTag tag = (HTMLOpeningTag) super.clone();
+		tag.attributes = (Vector<HTMLAttribute>) attributes.clone();
+		return tag;
+	}
 }

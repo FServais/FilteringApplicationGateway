@@ -3,7 +3,7 @@ package http.html;
  * @author Romain Mormont
  * A class for representing a html closing tag
  */
-public class HTMLClosingTag implements HTMLElement {
+public class HTMLClosingTag implements HTMLElement, Cloneable {
 	private String tagName;
 	
 	/**
@@ -31,6 +31,14 @@ public class HTMLClosingTag implements HTMLElement {
 	public String getName()
 	{
 		return tagName;
+	}
+	
+	/**
+	 * Makes a deep copy of the HTMLPage object
+	 */
+	public Object clone() throws CloneNotSupportedException
+	{
+		return super.clone();
 	}
 }
 

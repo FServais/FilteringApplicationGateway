@@ -58,4 +58,12 @@ public class HTMLAttribute
 	{
 		return name + "=\"" + value + "\"";
 	}
+	
+	/**
+	 * Makes a deep copy of the HTMLPage object
+	 */
+	public Object clone() throws CloneNotSupportedException
+	{
+		return super.clone();
+	}
 }

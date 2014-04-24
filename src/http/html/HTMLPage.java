@@ -7,7 +7,7 @@ import java.util.Vector;
  * A class for representing a HTML page 
  * @author Romain Mormont
  */
-public class HTMLPage 
+public class HTMLPage implements Cloneable
 {
 	private LinkedList<HTMLElement> list;
 	
@@ -293,7 +293,6 @@ public class HTMLPage
 		
 		return i - 1;
 	}
-
 	
 	/**
 	 * Returns the html code of the page
@@ -338,6 +337,46 @@ public class HTMLPage
 	}
 	
 	/**
+	 * Replace all the 'href' attributes of 'a' tags that are relatives to absolutes
+	 */
+	public void filterLinks(URL url)
+	{
+		for(HTMLElement htmlElement : list)
+		{
+			if(htmlElement instanceof HTMLOpeningTag)
+			{
+				//System.out.println("TagName = " + ((HTMLOpeningTag) htmlElement).getName());
+				if(((HTMLOpeningTag) htmlElement).getName().equals("a"))
+				{
+					String hrefValue = ((HTMLOpeningTag) htmlElement).getAttributeValue("href");
+					if(hrefValue == null)
+						continue;
+					
+					/* Analyze href */
+					try 
+					{
+						URL temp = new URL(hrefValue);
+						// Absolute link
+						//System.out.println("------ New hrefValue : " + "http://localhost:8005/?s="+URLEncoder.encode(hrefValue, "UTF-8"));
+						((HTMLOpeningTag) htmlElement).setAttributeValue("href", "http://localhost:8005/?s="+URLEncoder.encode(hrefValue, "UTF-8"));
+					} 
+					catch (UnsupportedEncodingException e) 
+					{
+						e.printStackTrace();
+					} catch (MalformedURLException e) {
+						//System.out.println("------ New hrefValue relative : " + "http://localhost:8005/?s="+URLEncoder.encode(url.getHost() + "/" + hrefValue, "UTF-8"));
+						try {
+							((HTMLOpeningTag) htmlElement).setAttributeValue("href", "http://localhost:8005/?s="+URLEncoder.encode(url.getHost() + "/" + hrefValue, "UTF-8"));
+						} catch (UnsupportedEncodingException e1) {
+							e1.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	/**
 	 * Returns all the content elements of the page without the javascript code
 	 * @return a Vector of HTMLContent objects containing all the content elements of the page (except javascript)
 	 */
@@ -362,5 +401,16 @@ public class HTMLPage
 				vec.add((HTMLOpeningTag) element);
 		
 		return vec;
+	}
+	
+	/**
+	 * Makes a deep copy of the HTMLPage object
+	 */
+	@SuppressWarnings("unchecked")
+	public Object clone() throws CloneNotSupportedException
+	{
+		HTMLPage page = (HTMLPage) super.clone();
+		page.list = (LinkedList<HTMLElement>) list.clone();
+		return page;
 	}
  }

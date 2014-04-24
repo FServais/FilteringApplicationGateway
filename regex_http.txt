@@ -1,0 +1,8 @@
+HTTP request :
+
+Request line : ^([A-Z]{3,7})\s+([\w\.\\/\+\-\?&=#]+)\s+([\w/\.\s]+)$
+=> group 1 : command
+=> group 2 : path
+=> group 3 : version
+
+Header : 
