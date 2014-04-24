@@ -1,6 +1,7 @@
 package http;
 
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -20,14 +21,14 @@ import displayer.DisplayerMessage;
  * Class that handle a connection from a client that request a page.
  * @author Fabs & Romain Mormont
  */
-public class HTTPClientRequest extends Thread {
+public class HTTPClientRequestThread extends Thread {
 	
 	private Socket socket = null;
 	private Cache<String, HTMLPage> cache = null;
 	private LinkedBlockingQueue<DisplayerMessage> msgQueue = null;
 	private WordList wordlist = null;
 	
-	public HTTPClientRequest(Socket socket, LinkedBlockingQueue<DisplayerMessage> msgQueue, WordList wordlist, Cache<String, HTMLPage> cache)
+	public HTTPClientRequestThread(Socket socket, LinkedBlockingQueue<DisplayerMessage> msgQueue, WordList wordlist, Cache<String, HTMLPage> cache)
 	{
 		this.socket = socket;
 		this.cache = cache;
@@ -58,34 +59,37 @@ public class HTTPClientRequest extends Thread {
 
 			request = sb.toString();
 			
+			if(request == null)
+			{
+				msgQueue.add(new DisplayerMessage("Bad request (null pointer)", true));
+				return;
+			}
+			
 			msgQueue.add(new DisplayerMessage("Request received")); 
 
 			
 			// Decode the request : get URL
-			DecodeClientRequest dcr = null;
-			URL urlRequested = null;
+			GatewayRequestDecoder grd = new GatewayRequestDecoder(request);
 			
-			if(request == null)
-				msgQueue.add(new DisplayerMessage("Bad request (null pointer)", true));
-			else
-			{
-				dcr = new DecodeClientRequest(request);
-				urlRequested = dcr.getURL();
+			if(!grd.validRequest())
+			{	
+				msgQueue.add(new DisplayerMessage("Invalid request")); 
+				return;
 			}
-
+			URL urlRequested = new URL(grd.getUrl());
 
 			if(urlRequested == null)
-				msgQueue.add(new DisplayerMessage("Null URL : " + request, true));
+				msgQueue.add(new DisplayerMessage("# DEBUG # Null Object URL : " + request, true));
 			else
 			{
-				msgQueue.add(new DisplayerMessage("URL = \"" + urlRequested.toString() + "\""));
+				msgQueue.add(new DisplayerMessage("Requested page : \"" + urlRequested.toString() + "\""));
 				
 				// Analysis of "forceRefresh" flag
-				boolean forceRefresh = dcr.getForceRefresh();
+				boolean forceRefresh = grd.refreshIsForced();
 				
 				HTMLPage response_page;
 
-				String url_string = urlRequested.toString();
+				String url_string = grd.getUrl();
 	
 				// If already in cache and don't need to be refreshed (timeout) and don't have "forceRefresh" flag
 				if(cache.isContained(url_string) && cache.getEntry(url_string).isValid() && !forceRefresh)
@@ -99,8 +103,10 @@ public class HTTPClientRequest extends Thread {
 					cache.addEntry(url_string, response_page);
 				}	
 				
+				HTMLPage cloned_page = (HTMLPage) response_page.clone();
+				
 				// filters page 
-				HTMLPageFilter hpl = new HTMLPageFilter(response_page, urlRequested, wordlist);
+				HTMLPageFilter hpl = new HTMLPageFilter(cloned_page, urlRequested, wordlist);
 				
 				writeResponse(HTTP.OK_HEADERS, hpl.getFilteredPage());
 			}
@@ -109,14 +115,18 @@ public class HTTPClientRequest extends Thread {
 		{
 			msgQueue.add(new DisplayerMessage(e.getMessage(), true));
 		}
+		catch (MalformedURLException e)
+		{
+			msgQueue.add(new DisplayerMessage("Bad url : " + e.getMessage(), true));
+		}
 		catch (IOException e) 
 		{
+			e.printStackTrace();
 			msgQueue.add(new DisplayerMessage("Error while getting the response page", true));
 		}
 		catch (Exception e)
 		{
-			msgQueue.add(new DisplayerMessage("Exception : ", true));
-			e.printStackTrace();
+			msgQueue.add(new DisplayerMessage("Exception : " + e.getMessage(), true));
 		}
 		finally
 		{
