@@ -1,19 +1,44 @@
-package http.html;
+package html;
 
 public class HTMLAttribute 
 {
 	private String name;
 	private String value;
+	private boolean quoted;
 	
 	/**
-	 * Constructs a HTMLAttribute with its name and its value
+	 * Constructs a HTMLAttribute with its name and its value (this last one
+	 * being quoted)
 	 * @param name a String containing the name of the attribute
 	 * @param value a String containing the value of the attribute
 	 */
 	public HTMLAttribute(String name, String value)
 	{
+		this(name, value, true);
+	}
+	
+	/**
+	 * Constructs a HTMLAttribute with its name (its an attribute with
+	 * no value)
+	 * @param name a String containing the name of the attribute
+	 */
+	public HTMLAttribute(String name)
+	{
+		this(name, null, true);
+	}
+	
+	/**
+	 * Constructs a HTMLAttribute with its name, value (this last 
+	 * one being quoted if quoted is true)
+	 * @param name a String containing the name
+	 * @param value a String containing the value
+	 * @param quoted true if the value must be quoted
+	 */
+	public HTMLAttribute(String name, String value, boolean quoted)
+	{
 		this.name = name;
 		this.value = value;
+		this.quoted = quoted;
 	}
 	
 	/**
@@ -56,7 +81,15 @@ public class HTMLAttribute
 	
 	public String toString()
 	{
-		return name + "=\"" + value + "\"";
+		if(value != null && !value.isEmpty())
+		{
+			if(quoted)
+				return name + "=\"" + value + "\"";
+			else
+				return name + "=" + value;
+		}
+		else
+			return name;
 	}
 	
 	/**
