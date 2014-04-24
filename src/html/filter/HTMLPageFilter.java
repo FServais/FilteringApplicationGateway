@@ -1,4 +1,4 @@
-package http.htmlFilter;
+package html.filter;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -197,7 +197,7 @@ public class HTMLPageFilter
 				// srcValue is a relative link OR begin with "www"
 				if(!srcValue.startsWith("www"))
 				{
-					System.out.println("IMAGE : getProtocol : " + url.getProtocol() + " --- getHost : " + url.getHost() + " --- getPath : " + url.getPath() + " --- cond : " + ((url.getPath().endsWith("/") == srcValue.startsWith("/")) && url.getPath().endsWith("/") ? "/" : "") + " --- srcValue : " + srcValue);
+					//System.out.println("IMAGE : getProtocol : " + url.getProtocol() + " --- getHost : " + url.getHost() + " --- getPath : " + url.getPath() + " --- cond : " + ((url.getPath().endsWith("/") == srcValue.startsWith("/")) && url.getPath().endsWith("/") ? "/" : "") + " --- srcValue : " + srcValue);
 					img_tag.setAttributeValue("src", url.getProtocol() + "://" + url.getHost() + url.getPath() + (url.getPath().endsWith("/") || srcValue.startsWith("/") ? "" : "/") + srcValue);
 				}
 			}

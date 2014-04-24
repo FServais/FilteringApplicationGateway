@@ -12,8 +12,8 @@ import java.io.PrintWriter;
 
 import html.HTMLPage;
 import html.exceptions.HTMLParsingException;
+import html.filter.HTMLPageFilter;
 import http.exceptions.RemoteConnectionException;
-import http.htmlFilter.HTMLPageFilter;
 import datastructures.Cache;
 import datastructures.WordList;
 import displayer.DisplayerMessage;
@@ -41,6 +41,8 @@ public class HTTPClientRequestThread extends Thread {
 	{
 		try 
 		{
+			long begin = System.currentTimeMillis(), duration;
+			
 			msgQueue.add(new DisplayerMessage("New request"));
 	
 			StringBuilder sb = new StringBuilder();
@@ -66,7 +68,8 @@ public class HTTPClientRequestThread extends Thread {
 				return;
 			}
 			
-			msgQueue.add(new DisplayerMessage("Request received")); 
+			duration = (System.currentTimeMillis() - begin);
+			msgQueue.add(new DisplayerMessage("Request received (" + duration  + " ms)")); 
 
 			
 			// Decode the request : get URL
@@ -81,39 +84,59 @@ public class HTTPClientRequestThread extends Thread {
 
 			URL urlRequested = new URL(grd.getUrl());
 
-			if(urlRequested == null)
-				msgQueue.add(new DisplayerMessage("# DEBUG # Null Object URL : " + request, true));
-			else
+			
+			msgQueue.add(new DisplayerMessage("Requested page : \"" + urlRequested.toString() + "\""));
+			
+			// Analysis of "forceRefresh" flag
+			boolean forceRefresh = grd.refreshIsForced();
+			
+			HTMLPage response_page;
+
+			String url_string = grd.getUrl();
+			
+			duration = System.currentTimeMillis() - begin;
+			msgQueue.add(new DisplayerMessage("Starts getting the page (" + duration + " ms)"));
+
+			// If already in cache and don't need to be refreshed (timeout) and don't have "forceRefresh" flag
+			if(cache.isContained(url_string) && cache.getEntry(url_string).isValid() && !forceRefresh)
 			{
-				msgQueue.add(new DisplayerMessage("Requested page : \"" + urlRequested.toString() + "\""));
+				response_page = cache.getEntry(url_string).getData();
 				
-				// Analysis of "forceRefresh" flag
-				boolean forceRefresh = grd.refreshIsForced();
-				
-				HTMLPage response_page;
-
-				String url_string = grd.getUrl();
-	
-				// If already in cache and don't need to be refreshed (timeout) and don't have "forceRefresh" flag
-				if(cache.isContained(url_string) && cache.getEntry(url_string).isValid() && !forceRefresh)
-				{
-					response_page = cache.getEntry(url_string).getData();
-				}
-				else // get page from remote server
-				{
-					response_page = getPageFromRemote(urlRequested);
-					// add entry to the cache
-					cache.addEntry(url_string, response_page);
-				}	
-				
-				HTMLPage cloned_page = (HTMLPage) response_page.clone();
-				
-				// filters page 
-
-				HTMLPageFilter hpl = new HTMLPageFilter(cloned_page, urlRequested, wordlist);
-
-				writeResponse(HTTP.OK_HEADERS, hpl.getFilteredPage());
+				duration = System.currentTimeMillis() - begin;
+				msgQueue.add(new DisplayerMessage("Page retrieved (from cache : " + duration + " ms)"));
 			}
+			else // get page from remote server
+			{
+				response_page = getPageFromRemote(urlRequested);
+				duration = System.currentTimeMillis() - begin;
+				msgQueue.add(new DisplayerMessage("Page retrieved (from remote : " + duration + " ms)"));
+				// add entry to the cache
+				cache.addEntry(url_string, response_page);
+				duration = System.currentTimeMillis() - begin;
+				msgQueue.add(new DisplayerMessage("Page cached (from remote : " + duration + " ms)"));
+				
+			}	
+			
+			duration = System.currentTimeMillis() - begin;
+			msgQueue.add(new DisplayerMessage("Start cloning (" + duration + " ms)"));
+			HTMLPage cloned_page = (HTMLPage) response_page.clone();
+			
+			duration = System.currentTimeMillis() - begin;
+			msgQueue.add(new DisplayerMessage("End cloning (" + duration + " ms)"));
+			// filters page 
+			
+			duration = System.currentTimeMillis() - begin;
+			msgQueue.add(new DisplayerMessage("Start filtering (" + duration + " ms)"));
+			HTMLPageFilter hpl = new HTMLPageFilter(cloned_page, urlRequested, wordlist);
+			
+			duration = System.currentTimeMillis() - begin;
+			msgQueue.add(new DisplayerMessage("Start filtering (" + duration + " ms)"));
+			
+			duration = System.currentTimeMillis() - begin;
+			msgQueue.add(new DisplayerMessage("Start writing (" + duration + " ms)"));
+			writeResponse(HTTP.OK_HEADERS, hpl.getFilteredPage());
+			duration = System.currentTimeMillis() - begin;
+			msgQueue.add(new DisplayerMessage("End writing (" + duration + " ms)\n"));
 		}
 		catch (RemoteConnectionException e)
 		{

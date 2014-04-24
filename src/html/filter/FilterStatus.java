@@ -1,4 +1,4 @@
-package http.htmlFilter;
+package html.filter;
 
 /**
  * 
