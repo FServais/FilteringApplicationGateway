@@ -1,9 +1,5 @@
 package http;
 
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,7 +13,6 @@ public class HTTPRequest
 {
 	private String path; 
 	private String method;
-	private String version;
 	private String content;
 	private HashMap<String, String> headers;
 	
@@ -26,6 +21,11 @@ public class HTTPRequest
 		this.headers = new HashMap<String, String>();
 
 		parseRequest(http_request);
+		
+		System.out.println("\n# DEBUG # HTTPRequest");
+		System.out.println("# method : " + method);
+		System.out.println("# path : " + path);
+		System.out.println("# content : " + content + "\n");
 	}
 	
 	/**
@@ -62,6 +62,9 @@ public class HTTPRequest
 		Pattern p = Pattern.compile(regex);
 		Matcher m = p.matcher(header);
 		
+		if(!m.find())
+			return; 
+	
 		headers.put(m.group(1), m.group(2));
 	}
 
@@ -87,13 +90,15 @@ public class HTTPRequest
 	private void parseRequestLine(String line)
 	{
 		// regex that splits the request line into three groups
-		String regex = "^([A-Z]{3,7})\\s+([\\w\\.\\\\/\\+\\-\\?&=#]+)\\s+([\\w/\\.\\s]+)$";
+		String regex = "^([A-Z]{3,7})\\s+([\\w\\.\\\\/\\+\\-\\?&=#%~]+)\\s+([\\w/\\.\\s]+)$";
 		Pattern p = Pattern.compile(regex);
 		Matcher m = p.matcher(line);
 		
+		if(!m.find())
+			return; 
+		
 		method = m.group(1);
 		path = m.group(2);
-		version = m.group(3);
 	}
 	
 	/**
