@@ -1,0 +1,11 @@
+package html.parser;
+
+public enum StateAttr 
+{
+	WAIT_ATTR_NAME,
+	READ_ATTR_NAME,
+	WAIT_ATTR_EQUAL,
+	WAIT_ATTR_VAL,
+	READ_ATTR_VAL_QUOTED,
+	READ_ATTR_VAL_UNQUOTED;
+}
