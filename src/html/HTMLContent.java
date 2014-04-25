@@ -4,7 +4,7 @@ package html;
  * @author Romain Mormont
  * A class for representing html content (everything which is not a tag)
  */
-public class HTMLContent implements HTMLElement {
+public class HTMLContent extends HTMLElement {
 	String data; // Content
 	
 	/**

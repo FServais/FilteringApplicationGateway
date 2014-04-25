@@ -78,7 +78,7 @@ public class HTTPClientRequestThread extends Thread {
 			
 			if(!grd.validRequest())
 			{	
-				msgQueue.add(new DisplayerMessage("Invalid request")); 
+				msgQueue.add(new DisplayerMessage("Invalid request : request : \n")); 
 				return;
 			}
 
@@ -113,8 +113,7 @@ public class HTTPClientRequestThread extends Thread {
 				// add entry to the cache
 				cache.addEntry(url_string, response_page);
 				duration = System.currentTimeMillis() - begin;
-				msgQueue.add(new DisplayerMessage("Page cached (from remote : " + duration + " ms)"));
-				
+				msgQueue.add(new DisplayerMessage("Page cached (" + duration + " ms)"));
 			}	
 			
 			duration = System.currentTimeMillis() - begin;
@@ -130,7 +129,7 @@ public class HTTPClientRequestThread extends Thread {
 			HTMLPageFilter hpl = new HTMLPageFilter(cloned_page, urlRequested, wordlist);
 			
 			duration = System.currentTimeMillis() - begin;
-			msgQueue.add(new DisplayerMessage("Start filtering (" + duration + " ms)"));
+			msgQueue.add(new DisplayerMessage("End filtering (" + duration + " ms)"));
 			
 			duration = System.currentTimeMillis() - begin;
 			msgQueue.add(new DisplayerMessage("Start writing (" + duration + " ms)"));

@@ -4,7 +4,7 @@ package html;
  * @author Romain Mormont
  * A class for representing an HTML comment
  */
-public class HTMLComment implements HTMLElement, Cloneable {
+public class HTMLComment extends HTMLElement implements  Cloneable {
 	String comment; // Content
 	
 	/**

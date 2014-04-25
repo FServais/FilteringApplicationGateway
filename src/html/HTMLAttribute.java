@@ -1,6 +1,6 @@
 package html;
 
-public class HTMLAttribute 
+public class HTMLAttribute implements Cloneable
 {
 	private String name;
 	private String value;

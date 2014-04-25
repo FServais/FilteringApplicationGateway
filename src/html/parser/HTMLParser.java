@@ -189,7 +189,9 @@ public class HTMLParser
 		String attr_name = "";
 		
 		// mainly for !DOCTYPE tag which sometimes contains a standalone quoted entity
-		boolean quoted_attr_name = false; 
+		boolean quoted_attr_name = false,
+				// for taking into account apostrophe as attribute value delimiter
+				val_delim_is_quote = false;
 		
 		StringBuilder sb = new StringBuilder();
 		
@@ -276,8 +278,11 @@ public class HTMLParser
 				
 				case WAIT_ATTR_VAL :
 				{
-					if(c == '"') // start of a quoted attribute value
+					if(c == '"' || c == '\'') // start of a quoted attribute value
+					{
+						val_delim_is_quote = (c == '"');
 						switchStateAttr(StateAttr.READ_ATTR_VAL_QUOTED);
+					}
 					else if(c != ' ')  // start of an unquoted attribute value
 					{
 						sb.append(c);
@@ -289,10 +294,13 @@ public class HTMLParser
 				
 				case READ_ATTR_VAL_QUOTED :
 				{
-					if(c != '"') // still reading the value
+					if((c != '"' && c != '\'')   // still reading the value
+							|| (c == '\'' && val_delim_is_quote)
+							|| (c == '"' && !val_delim_is_quote))	
 						sb.append(c);
 					else  // end of a quoted attribute value
 					{
+						
 						attr.add(new HTMLAttribute(attr_name, sb.toString()));
 						sb.setLength(0);
 						switchStateAttr(StateAttr.WAIT_ATTR_NAME);

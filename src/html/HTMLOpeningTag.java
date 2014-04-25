@@ -6,7 +6,7 @@ import java.util.Vector;
  * @author Romain Mormont
  * Class that represents a HTML opening tag.
  */
-public class HTMLOpeningTag implements HTMLElement 
+public class HTMLOpeningTag extends HTMLElement implements Cloneable
 {
 	protected String tagName;
 	protected Vector<HTMLAttribute> attributes;
@@ -140,11 +140,13 @@ public class HTMLOpeningTag implements HTMLElement
 	/**
 	 * Makes a deep copy of the HTMLOpeningTag object
 	 */
-	@SuppressWarnings("unchecked")
 	public Object clone() throws CloneNotSupportedException
 	{
 		HTMLOpeningTag tag = (HTMLOpeningTag) super.clone();
-		tag.attributes = (Vector<HTMLAttribute>) attributes.clone();
+		tag.attributes = new Vector<HTMLAttribute>();
+		for(HTMLAttribute attr : attributes)
+			tag.attributes.add((HTMLAttribute) attr.clone());
+		
 		return tag;
 	}
 }

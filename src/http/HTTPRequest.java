@@ -21,12 +21,11 @@ public class HTTPRequest
 		this.headers = new HashMap<String, String>();
 
 		parseRequest(http_request);
-		/*
+		
 		System.out.println("\n# DEBUG # HTTPRequest");
 		System.out.println("# method : " + method);
 		System.out.println("# path : " + path);
 		System.out.println("# content : " + content + "\n");
-		*/
 	}
 	
 	/**

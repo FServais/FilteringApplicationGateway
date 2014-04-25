@@ -18,8 +18,8 @@ public class GatewayRequestDecoder
 	
 	private void disp()
 	{
-		// System.out.println("# DEBUG # GatewayRequestDecoder");
-		// System.out.println("# remote : " + remote_address);
+		System.out.println("\n# DEBUG # GatewayRequestDecoder");
+		System.out.println("# remote : " + remote_address + "\n");
 	}
 	
 	public GatewayRequestDecoder(String request)
@@ -29,7 +29,7 @@ public class GatewayRequestDecoder
 
 		parsePath();
 		parseRemoteAddress();
-		disp();
+		//disp();
 	}
 	
 	/**
@@ -51,7 +51,7 @@ public class GatewayRequestDecoder
 	 */
 	private void parsePath()
 	{
-		String regex = "^(?:/?\\?)?((?:&?[\\w%~\\.=]*)*)(#[\\w%~\\.=]*)?$";
+		String regex = "^(?:/?\\?)?((?:&?[\\w%~\\.=\\-]*)*)(#[\\w%~\\.=]*)?$";
 		Pattern p = Pattern.compile(regex);
 
 		Matcher m = p.matcher(http_req.getPath());

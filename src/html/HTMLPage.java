@@ -129,11 +129,14 @@ public class HTMLPage implements Cloneable
 	/**
 	 * Makes a deep copy of the HTMLPage object
 	 */
-	@SuppressWarnings("unchecked")
 	public Object clone() throws CloneNotSupportedException
 	{
 		HTMLPage page = (HTMLPage) super.clone();
-		page.list = (LinkedList<HTMLElement>) list.clone();
+		
+		page.list = new LinkedList<HTMLElement>();
+		
+		for(HTMLElement elem : list)
+			page.list.addLast((HTMLElement) elem.clone());
 		return page;
 	}
  }
