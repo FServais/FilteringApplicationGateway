@@ -66,7 +66,6 @@ public class GatewayRequestDecoder
 			if(!arg.isEmpty())
 			{
 				String[] arg_exploded = arg.split("=", 2); // split arg name and value
-				
 				if(arg_exploded.length == 1)
 					path_params.put(arg_exploded[0], "");
 				else

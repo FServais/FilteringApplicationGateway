@@ -2,6 +2,8 @@ package html.filter;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Vector;
@@ -130,6 +132,7 @@ public class HTMLPageFilter
 		{
 			filterLinks();
 			filterImg();
+			filterCSS();
 			if(status == FilterStatus.PAGE_OK)
 				return page.toString();
 			else 
@@ -152,28 +155,21 @@ public class HTMLPageFilter
 				continue;
 			
 			/* Analyze href */
-			try 
+			try
 			{
-				new URL(hrefValue); // Check if absolute or not
-				// Absolute link
-				//System.out.println("------ New hrefValue : " + "http://localhost:8005/?s="+URLEncoder.encode(hrefValue, "UTF-8"));
-				a_tag.setAttributeValue("href", "http://localhost:8005/?s="+URLEncoder.encode(hrefValue, "UTF-8"));
-			} 
-			catch (UnsupportedEncodingException e) 
+				if(isRelativeURL(hrefValue))
+				{
+					String path = getPathWithoutFilename(url.getPath());
+					a_tag.setAttributeValue("href", "http://localhost:8005/?s="+URLEncoder.encode(url.getHost() + path + (path.endsWith("/") || hrefValue.startsWith("/") ? "" : "/") + hrefValue, "UTF-8"));
+				}
+				else
+				{
+					a_tag.setAttributeValue("href", "http://localhost:8005/?s="+URLEncoder.encode(hrefValue, "UTF-8"));
+				}
+			}
+			catch(UnsupportedEncodingException e)
 			{
 				e.printStackTrace();
-			} 
-			catch (MalformedURLException e) 
-			{
-				if(!hrefValue.startsWith("www"))
-				{
-					try 
-					{
-						//System.out.println("------ New hrefValue relative : " + "http://localhost:8005/?s="+URLEncoder.encode(url.getHost() + url.getPath() + ((url.getPath().endsWith("/") == hrefValue.startsWith("/")) && url.getPath().endsWith("/") ? "/" : "") + hrefValue, "UTF-8"));
-						a_tag.setAttributeValue("href", "http://localhost:8005/?s="+URLEncoder.encode(url.getHost() + url.getPath() + ((url.getPath().endsWith("/") == hrefValue.startsWith("/")) && url.getPath().endsWith("/") ? "/" : "") + hrefValue, "UTF-8"));
-					} 
-					catch (UnsupportedEncodingException e1) {e1.printStackTrace();}
-				}
 			}
 		}
 	}
@@ -187,20 +183,64 @@ public class HTMLPageFilter
 			if(srcValue == null)
 				continue;
 			
-			try
+			if(isRelativeURL(srcValue))
 			{
-				new URL(srcValue);
-				// If MalformedURLException not caught -> Absolute link -> OK
+				String path = getPathWithoutFilename(url.getPath());
+				img_tag.setAttributeValue("src", url.getProtocol() + "://" + url.getHost() + path + (path.endsWith("/") || srcValue.startsWith("/") ? "" : "/") + srcValue);
 			}
-			catch(MalformedURLException e)
+		}
+	}
+	
+	
+	private void filterCSS()
+	{
+		for(HTMLOpeningTag link_tag : page.getOpeningTagElements("link"))
+		{
+			System.out.println("# degub : " + link_tag.toString());
+			if(link_tag.getAttributeValue("rel") == null || !link_tag.getAttributeValue("rel").equalsIgnoreCase("stylesheet")){
+				System.out.println("OUT " + link_tag.getAttributeValue("rel"));
+				continue;
+			}
+			
+			String hrefValue = link_tag.getAttributeValue("href");
+			System.out.println("#DEBUG : hrefValue : " + hrefValue);
+			if(hrefValue == null)
+				continue;
+			
+			if(isRelativeURL(hrefValue))
 			{
-				// srcValue is a relative link OR begin with "www"
-				if(!srcValue.startsWith("www"))
-				{
-					System.out.println("IMAGE : getProtocol : " + url.getProtocol() + " --- getHost : " + url.getHost() + " --- getPath : " + url.getPath() + " --- cond : " + ((url.getPath().endsWith("/") == srcValue.startsWith("/")) && url.getPath().endsWith("/") ? "/" : "") + " --- srcValue : " + srcValue);
-					img_tag.setAttributeValue("src", url.getProtocol() + "://" + url.getHost() + url.getPath() + (url.getPath().endsWith("/") || srcValue.startsWith("/") ? "" : "/") + srcValue);
-				}
+				String path = getPathWithoutFilename(url.getPath());
+				if(path.lastIndexOf("/") != -1 && path.substring(path.lastIndexOf("/"), path.length()).contains("."))
+					path = path.substring(0, path.lastIndexOf("/"));
+				System.out.println("#DBUG (path) " + path);
+				
+				System.out.println("# New href value : " + url.getProtocol() + "://" + url.getHost() + path + (path.endsWith("/") || hrefValue.startsWith("/") ? "" : "/") + hrefValue);
+				link_tag.setAttributeValue("href", url.getProtocol() + "://" + url.getHost() + path + (path.endsWith("/") || hrefValue.startsWith("/") ? "" : "/") + hrefValue);
 			}
+		}	
+	}
+	
+	private String getPathWithoutFilename(String path)
+	{
+		if(path.lastIndexOf("/") != -1 && path.substring(path.lastIndexOf("/"), path.length()).contains("."))
+			return path.substring(0, path.lastIndexOf("/"));
+		else 
+			return path;
+	}
+	
+	private boolean isRelativeURL(String url)
+	{
+		
+		if(url.startsWith("http://") || url.startsWith("https://") || url.startsWith("ftp://") || url.startsWith("www") || url.startsWith("//"))
+			return false;
+
+		try 
+		{
+			return !new URI(url).isAbsolute();
+		} 
+		catch (URISyntaxException e) {
+			System.out.println("Malformed exception !");
+			return false;
 		}
 	}
 	
