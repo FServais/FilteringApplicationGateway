@@ -22,6 +22,7 @@ public class HTMLParser
 	public HTMLParser(String html) throws HTMLParsingException
 	{
 		list = new LinkedList<HTMLElement>();
+		System.out.println(html);
 		parse(html);
 	}
 	
@@ -382,12 +383,17 @@ public class HTMLParser
 	{
 		StringBuilder sb = new StringBuilder();
 		int i = currentCharIndex;
+
+		HTMLElement elem = list.getLast();		
+		boolean in_javascript = ((elem != null) && (elem instanceof HTMLOpeningTag)
+									&& ((HTMLOpeningTag) elem).getName().toLowerCase().equals("script")); 
 		
 		for(; i < html.length(); i++)
 		{
 			char c = html.charAt(i);
-			if(c == '<') // has reached a tag
+			if(!in_javascript && c == '<') // has reached a tag 
 				break;
+			
 			sb.append(c);
 		}
 		

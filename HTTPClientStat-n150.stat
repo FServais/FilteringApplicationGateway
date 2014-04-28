@@ -1,0 +1,73 @@
+n150
+
+Extracting request       
+	Mean : 1158.6137931034482
+	Std  : 1.3129648857740782E7
+	Std2 : 1.3220826974808427E7
+	Size : 145
+
+Decoding request         
+	Mean : 3.611940298507463
+	Std  : 15.849409668077499
+	Std2 : 15.968578161822442
+	Size : 134
+
+Getting page             
+	Mean : 444.5416666666667
+	Std  : 494976.99826388905
+	Std2 : 505508.42375886545
+	Size : 48
+
+Cloning page             
+	Mean : 2.3333333333333335
+	Std  : 14.722222222222241
+	Std2 : 15.03546099290782
+	Size : 48
+
+Filtering page           
+	Mean : 2.2083333333333335
+	Std  : 9.081597222222227
+	Std2 : 9.274822695035464
+	Size : 48
+
+Writing response         
+	Mean : 31.25
+	Std  : 1751.3958333333333
+	Std2 : 1788.659574468085
+	Size : 48
+
+Getting page from remote 
+	Mean : 559.7631578947369
+	Std  : 560423.6018005541
+	Std2 : 575570.1856330015
+	Size : 38
+
+Getting page from cache  
+	Mean : 0.1
+	Std  : 0.09000000000000001
+	Std2 : 0.10000000000000002
+	Size : 10
+
+Whole operation          
+	Mean : 607.7708333333334
+	Std  : 1259487.759982639
+	Std2 : 1286285.3718971633
+	Size : 48
+
+Bad requests from user   
+	Mean : 0.5522388059701493
+	Std  : 0.24727110715081363
+	Std2 : 0.24913028840758666
+	Size : 134
+
+Error from remote        
+	Mean : 0.24
+	Std  : 0.18240000000000012
+	Std2 : 0.18612244897959196
+	Size : 50
+
+Number of connection     
+	Mean : 1.0
+	Std  : 0.0
+	Std2 : 0.0
+	Size : 149

@@ -7,7 +7,7 @@
 
 ## HTMLPage
 ### parsing  
-- seems OK
+- error with javascript <
 
 ## HTTP parsing
 - seems OK
