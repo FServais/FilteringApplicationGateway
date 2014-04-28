@@ -385,14 +385,26 @@ public class HTMLParser
 		int i = currentCharIndex;
 
 		HTMLElement elem = list.getLast();		
+		
 		boolean in_javascript = ((elem != null) && (elem instanceof HTMLOpeningTag)
-									&& ((HTMLOpeningTag) elem).getName().toLowerCase().equals("script")); 
+									&& ((HTMLOpeningTag) elem).getName().equalsIgnoreCase("script")); 
 		
 		for(; i < html.length(); i++)
 		{
 			char c = html.charAt(i);
+			
 			if(!in_javascript && c == '<') // has reached a tag 
 				break;
+			
+			if(in_javascript && c == '<') // checks if < is the beginning of a tag
+			{
+				int j = i + 1;
+				System.out.print("Parser : ");
+				while(html.charAt(j) == ' '){ System.out.print(html.charAt(j) + " "); j++; }// skip spaces
+				System.out.println(html.charAt(j) + " |");
+				if(html.charAt(j) == '/') // char is a closing tag
+					break;
+			}
 			
 			sb.append(c);
 		}
