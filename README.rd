@@ -16,3 +16,6 @@
 # Further developement
 - create a page when the requested page is not valid
 - manage the problematic responses from remote server
+
+
+limitations : mauvais formatage du code html

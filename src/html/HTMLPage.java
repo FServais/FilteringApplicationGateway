@@ -139,4 +139,22 @@ public class HTMLPage implements Cloneable
 			page.list.addLast((HTMLElement) elem.clone());
 		return page;
 	}
+	
+	public void print()
+	{
+		for(HTMLElement elem : list)
+		{
+			if(elem instanceof HTMLOpeningTag)
+			{
+				HTMLOpeningTag h = (HTMLOpeningTag) elem;
+				
+				if(h.getName().equalsIgnoreCase("a"))
+					System.out.println();
+				System.out.print(h.getName());
+				if(h.getName().equalsIgnoreCase("a"))
+					System.out.print(" : " + h.getAttributeValue("href"));
+				System.out.println();
+			}	
+		}
+	}
  }

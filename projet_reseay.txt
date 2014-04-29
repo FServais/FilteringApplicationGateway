@@ -50,3 +50,20 @@ parser une page html :
 		- les noeuds internes sont des balises paires
 
 	* classe HTMLElement -> HTMLContent, HTMLPairTag (stocke les attributs dans un tableau), HTMLUniqueTag
+
+
+remplacement des liens :
+
+Liens relatifs : 
+- (...)/
+- /(...)
+- ./(...)
+- ../(...)
+- (...).(html?|php|j(spx?|son)|asp|aspx)
+
+- (..?)?/[\w~/]*[\w\.]\.(html?|php|j(spx?|son)|asp|aspx)
+lien : 
+- 
+
+Images : 
+- ((..?)?/)?(...)

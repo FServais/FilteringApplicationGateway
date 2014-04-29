@@ -130,12 +130,15 @@ public class HTMLPageFilter
 		}
 		else
 		{
+			System.out.println("Filter links...");
 			filterLinks();
+			System.out.println("Filter images...");
 			filterImg();
 			if(status == FilterStatus.PAGE_OK)
 				return page.toString();
 			else 
 			{
+				System.out.println("Filter keywords...");
 				filterRestrictedWords();
 				return page.toString();
 			}
@@ -158,7 +161,7 @@ public class HTMLPageFilter
 		for(HTMLOpeningTag tag : tags)
 		{
 			i++;
-			System.out.print("Link " + i + " ");
+			System.out.print(tag.getName() + " " + i + "\n");
 			String href_value = tag.getAttributeValue("href");
 			if(href_value == null)
 			{
@@ -166,35 +169,10 @@ public class HTMLPageFilter
 				continue;
 			}
 			String ur = getCorrectLink(href_value);
-			System.out.println("From : " + href_value);
-			System.out.println("To   : " + ur);
+			//System.out.println("From : " + href_value);
+			//href_value.System.out.println("To   : " + ur);
 			tag.setAttributeValue("href", ur);
 
-			/* Analyze href */
-			/*
-			try 
-			{
-				new URL(hrefValue); // Check if absolute or not
-				// Absolute link
-				//System.out.println("------ New hrefValue : " + "http://localhost:8005/?s="+URLEncoder.encode(hrefValue, "UTF-8"));
-				a_tag.setAttributeValue("href", "http://localhost:8005/?s="+URLEncoder.encode(hrefValue, "UTF-8"));
-			} 
-			catch (UnsupportedEncodingException e) 
-			{
-				e.printStackTrace();
-			} 
-			catch (MalformedURLException e) 
-			{
-				if(!hrefValue.startsWith("www"))
-				{
-					try 
-					{
-						//System.out.println("------ New hrefValue relative : " + "http://localhost:8005/?s="+URLEncoder.encode(url.getHost() + url.getPath() + ((url.getPath().endsWith("/") == hrefValue.startsWith("/")) && url.getPath().endsWith("/") ? "/" : "") + hrefValue, "UTF-8"));
-						a_tag.setAttributeValue("href", "http://localhost:8005/?s="+URLEncoder.encode(url.getHost() + url.getPath() + ((url.getPath().endsWith("/") == hrefValue.startsWith("/")) && url.getPath().endsWith("/") ? "/" : "") + hrefValue, "UTF-8"));
-					} 
-					catch (UnsupportedEncodingException e1) {e1.printStackTrace();}
-				}
-			}*/
 		}
 	}
 	
@@ -212,7 +190,7 @@ public class HTMLPageFilter
 		
 		if(m.matches())
 		{
-			System.out.print("match ");
+			//System.out.print("match ");
 			String link_path = m.group(2),
 				   pref_path = m.group(1);
 			
@@ -221,17 +199,17 @@ public class HTMLPageFilter
 			
 			if(pref_path == null)
 			{
-				System.out.println("1");
+				// System.out.println("1");
 				new_url = pref + "/" + link_path;
 			} 
 			else if(!pref_path.equals("/"))
 			{
-				System.out.println("2");
+				// System.out.println("2");
 				new_url = pref + url.getPath() + link_path;
 			}
 			else
 			{
-				System.out.println("3");
+				// System.out.println("3");
 				new_url = pref + link;
 			}
 			
@@ -240,7 +218,7 @@ public class HTMLPageFilter
 		}
 		else
 		{
-			System.out.println("no match");
+			//System.out.println("no match");
 			new_url = link;
 			// System.out.println("From : " + link);
 			// System.out.println("To   : " + link + "\n");

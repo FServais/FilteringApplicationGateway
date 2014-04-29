@@ -127,13 +127,13 @@ public class HTTPClientRequestThread extends Thread {
 			duration = System.currentTimeMillis() - begin;
 			msgQueue.add(new DisplayerMessage("Start filtering (" + duration + " ms)"));
 			HTMLPageFilter hpl = new HTMLPageFilter(cloned_page, urlRequested, wordlist);
-			
+			String filtered_page = hpl.getFilteredPage();
 			duration = System.currentTimeMillis() - begin;
 			msgQueue.add(new DisplayerMessage("End filtering (" + duration + " ms)"));
 			
 			duration = System.currentTimeMillis() - begin;
 			msgQueue.add(new DisplayerMessage("Start writing (" + duration + " ms)"));
-			writeResponse(HTTP.OK_HEADERS, hpl.getFilteredPage());
+			writeResponse(HTTP.OK_HEADERS, filtered_page);
 			duration = System.currentTimeMillis() - begin;
 			msgQueue.add(new DisplayerMessage("End writing (" + duration + " ms)\n"));
 		}
