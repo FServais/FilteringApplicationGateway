@@ -5,6 +5,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import datastructures.WordList;
 import html.HTMLContent;
@@ -145,13 +147,31 @@ public class HTMLPageFilter
 	 */
 	private void filterLinks()
 	{
-		for(HTMLOpeningTag a_tag : page.getOpeningTagElements("a"))
+		int i = 0;
+		//page.print();
+		
+		Vector<HTMLOpeningTag> tags = new Vector<HTMLOpeningTag>();
+		
+		tags.addAll(page.getOpeningTagElements("a"));
+		tags.addAll(page.getOpeningTagElements("link"));
+		
+		for(HTMLOpeningTag tag : tags)
 		{
-			String hrefValue = a_tag.getAttributeValue("href");
-			if(hrefValue == null)
+			i++;
+			System.out.print("Link " + i + " ");
+			String href_value = tag.getAttributeValue("href");
+			if(href_value == null)
+			{
+				System.err.println("<a|link> with no href");
 				continue;
-			
+			}
+			String ur = getCorrectLink(href_value);
+			System.out.println("From : " + href_value);
+			System.out.println("To   : " + ur);
+			tag.setAttributeValue("href", ur);
+
 			/* Analyze href */
+			/*
 			try 
 			{
 				new URL(hrefValue); // Check if absolute or not
@@ -174,10 +194,71 @@ public class HTMLPageFilter
 					} 
 					catch (UnsupportedEncodingException e1) {e1.printStackTrace();}
 				}
-			}
+			}*/
 		}
 	}
 	
+	private String getCorrectLink(String link)
+	{
+		String regex_rel = "^\\s*(\\.{0,2}/)?((?:[\\w~-]*/?)*" + 
+				   "(?:[\\w]+\\.(?:[jx]?html?|ph(?:p[345]?|tml)" + 
+				   "|j(?:s(f|p[xa]?)?|son)|do|action|a(?:xd|s[pmh]?x?)|py|xml|css))?" +
+				   "(?:\\?(?:\\w+=[-\\w%\\.]+)(?:&(?:\\w+=[-\\w%\\.]+))*)?)?$";
+
+		Pattern p = Pattern.compile(regex_rel);
+		Matcher m = p.matcher(link);
+		
+		String new_url;
+		
+		if(m.matches())
+		{
+			System.out.print("match ");
+			String link_path = m.group(2),
+				   pref_path = m.group(1);
+			
+			int port = url.getPort();
+			String pref = url.getProtocol() + "://" + url.getHost() + (port == -1 ? "" : ":" + port);
+			
+			if(pref_path == null)
+			{
+				System.out.println("1");
+				new_url = pref + "/" + link_path;
+			} 
+			else if(!pref_path.equals("/"))
+			{
+				System.out.println("2");
+				new_url = pref + url.getPath() + link_path;
+			}
+			else
+			{
+				System.out.println("3");
+				new_url = pref + link;
+			}
+			
+			// System.out.println("From : " + link);
+			// System.out.println("To   : " + "http://localhost:8005/?s=" + pref + m.group(2) + "\n");
+		}
+		else
+		{
+			System.out.println("no match");
+			new_url = link;
+			// System.out.println("From : " + link);
+			// System.out.println("To   : " + link + "\n");
+		}
+		
+		String final_url = "";
+		
+		try 
+		{
+			final_url = URLEncoder.encode(new_url, "UTF-8");
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			e.printStackTrace();
+		}
+	
+		return "http://localhost:8005/?s=" + final_url;
+	}
 	
 	private void filterImg()
 	{
@@ -197,7 +278,7 @@ public class HTMLPageFilter
 				// srcValue is a relative link OR begin with "www"
 				if(!srcValue.startsWith("www"))
 				{
-					System.out.println("IMAGE : getProtocol : " + url.getProtocol() + " --- getHost : " + url.getHost() + " --- getPath : " + url.getPath() + " --- cond : " + ((url.getPath().endsWith("/") == srcValue.startsWith("/")) && url.getPath().endsWith("/") ? "/" : "") + " --- srcValue : " + srcValue);
+					//System.out.println("IMAGE : getProtocol : " + url.getProtocol() + " --- getHost : " + url.getHost() + " --- getPath : " + url.getPath() + " --- cond : " + ((url.getPath().endsWith("/") == srcValue.startsWith("/")) && url.getPath().endsWith("/") ? "/" : "") + " --- srcValue : " + srcValue);
 					img_tag.setAttributeValue("src", url.getProtocol() + "://" + url.getHost() + url.getPath() + (url.getPath().endsWith("/") || srcValue.startsWith("/") ? "" : "/") + srcValue);
 				}
 			}

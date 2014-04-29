@@ -44,7 +44,6 @@ public class HTTPServer extends Thread
 	
 	public void run()
 	{	
-
 		while(true)
 		{
 			try

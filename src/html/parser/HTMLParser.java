@@ -151,7 +151,7 @@ public class HTMLParser
 				
 				if(c == '/' || c == '>') // end of tag
 					break;
-				else if(c == ' ') // end of tag or attributes after some spaces
+				else if(c == ' ' || c == '\n' || c == '\r' || c == '\t') // end of tag or attributes after some spaces
 				{
 					i = parseAttribute(html, i, attr);
 					break;
@@ -159,7 +159,7 @@ public class HTMLParser
 				else
 					sb.append(c);
 			}
-			else if(c != ' ')
+			else if(c != ' ' && c != '\n' && c != '\r' && c != '\t')
 			{
 				current_state = StateOpeningTag.READ_TAG_NAME;
 				sb.append(c);
@@ -216,7 +216,7 @@ public class HTMLParser
 				else if(current_state == StateAttr.READ_ATTR_VAL_UNQUOTED )
 					attr.add(new HTMLAttribute(attr_name, built_string, false));
 				
-				// go to the end of the tag chat
+				// go to the end of the tag char
 				while((c = html.charAt(i)) != '>')
 					i++;
 				
@@ -229,7 +229,7 @@ public class HTMLParser
 			{
 				case WAIT_ATTR_NAME :
 				{
-					if(c != ' ') // first char of the attribute name found
+					if(c != ' ' && c != '\n' && c != '\r' && c != '\t') // first char of the attribute name found
 					{
 						quoted_attr_name = (c == '"');
 						sb.append(c);
@@ -266,7 +266,7 @@ public class HTMLParser
 				{
 					if(c == '=') // equal found after few spaces after an attribute name
 						switchStateAttr(StateAttr.WAIT_ATTR_VAL);
-					else if(c != ' ') // found the beginning of a new attribute name
+					else if(c != ' ' && c != '\n' && c != '\r' && c != '\t') // found the beginning of a new attribute name
 					{
 						quoted_attr_name = (c == '"');
 						attr.add(new HTMLAttribute(attr_name));
@@ -284,7 +284,7 @@ public class HTMLParser
 						val_delim_is_quote = (c == '"');
 						switchStateAttr(StateAttr.READ_ATTR_VAL_QUOTED);
 					}
-					else if(c != ' ')  // start of an unquoted attribute value
+					else if(c != ' ' && c != '\n' && c != '\r' && c != '\t')  // start of an unquoted attribute value
 					{
 						sb.append(c);
 						switchStateAttr(StateAttr.READ_ATTR_VAL_UNQUOTED);
@@ -399,9 +399,9 @@ public class HTMLParser
 			if(in_javascript && c == '<') // checks if < is the beginning of a tag
 			{
 				int j = i + 1;
-				System.out.print("Parser : ");
-				while(html.charAt(j) == ' '){ System.out.print(html.charAt(j) + " "); j++; }// skip spaces
-				System.out.println(html.charAt(j) + " |");
+				
+				while(html.charAt(j) == ' ') j++; // skip spaces
+
 				if(html.charAt(j) == '/') // char is a closing tag
 					break;
 			}
