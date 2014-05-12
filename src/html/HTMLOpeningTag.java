@@ -105,7 +105,7 @@ public class HTMLOpeningTag extends HTMLElement implements Cloneable
 	/**
 	 * Returns the value of an attribute of the given name
 	 * @param name a String containing the value of the attribute
-	 * @return the attribute value if it is found, false otherwise
+	 * @return the attribute value if it is found, null otherwise
 	 */
 	public String getAttributeValue(String name)
 	{
@@ -148,5 +148,15 @@ public class HTMLOpeningTag extends HTMLElement implements Cloneable
 			tag.attributes.add((HTMLAttribute) attr.clone());
 		
 		return tag;
+	}
+	
+	/**
+	 * Returns true if the name of the tag equals s (case insensitive)
+	 * @param s a String containing the name to compare
+	 * @return true if the names are the same, false otherwise
+	 */
+	public boolean nameEquals(String s)
+	{
+		return tagName.equalsIgnoreCase(s);
 	}
 }

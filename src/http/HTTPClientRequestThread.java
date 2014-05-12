@@ -13,6 +13,7 @@ import java.io.PrintWriter;
 import html.HTMLPage;
 import html.exceptions.HTMLParsingException;
 import html.filter.HTMLPageFilter;
+import http.exceptions.BadRequestException;
 import http.exceptions.RemoteConnectionException;
 import datastructures.Cache;
 import datastructures.WordList;
@@ -45,35 +46,12 @@ public class HTTPClientRequestThread extends Thread {
 			
 			msgQueue.add(new DisplayerMessage("New request"));
 	
-			StringBuilder sb = new StringBuilder();
-			String request = null;
-	
-			// reads the HTTP request
-
-			InputStreamReader isr = new InputStreamReader(socket.getInputStream());
-			BufferedReader br = new BufferedReader(isr);
-			
-			// Read the request
-			String line;
-			while((line = br.readLine()) != null && !line.equals(""))
-			{
-				sb.append(line + "\n");
-			}
-
-			request = sb.toString();
-			
-			if(request == null)
-			{
-				msgQueue.add(new DisplayerMessage("Bad request (null pointer)", true));
-				return;
-			}
+			HTTPRequest request = readRequest();
 			
 			duration = (System.currentTimeMillis() - begin);
 			msgQueue.add(new DisplayerMessage("Request received (" + duration  + " ms)")); 
-
 			
 			// Decode the request : get URL
-
 			GatewayRequestDecoder grd = new GatewayRequestDecoder(request);
 			
 			if(!grd.validRequest())
@@ -100,6 +78,7 @@ public class HTTPClientRequestThread extends Thread {
 			// If already in cache and don't need to be refreshed (timeout) and don't have "forceRefresh" flag
 			if(cache.isContained(url_string) && cache.getEntry(url_string).isValid() && !forceRefresh)
 			{
+				System.out.println("Cache");
 				response_page = cache.getEntry(url_string).getData();
 				
 				duration = System.currentTimeMillis() - begin;
@@ -107,6 +86,7 @@ public class HTTPClientRequestThread extends Thread {
 			}
 			else // get page from remote server
 			{
+				System.out.println("NoCache");
 				response_page = getPageFromRemote(urlRequested);
 				duration = System.currentTimeMillis() - begin;
 				msgQueue.add(new DisplayerMessage("Page retrieved (from remote : " + duration + " ms)"));
@@ -145,6 +125,11 @@ public class HTTPClientRequestThread extends Thread {
 		{
 			msgQueue.add(new DisplayerMessage("Bad url : " + e.getMessage(), true));
 		}
+		catch (BadRequestException e)
+		{
+			e.printStackTrace();
+			msgQueue.add(new DisplayerMessage("Error while parsing the http request", true));
+		}
 		catch (IOException e) 
 		{
 			e.printStackTrace();
@@ -152,6 +137,7 @@ public class HTTPClientRequestThread extends Thread {
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace();
 			msgQueue.add(new DisplayerMessage("Exception : " + e.getMessage(), true));
 		}
 		finally
@@ -187,10 +173,34 @@ public class HTTPClientRequestThread extends Thread {
 	}
 	
 	/**
-	 * Don't take into account bad response from remote server
-	 * @param url
-	 * @return
-	 * @throws RemoteConnectionException
+	 * Reads the http request received 
+	 * @return an HTTPRequest object representing the request
+	 * @throws IOException if the reading of the socket input stream fails
+	 * @throws BadRequestException if an error occurs while creating the http request
+	 */
+	private HTTPRequest readRequest() throws BadRequestException, IOException
+	{
+		StringBuilder sb = new StringBuilder();
+		String request = null;
+
+		// reads the HTTP request
+
+		InputStreamReader isr = new InputStreamReader(socket.getInputStream());
+		BufferedReader br = new BufferedReader(isr);
+		
+		// Read the request
+		String line;
+		while((line = br.readLine()) != null && !line.equals(""))
+			sb.append(line + "\n");
+
+		return new HTTPRequest(sb.toString());
+	}
+	/**
+	 * This method connects to the url and returns an HTMLPage representing the content
+	 * loaded from the remote server
+	 * @param url an URL object from which the content must be gathered
+	 * @return an HTMLPage object containing the page of the remote
+	 * @throws RemoteConnectionException exception thrown on parsing error or on connection failure
 	 */
 	private HTMLPage getPageFromRemote(URL url) throws RemoteConnectionException
 	{
@@ -216,6 +226,7 @@ public class HTTPClientRequestThread extends Thread {
 			in.close();
 			isr.close();
 			
+			// create page
 			return new HTMLPage(response.toString());
 		}
 		catch(IOException | HTMLParsingException e)

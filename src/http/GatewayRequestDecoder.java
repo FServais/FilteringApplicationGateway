@@ -22,9 +22,9 @@ public class GatewayRequestDecoder
 		System.out.println("# remote : " + remote_address + "\n");
 	}
 	
-	public GatewayRequestDecoder(String request)
+	public GatewayRequestDecoder(HTTPRequest request)
 	{
-		http_req = new HTTPRequest(request);
+		http_req = request;
 		path_params = new HashMap<String, String>();
 
 		parsePath();

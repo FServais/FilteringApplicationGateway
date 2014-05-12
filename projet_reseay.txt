@@ -67,3 +67,21 @@ lien :
 
 Images : 
 - ((..?)?/)?(...)
+
+
+limitations : 
+ - javascript (publicité)
+ - lien dans des autres balises 
+ - page n'ayant pas d'extension (liens)
+ 
+a 246
+Link : personnel.php?op=detail&amp;id=700
+URL : http://www.montefiore.ulg.ac.be/personnel.php?op=list&amp;type=academic
+[CORR] other-match : http://www.montefiore.ulg.ac.be/personnel.php?op=detail&amp;id=700
+set ok!!
+
+a 247
+Link : personnel.php?op=detail&amp;id=924
+URL : http://www.montefiore.ulg.ac.be/personnel.php?op=list&amp;type=academic
+[CORR] other-nomatch : -match : http://www.montefiore.ulg.ac.be/personnel.php?op=detail&amp;id=924
+set ok!!

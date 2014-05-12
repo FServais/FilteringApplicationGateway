@@ -30,33 +30,6 @@ public class HTMLPage implements Cloneable
 		this.list = parser.getList();
 	}
 	
-/*	public static void main(String[] args) throws IOException, HTMLParsingException 
-	{
-		URL u = new URL("http://www.montefiore.ulg.ac.be/~pw/");
-		HttpURLConnection huc = (HttpURLConnection) u.openConnection();
-		
-		huc.setRequestMethod("GET");
-		BufferedReader in = new BufferedReader(
-		        new InputStreamReader(huc.getInputStream()));
-		
-		String inputLine;
-		StringBuffer response = new StringBuffer();
- 
-		while ((inputLine = in.readLine()) != null) 
-		{
-			response.append(inputLine);
-		}
-		in.close();
- 
-		//print result
-		System.out.println(response.toString());
-		
-		HTMLPage hp = new HTMLPage(response.toString());
-		System.out.println(hp.toString());
-	}*/
-	
-	
-	
 	/**
 	 * Returns all the content elements of the page (with or without the javascript code)
 	 * @param the content in script tags are added to the vector, they're not otherwise
@@ -71,10 +44,10 @@ public class HTMLPage implements Cloneable
 		for(HTMLElement htmlElement : list)
 		{
 			if(htmlElement instanceof HTMLOpeningTag // starts script
-					&& ((HTMLOpeningTag) htmlElement).getName().equals("script"))
+					&& ((HTMLOpeningTag) htmlElement).nameEquals("script"))
 				in_javascript = true;
 			else if(htmlElement instanceof HTMLClosingTag // ends script
-					&& ((HTMLClosingTag) htmlElement).getName().equals("script"))
+					&& ((HTMLClosingTag) htmlElement).nameEquals("script"))
 				in_javascript = false;
 			
 			if(htmlElement instanceof HTMLContent // add content
@@ -120,7 +93,7 @@ public class HTMLPage implements Cloneable
 		
 		for(HTMLElement element : list)
 			if(element instanceof HTMLOpeningTag 
-					&& (name.equals("*") || ((HTMLOpeningTag) element).getName().equalsIgnoreCase(name)))
+					&& (name.equals("*") || ((HTMLOpeningTag) element).nameEquals(name)))
 				vec.add((HTMLOpeningTag) element);
 		
 		return vec;

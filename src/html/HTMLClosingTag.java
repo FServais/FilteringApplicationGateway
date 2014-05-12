@@ -40,5 +40,15 @@ public class HTMLClosingTag extends HTMLElement implements Cloneable {
 	{
 		return super.clone();
 	}
+	
+	/**
+	 * Returns true if the name of the tag equals s (case insensitive)
+	 * @param s a String containing the name to compare
+	 * @return true if the names are the same, false otherwise
+	 */
+	public boolean nameEquals(String s)
+	{
+		return tagName.equalsIgnoreCase(s);
+	}
 }
 

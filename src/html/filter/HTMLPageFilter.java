@@ -1,18 +1,17 @@
 package html.filter;
 
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import datastructures.WordList;
 import html.HTMLContent;
 import html.HTMLOpeningTag;
 import html.HTMLPage;
 
+/**
+ * A class for filtering an html page
+ * @author Fabrice Servais & Romain Mormont
+ */
 public class HTMLPageFilter 
 {
 	private FilterStatus status;
@@ -120,7 +119,7 @@ public class HTMLPageFilter
 	}
 	
 	/**
-	 * Returns the html code of the filtrated page (or not according to the status)
+	 * Returns the html code of the filtered page (or not according to the status)
 	 * @return a String containing the html code of the page
 	 */
 	public String getFilteredPage()
@@ -132,8 +131,7 @@ public class HTMLPageFilter
 		{
 			System.out.println("Filter links...");
 			filterLinks();
-			System.out.println("Filter images...");
-			filterImg();
+			
 			if(status == FilterStatus.PAGE_OK)
 				return page.toString();
 			else 
@@ -146,98 +144,97 @@ public class HTMLPageFilter
 	}
 	
 	/**
-	 * Replace all the 'href' attributes of 'a' tags that are relatives to absolutes
+	 * Filters the "href" or "src" attribute of "a", "frame" and "link" tags of a page
 	 */
 	private void filterLinks()
 	{
-		int i = 0;
+		//System.out.println(page.toString());
 		//page.print();
 		
+		// find the absolute path of the page
+		URL base_url = null;
+		
+		Vector<HTMLOpeningTag> base = new Vector<HTMLOpeningTag>();
+		base.addAll(page.getOpeningTagElements("base"));
+		
+		try
+		{
+			if(!base.isEmpty()) // base tag on the page
+				base_url = new URL(base.firstElement().getAttributeValue("href"));
+			else // no base tag on the page
+				base_url = new URL(url.getProtocol() + "://" + url.getHost() + url.getPath());
+		}
+		catch(MalformedURLException e)
+		{
+			System.err.println(e.getMessage());
+		}
+		
+		//System.out.println("Base : " + base_url.toString());
+		
+		// filters tags
+		filterAttribute("a", "href", base_url, true);
+		filterAttribute("link", "href", base_url, false);
+		filterAttribute("frame", "src", base_url, false);
+		filterAttribute("img", "src", base_url, false);
+		filterAttribute("script","src", base_url, false);
+		
+		//System.out.println("out");
+	}
+	
+	
+	/**
+	 * Filters the attribute value of every tag having the given name in a html page.
+	 * These values are expected to be links. If the tag_name is "a" or "frame", then the 
+	 * links are encoded and are set as the "s" argument of an URL to the gateway platform
+	 * @param tag_name a String containing the name of the tag ("a", "link", "img",...)
+	 * @param attribute_name a String containing the name of the tag ("src", "href",...)
+	 * @param base_url the absolute path to which must be appended any relative link
+	 * @param encode true if the links must be encoded (and put in the string
+	 * 				 "http://gateway_host:8005/?s=..."),	false otherwise
+	 */
+	private void filterAttribute(String tag_name, String attribute_name, URL base_url, boolean encode)
+	{
 		Vector<HTMLOpeningTag> tags = new Vector<HTMLOpeningTag>();
 		
-		tags.addAll(page.getOpeningTagElements("a"));
-		tags.addAll(page.getOpeningTagElements("link"));
+		tags.addAll(page.getOpeningTagElements(tag_name));
 		
+		int i = 0;
+		// run through the "tag_name" tags of the page
 		for(HTMLOpeningTag tag : tags)
 		{
-			i++;
-			System.out.print(tag.getName() + " " + i + "\n");
-			String href_value = tag.getAttributeValue("href");
-			if(href_value == null)
-			{
-				System.err.println("<a|link> with no href");
-				continue;
-			}
-			String ur = getCorrectLink(href_value);
-			//System.out.println("From : " + href_value);
-			//href_value.System.out.println("To   : " + ur);
-			tag.setAttributeValue("href", ur);
-
-		}
-	}
-	
-	private String getCorrectLink(String link)
-	{
-		String regex_rel = "^\\s*(\\.{0,2}/)?((?:[\\w~-]*/?)*" + 
-				   "(?:[\\w]+\\.(?:[jx]?html?|ph(?:p[345]?|tml)" + 
-				   "|j(?:s(f|p[xa]?)?|son)|do|action|a(?:xd|s[pmh]?x?)|py|xml|css))?" +
-				   "(?:\\?(?:\\w+=[-\\w%\\.]+)(?:&(?:\\w+=[-\\w%\\.]+))*)?)?$";
-
-		Pattern p = Pattern.compile(regex_rel);
-		Matcher m = p.matcher(link);
-		
-		String new_url;
-		
-		if(m.matches())
-		{
-			//System.out.print("match ");
-			String link_path = m.group(2),
-				   pref_path = m.group(1);
+			String attribute_value = tag.getAttributeValue(attribute_name);
 			
-			int port = url.getPort();
-			String pref = url.getProtocol() + "://" + url.getHost() + (port == -1 ? "" : ":" + port);
-			
-			if(pref_path == null)
+			if(attribute_value != null) // checks if attribute is defined
 			{
-				// System.out.println("1");
-				new_url = pref + "/" + link_path;
-			} 
-			else if(!pref_path.equals("/"))
-			{
-				// System.out.println("2");
-				new_url = pref + url.getPath() + link_path;
+				LinkFilter lf = null;
+				
+				if(encode)
+				{	
+					lf = new LinkFilter(base_url, attribute_value);
+					tag.setAttributeValue(attribute_name, "http://localhost:8005/?s=" 
+																+ lf.getFilteredLink());
+				}
+				else
+				{
+					lf = new LinkFilter(base_url, attribute_value, false);
+					tag.setAttributeValue(attribute_name, lf.getFilteredLink());
+				}
+				
+				/*System.out.println("\n[" + tag_name + "] n°" + (++i));
+				System.out.println("  URL  :  " + url.toString());
+				System.out.println("  Link : " + attribute_value);
+				System.out.println("  new  :  " + lf.getFilteredLink());
+				*/
+				
+				 
+				//System.out.println("set ok!!\n");
 			}
 			else
-			{
-				// System.out.println("3");
-				new_url = pref + link;
-			}
-			
-			// System.out.println("From : " + link);
-			// System.out.println("To   : " + "http://localhost:8005/?s=" + pref + m.group(2) + "\n");
-		}
-		else
-		{
-			//System.out.println("no match");
-			new_url = link;
-			// System.out.println("From : " + link);
-			// System.out.println("To   : " + link + "\n");
-		}
-		
-		String final_url = "";
-		
-		try 
-		{
-			final_url = URLEncoder.encode(new_url, "UTF-8");
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			e.printStackTrace();
-		}
-	
-		return "http://localhost:8005/?s=" + final_url;
+				System.err.println("\"" + tag_name + "\"" + " with no \"" + attribute_name + "\"");
+		}	
 	}
-	
+
+	/*
 	private void filterImg()
 	{
 		for(HTMLOpeningTag img_tag : page.getOpeningTagElements("img"))
@@ -262,7 +259,7 @@ public class HTMLPageFilter
 			}
 		}
 	}
-	
+	*/
 
 	/**
 	 * Returns the number of occurences of a substring in a string
@@ -277,7 +274,10 @@ public class HTMLPageFilter
 		return (strlen - str.replace(substr, "").length()) / substrlen;
 	}
 
-	private void filterRestrictedWords()
+	/**
+	 * Filters the restricted keywords on the html page
+	 */
+	public void filterRestrictedWords()
 	{
 		Vector<HTMLContent> vec = page.getContentElements(false);
 		

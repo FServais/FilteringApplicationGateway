@@ -11,6 +11,10 @@ import html.exceptions.HTMLParsingException;
 import java.util.LinkedList;
 import java.util.Vector;
 
+/**
+ * A class for parsing html code
+ * @author Romain Mormont
+ */
 public class HTMLParser
 {
 	private LinkedList<HTMLElement> list = null;
@@ -22,7 +26,7 @@ public class HTMLParser
 	public HTMLParser(String html) throws HTMLParsingException
 	{
 		list = new LinkedList<HTMLElement>();
-		System.out.println(html);
+		//System.out.println(html);
 		parse(html);
 	}
 	
@@ -149,8 +153,14 @@ public class HTMLParser
 				if(c == '/' || c == '>' || c == ' ') // end of tag name reached
 					tag_name = sb.toString();
 				
-				if(c == '/' || c == '>') // end of tag
+				if(c == '>') // end of tag
 					break;
+				else if(c == '/')
+				{
+					// reached the char following the '>'
+					while(c != '>') c = html.charAt(++i);
+					break;
+				}
 				else if(c == ' ' || c == '\n' || c == '\r' || c == '\t') // end of tag or attributes after some spaces
 				{
 					i = parseAttribute(html, i, attr);
