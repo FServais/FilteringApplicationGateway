@@ -1,14 +1,18 @@
 package html;
 
+/**
+ * A class for representing an HTML attribute
+ * @author Romain Mormont
+ */
 public class HTMLAttribute implements Cloneable
 {
-	private String name;
-	private String value;
-	private boolean quoted;
+	private String name; // attribute name
+	private String value; // attribute value
+	private boolean quoted; // true if the attribute values is quoted
 	
 	/**
-	 * Constructs a HTMLAttribute with its name and its value (this last one
-	 * being quoted)
+	 * Constructs a HTMLAttribute with its name and its value (the value is considered 
+	 * to be quoted)
 	 * @param name a String containing the name of the attribute
 	 * @param value a String containing the value of the attribute
 	 */
@@ -18,8 +22,7 @@ public class HTMLAttribute implements Cloneable
 	}
 	
 	/**
-	 * Constructs a HTMLAttribute with its name (its an attribute with
-	 * no value)
+	 * Constructs a HTMLAttribute with its name (and no attribute value)
 	 * @param name a String containing the name of the attribute
 	 */
 	public HTMLAttribute(String name)
@@ -28,8 +31,7 @@ public class HTMLAttribute implements Cloneable
 	}
 	
 	/**
-	 * Constructs a HTMLAttribute with its name, value (this last 
-	 * one being quoted if quoted is true)
+	 * Constructs a HTMLAttribute with its name, value
 	 * @param name a String containing the name
 	 * @param value a String containing the value
 	 * @param quoted true if the value must be quoted
@@ -42,8 +44,8 @@ public class HTMLAttribute implements Cloneable
 	}
 	
 	/**
-	 * Returns the value of the attribute
-	 * @return a String containing the value of the attribute
+	 * Returns the name of the attibute
+	 * @return a String containing the name of the attribute
 	 */
 	public String getName()
 	{
@@ -51,8 +53,8 @@ public class HTMLAttribute implements Cloneable
 	}
 	
 	/**
-	 * Returns the name of the attribute
-	 * @return a String containing the name of the attribute
+	 * Returns the value of the attribute
+	 * @return a String containing the value of the attribute
 	 */	
 	public String getValue()
 	{
@@ -79,6 +81,10 @@ public class HTMLAttribute implements Cloneable
 		value = new_value;
 	}
 	
+	/**
+	 * Converts the HTML attribute to a string
+	 * @return a String containing the html attribute
+	 */
 	public String toString()
 	{
 		if(value != null && !value.isEmpty())
@@ -93,7 +99,8 @@ public class HTMLAttribute implements Cloneable
 	}
 	
 	/**
-	 * Makes a deep copy of the HTMLPage object
+	 * Makes a deep copy of the HTMLAttribute object
+	 * @return a copy of the HTMLAttribute object
 	 */
 	public Object clone() throws CloneNotSupportedException
 	{

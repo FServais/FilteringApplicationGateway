@@ -1,14 +1,14 @@
 package html;
 
 /**
- * @author Romain Mormont
  * A class for representing html content (everything which is not a tag)
+ * @author Romain Mormont
  */
 public class HTMLContent extends HTMLElement {
 	String data; // Content
 	
 	/**
-	 * Constructs a HTMLContent object with the
+	 * Constructs a HTMLContent object with its content
 	 * @param data a String containing the content
 	 */
 	public HTMLContent(String data)
@@ -17,7 +17,7 @@ public class HTMLContent extends HTMLElement {
 	}
 	
 	/**
-	 * Returns the data as a string
+	 * Converts the HTMLContent object to a String
 	 * @return a String containing the content
 	 */
 	public String toString()
@@ -26,8 +26,9 @@ public class HTMLContent extends HTMLElement {
 	}
 	
 	/**
-	 * Returns an array containing the words 
-	 * @return a String array containing the words of the content
+	 * Returns an array containing the words contained in the HTMLContent object
+	 * In ordre to get the words, the content is split around any word boundaries (e.g. regex class '\b')
+	 * @return a String array containing the words of the content 
 	 */
 	public String[] getWordsArray()
 	{
@@ -44,17 +45,14 @@ public class HTMLContent extends HTMLElement {
 	{
 		String rep = getUnicharString(rep_char, substr.length());
 		
-		//System.out.println("Substr = " + substr + " (" + rep + ")");
-		//System.out.println(data);
 		data = data.replaceAll("(?i)" + substr, rep);
-		//System.out.println(data);
 	}
 	
 	/**
-	 * Returns a String composed of count occurrences of c
+	 * Returns a String composed of 'count' occurrences of c
 	 * @param c the char to repeat
 	 * @param count the number of occurrences of c
-	 * @return the resulting String
+	 * @return a String containing 'count' occurences of c
 	 */
 	private String getUnicharString(char c, int count)
 	{
@@ -67,7 +65,8 @@ public class HTMLContent extends HTMLElement {
 	}
 	
 	/**
-	 * Makes a deep copy of the HTMLPage object
+	 * Makes a deep copy of the HTMLContent object
+	 * @return a copy of the HTMLContent object
 	 */
 	public Object clone() throws CloneNotSupportedException
 	{

@@ -1,18 +1,18 @@
 package html;
 /**
+ * A class for representing an html closing tag
  * @author Romain Mormont
- * A class for representing a html closing tag
  */
 public class HTMLClosingTag extends HTMLElement implements Cloneable {
-	private String tagName;
+	private String tag_name;
 	
 	/**
 	 * Constructs a HTMLClosingTag objects with the name of the tag
-	 * @param tagName a String containing the name of the tag
+	 * @param tag_name a String containing the name of the tag
 	 */
-	public HTMLClosingTag(String tagName)
+	public HTMLClosingTag(String tag_name)
 	{
-		this.tagName = tagName;
+		this.tag_name = tag_name;
 	}
 	
 	/**
@@ -21,7 +21,7 @@ public class HTMLClosingTag extends HTMLElement implements Cloneable {
 	 */
 	public String toString()
 	{
-		return "</" + tagName + ">";
+		return "</" + tag_name + ">";
 	}
 	
 	/**
@@ -30,11 +30,13 @@ public class HTMLClosingTag extends HTMLElement implements Cloneable {
 	 */
 	public String getName()
 	{
-		return tagName;
+		return tag_name;
 	}
 	
 	/**
-	 * Makes a deep copy of the HTMLPage object
+	 * Makes a deep copy of the HTMLClosingTag object
+	 * @return a copy the HTMLClosingTag object
+	 * @throws CloneNotSupportedException if clonage is not supported
 	 */
 	public Object clone() throws CloneNotSupportedException
 	{
@@ -48,7 +50,7 @@ public class HTMLClosingTag extends HTMLElement implements Cloneable {
 	 */
 	public boolean nameEquals(String s)
 	{
-		return tagName.equalsIgnoreCase(s);
+		return tag_name.equalsIgnoreCase(s);
 	}
 }
 

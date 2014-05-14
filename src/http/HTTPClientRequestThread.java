@@ -25,17 +25,22 @@ import displayer.DisplayerMessage;
  */
 public class HTTPClientRequestThread extends Thread {
 	
-	private Socket socket = null;
-	private Cache<String, HTMLPage> cache = null;
-	private LinkedBlockingQueue<DisplayerMessage> msgQueue = null;
-	private WordList wordlist = null;
+	private Socket socket;
+	private Cache<String, HTMLPage> cache;
+	private LinkedBlockingQueue<DisplayerMessage> msgQueue;
+	private WordList wordlist;
+	private int connection_number = 0;
+	private String gateway_ip;
 	
-	public HTTPClientRequestThread(Socket socket, LinkedBlockingQueue<DisplayerMessage> msgQueue, WordList wordlist, Cache<String, HTMLPage> cache)
+	public HTTPClientRequestThread(int connection_number, Socket socket, LinkedBlockingQueue<DisplayerMessage> msgQueue, 
+									WordList wordlist, Cache<String, HTMLPage> cache, String gateway_ip)
 	{
 		this.socket = socket;
 		this.cache = cache;
 		this.msgQueue = msgQueue;
 		this.wordlist = wordlist;
+		this.connection_number = connection_number;
+		this.gateway_ip = gateway_ip;
 	}
 	
 	public void run()
@@ -44,115 +49,121 @@ public class HTTPClientRequestThread extends Thread {
 		{
 			long begin = System.currentTimeMillis(), duration;
 			
-			msgQueue.add(new DisplayerMessage("New request"));
+			message("New request");
 	
-			HTTPRequest request = readRequest();
+			HTTPRequest request = new HTTPRequest(socket);
 			
 			duration = (System.currentTimeMillis() - begin);
-			msgQueue.add(new DisplayerMessage("Request received (" + duration  + " ms)")); 
+			message("Request received (" + duration  + " ms)"); 
 			
 			// Decode the request : get URL
 			GatewayRequestDecoder grd = new GatewayRequestDecoder(request);
 			
 			if(!grd.validRequest())
 			{	
-				msgQueue.add(new DisplayerMessage("Invalid request : request : \n")); 
+				// TODO implement response to this error
+				message("Invalid request : path cannot be handled\n"); 
 				return;
 			}
 
-			URL urlRequested = new URL(grd.getUrl());
-
+			URL request_url = new URL(grd.getUrl());
 			
-			msgQueue.add(new DisplayerMessage("Requested page : \"" + urlRequested.toString() + "\""));
+			message("Requested page : \"" + request_url.toString() + "\"");
 			
-			// Analysis of "forceRefresh" flag
+			// checks if "forceRefresh" flag is set
 			boolean forceRefresh = grd.refreshIsForced();
 			
 			HTMLPage response_page;
-
-			String url_string = grd.getUrl();
 			
 			duration = System.currentTimeMillis() - begin;
-			msgQueue.add(new DisplayerMessage("Starts getting the page (" + duration + " ms)"));
+			message("Starts getting the page (" + duration + " ms)");
 
 			// If already in cache and don't need to be refreshed (timeout) and don't have "forceRefresh" flag
-			if(cache.isContained(url_string) && cache.getEntry(url_string).isValid() && !forceRefresh)
+			if(cache.isContained(request_url.toString()) && cache.getEntry(request_url.toString()).isValid() && !forceRefresh)
 			{
-				System.out.println("Cache");
-				response_page = cache.getEntry(url_string).getData();
+				response_page = cache.getEntry(request_url.toString()).getData();
 				
 				duration = System.currentTimeMillis() - begin;
-				msgQueue.add(new DisplayerMessage("Page retrieved (from cache : " + duration + " ms)"));
+				message("Page retrieved (from cache : " + duration + " ms)");
 			}
 			else // get page from remote server
 			{
-				System.out.println("NoCache");
-				response_page = getPageFromRemote(urlRequested);
+				response_page = getPageFromRemote(request_url);
+				
 				duration = System.currentTimeMillis() - begin;
-				msgQueue.add(new DisplayerMessage("Page retrieved (from remote : " + duration + " ms)"));
+				message("Page retrieved (from remote : " + duration + " ms)");
+				
+				// filters the link of the page
+				HTMLPageFilter filter = new HTMLPageFilter(response_page, request_url, wordlist, gateway_ip);
+				filter.filterLinks();
+				
+				duration = System.currentTimeMillis() - begin;
+				message("Page's links fitlered (" + duration + " ms)");
+				
 				// add entry to the cache
-				cache.addEntry(url_string, response_page);
+				cache.addEntry(request_url.toString(), response_page);
 				duration = System.currentTimeMillis() - begin;
-				msgQueue.add(new DisplayerMessage("Page cached (" + duration + " ms)"));
+				message("Page cached (" + duration + " ms)");
 			}	
 			
 			duration = System.currentTimeMillis() - begin;
-			msgQueue.add(new DisplayerMessage("Start cloning (" + duration + " ms)"));
+			message("Start cloning (" + duration + " ms)");
 			HTMLPage cloned_page = (HTMLPage) response_page.clone();
 			
 			duration = System.currentTimeMillis() - begin;
-			msgQueue.add(new DisplayerMessage("End cloning (" + duration + " ms)"));
+			message("End cloning (" + duration + " ms)");
 			// filters page 
 			
 			duration = System.currentTimeMillis() - begin;
-			msgQueue.add(new DisplayerMessage("Start filtering (" + duration + " ms)"));
-			HTMLPageFilter hpl = new HTMLPageFilter(cloned_page, urlRequested, wordlist);
+			message("Start filtering keywords (" + duration + " ms)");
+			HTMLPageFilter hpl = new HTMLPageFilter(cloned_page, request_url, wordlist, gateway_ip);
 			String filtered_page = hpl.getFilteredPage();
 			duration = System.currentTimeMillis() - begin;
-			msgQueue.add(new DisplayerMessage("End filtering (" + duration + " ms)"));
+			message("End filtering keywords (" + duration + " ms)");
 			
 			duration = System.currentTimeMillis() - begin;
-			msgQueue.add(new DisplayerMessage("Start writing (" + duration + " ms)"));
+			message("Start writing (" + duration + " ms)");
 			writeResponse(HTTP.OK_HEADERS, filtered_page);
 			duration = System.currentTimeMillis() - begin;
-			msgQueue.add(new DisplayerMessage("End writing (" + duration + " ms)\n"));
+			message("End writing (" + duration + " ms)\n");
 		}
 		catch (RemoteConnectionException e)
 		{
-			msgQueue.add(new DisplayerMessage(e.getMessage(), true));
+			message(e.getMessage(), true);
 		}
 		catch (MalformedURLException e)
 		{
-			msgQueue.add(new DisplayerMessage("Bad url : " + e.getMessage(), true));
+			message("Bad url : " + e.getMessage(), true);
 		}
 		catch (BadRequestException e)
 		{
 			e.printStackTrace();
-			msgQueue.add(new DisplayerMessage("Error while parsing the http request", true));
+			message("Error while parsing the http request", true);
 		}
 		catch (IOException e) 
 		{
 			e.printStackTrace();
-			msgQueue.add(new DisplayerMessage("Error while getting the response page", true));
+			message("Error while getting the response page", true);
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			msgQueue.add(new DisplayerMessage("Exception : " + e.getMessage(), true));
+			message("Exception : " + e.getMessage(), true);
 		}
 		finally
 		{
 			try {
 				socket.close();
 			} catch (IOException e) {
-				msgQueue.add(new DisplayerMessage("Closing socket failed", true));
+				message("Closing socket failed", true);
 			}
 		}
 	}// End run
 	
 	/**
 	 * 
-	 * @param outputMessage
+	 * @param headers
+	 * @param content
 	 * @throws IOException
 	 */
 	private void writeResponse(String headers, String content) throws IOException
@@ -172,29 +183,6 @@ public class HTTPClientRequestThread extends Thread {
 		out.close();
 	}
 	
-	/**
-	 * Reads the http request received 
-	 * @return an HTTPRequest object representing the request
-	 * @throws IOException if the reading of the socket input stream fails
-	 * @throws BadRequestException if an error occurs while creating the http request
-	 */
-	private HTTPRequest readRequest() throws BadRequestException, IOException
-	{
-		StringBuilder sb = new StringBuilder();
-		String request = null;
-
-		// reads the HTTP request
-
-		InputStreamReader isr = new InputStreamReader(socket.getInputStream());
-		BufferedReader br = new BufferedReader(isr);
-		
-		// Read the request
-		String line;
-		while((line = br.readLine()) != null && !line.equals(""))
-			sb.append(line + "\n");
-
-		return new HTTPRequest(sb.toString());
-	}
 	/**
 	 * This method connects to the url and returns an HTMLPage representing the content
 	 * loaded from the remote server
@@ -219,9 +207,7 @@ public class HTTPClientRequestThread extends Thread {
 			StringBuilder response = new StringBuilder();
 	 
 			while ((inputLine = in.readLine()) != null) 
-			{
-				response.append(inputLine);
-			}
+				response.append(inputLine + "\n");
 			
 			in.close();
 			isr.close();
@@ -233,5 +219,14 @@ public class HTTPClientRequestThread extends Thread {
 		{
 			throw new RemoteConnectionException("Cannot get targeted page from remote website : " + e.getMessage());
 		}
+	}
+	
+	void message(String msg)
+	{
+		message(msg, false);
+	}
+	void message(String msg, boolean error)
+	{
+		msgQueue.add(new DisplayerMessage("[" + connection_number + "] " + msg, error));
 	}
 }

@@ -44,12 +44,15 @@ public class HTTPServer extends Thread
 	
 	public void run()
 	{	
+		int i = 0;
 		while(true)
 		{
 			try
 			{
 				Socket client_gateway = ss.accept();
-				threadPool.execute(new HTTPClientRequestThread(client_gateway, msgQueue, wordlist, cache));
+				Runnable r = new HTTPClientRequestThread(++i, client_gateway, msgQueue, 
+															wordlist, cache, "localhost");
+				threadPool.execute(r);
 			}
 			catch(IOException e)
 			{

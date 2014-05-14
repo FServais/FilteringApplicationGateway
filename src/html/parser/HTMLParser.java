@@ -9,6 +9,7 @@ import html.HTMLOpeningTag;
 import html.exceptions.HTMLParsingException;
 
 import java.util.LinkedList;
+import java.util.NoSuchElementException;
 import java.util.Vector;
 
 /**
@@ -17,25 +18,58 @@ import java.util.Vector;
  */
 public class HTMLParser
 {
-	private LinkedList<HTMLElement> list = null;
+	// list for storing the parsed html elements
+	private LinkedList<HTMLElement> list; 
+
+	// a String containing the html content
+	private String html;
 	
-	// states for attributes parsing
-	StateAttr current_state = StateAttr.WAIT_ATTR_NAME;
-	StateAttr prev_state = StateAttr.WAIT_ATTR_NAME;
-	
+	// states for opening tag attributes parsing
+	private StateAttr current_state = StateAttr.WAIT_ATTR_NAME;
+	private StateAttr prev_state = StateAttr.WAIT_ATTR_NAME;
+
+	// true if the page was already parsed
+	private boolean parsed = false;
+
+	/**
+	 * Builds an HTMLParser object and parses the content
+	 * @param html a String containing the html code
+	 */	
 	public HTMLParser(String html) throws HTMLParsingException
 	{
-		list = new LinkedList<HTMLElement>();
-		//System.out.println(html);
-		parse(html);
+		this(html, true);
+	}
+
+	/**
+	 * Builds an HTMLParser object and parses the content
+	 * @param html a String containing the html code
+	 * @param do_parse true if the parsing must be launched at initialization
+	 * @throws HTMLParsingException if an error occurs while parsing the page
+	 */
+	public HTMLParser(String html, boolean do_parse) throws HTMLParsingException
+	{
+		this.html = html;
+		this.list = new LinkedList<HTMLElement>();
+		if(do_parse)
+			parseHTML(html);
+	}
+
+	/**
+     * Parses the html code if this operation hasn't been performed before
+	 * @throws HTMLParsingException if an error occurs while parsing the page
+     */
+	public void parse() throws HTMLParsingException
+	{
+		if(!parsed)
+			parseHTML(html);
 	}
 	
 	/**
-	 * Converts a String containing the code of a HTML page to a list of objects
+	 * Converts a String containing the code of a HTML page to a list of HTMLElement objects
 	 * @param s String containing the HTML code.
-	 * @throws HTMLParsingException if an error occured while parsing the code
+	 * @throws HTMLParsingException if an error occurred while parsing
 	 */
-	private void parse(String s) throws HTMLParsingException
+	private void parseHTML(String s) throws HTMLParsingException
 	{
 		for(int i = 0; i < s.length(); i++) // run through the string
 		{
@@ -46,14 +80,16 @@ public class HTMLParser
 			else
 				i = parseContent(s, i);
 		}
+
+		parsed = true;
 	}
 	
 	/**
-	 * Parses a html tag and adds it to the list
-	 * @param html the string containing the html code
+	 * Parses an html tag and adds it to the list
+	 * @param html a String containing the html code
 	 * @param currentCharIndex the index of the '<' char opening the tag
 	 * @return the index of the closing char of the tag '>'
-	 * @throws HTMLParsingException if an error occured while parsing the code
+	 * @throws HTMLParsingException if an error occurred while parsing the code
 	 */
 	private int parseTag(String html, int currentCharIndex) 
 			throws HTMLParsingException
@@ -64,9 +100,9 @@ public class HTMLParser
 		while(html.charAt(i) == ' ' || html.charAt(i) == '<')
 			i++;
 			
-		if(html.charAt(i) == '/')
+		if(html.charAt(i) == '/') // html closing tag
 			return parseClosingTag(html, i);
-		else if(html.charAt(i) == '!' 
+		else if(html.charAt(i) == '!'  // html comment
 					&& (i + 2 < html.length()) // checks that there is two more chars in the string
 					&& html.charAt(i + 1) == '-'
 					&& html.charAt(i + 2) == '-')
@@ -105,11 +141,11 @@ public class HTMLParser
 			// append char if necessary
 			if(c == '-' && prevEOC1 && prevEOC2)
 				sb.append("-");
-			else if(c != '-')
+			else if(c != '-') // TODO check this : two or one -
 			{
-				if(prevEOC2) // one '-' read but other char was following
+				if(prevEOC2) // one '-' read but different char was following
 					sb.append("--" + c); 
-				else if(prevEOC1) // two '-' read but other char was following
+				else if(prevEOC1) // two '-' read but different char was following
 					sb.append("-" + c);
 				else
 					sb.append(c);
@@ -124,12 +160,11 @@ public class HTMLParser
 	}
 
 	/**
-	 * TODO some attribute values don't have " "
 	 * Parses an opening html tag 
-	 * @param html the String containing the html code
+	 * @param html a String containing the html code
 	 * @param currentCharIndex the index of the first char of the tag '<'
-	 * @return the index of the closing char of the tag '>'
-	 * @throws HTMLParsingException if an error occured while parsing the code
+	 * @return the index of the closing char '>' of the tag 
+	 * @throws HTMLParsingException if an error occured while parsing
 	 */
 	private int parseOpeningTag(String html, int currentCharIndex) 
 			throws HTMLParsingException
@@ -155,7 +190,7 @@ public class HTMLParser
 				
 				if(c == '>') // end of tag
 					break;
-				else if(c == '/')
+				else if(c == '/') // end of tag too
 				{
 					// reached the char following the '>'
 					while(c != '>') c = html.charAt(++i);
@@ -166,10 +201,10 @@ public class HTMLParser
 					i = parseAttribute(html, i, attr);
 					break;
 				}
-				else
+				else // char of the tag name
 					sb.append(c);
 			}
-			else if(c != ' ' && c != '\n' && c != '\r' && c != '\t')
+			else if(c != ' ' && c != '\n' && c != '\r' && c != '\t') // first char of the tag name
 			{
 				current_state = StateOpeningTag.READ_TAG_NAME;
 				sb.append(c);
@@ -186,10 +221,10 @@ public class HTMLParser
 	}
 	
 	/**
-	 * Parses the attibutes of a html opening tag
-	 * @param html the string containing the html code
+	 * Parses the attibutes of an html opening tag
+	 * @param html a String containing the html code
 	 * @param currentCharIndex the index of the "slash" (or the following) char in the html string
-	 * @param a Vector of String in which the parsed attributes must be placed
+	 * @param attr a Vector of String in which the parsed attributes must be stored
 	 * @return the index of the closing char of the tag '>'
 	 * @throws HTMLParsingException if an error occured while parsing the code
 	 */
@@ -227,8 +262,7 @@ public class HTMLParser
 					attr.add(new HTMLAttribute(attr_name, built_string, false));
 				
 				// go to the end of the tag char
-				while((c = html.charAt(i)) != '>')
-					i++;
+				while((c = html.charAt(i)) != '>') i++;
 				
 				return i;
 			}
@@ -310,8 +344,7 @@ public class HTMLParser
 							|| (c == '"' && !val_delim_is_quote))	
 						sb.append(c);
 					else  // end of a quoted attribute value
-					{
-						
+					{						
 						attr.add(new HTMLAttribute(attr_name, sb.toString()));
 						sb.setLength(0);
 						switchStateAttr(StateAttr.WAIT_ATTR_NAME);
@@ -333,16 +366,15 @@ public class HTMLParser
 					
 					break;
 				}
-			}
-			
+			}			
 		}
-		
+		// Normally, this section can never be reached
 		throw new HTMLParsingException("Parsing error : illegal state reached while parsing attributes of a tag");
 	}
 	
 	/**
 	 * Parses a html closing tag
-	 * @param html the string containing the html code
+	 * @param html a String containing the html code
 	 * @param currentCharIndex the index of the "slash" (or the following) char in the html string
 	 * @return the index of the closing char of the tag '>'
 	 */
@@ -385,16 +417,21 @@ public class HTMLParser
 	
 	/**
 	 * Parses a content of a html page
-	 * @param html the string containing the html code
+	 * @param html a String containing the html code
 	 * @param currentCharIndex the index of the first char (of the html string) to add to the content
-	 * @return the index of the first "non-content" char in the html string ('<')
+	 * @return the index of the first "non-content" char in the html string (typically : '<')
 	 */
 	private int parseContent(String html, int currentCharIndex)
 	{
 		StringBuilder sb = new StringBuilder();
 		int i = currentCharIndex;
 
-		HTMLElement elem = list.getLast();		
+		HTMLElement elem = null;
+		
+		try
+		{ 
+			elem = list.getLast();		
+		}catch(NoSuchElementException e) { }
 		
 		boolean in_javascript = ((elem != null) && (elem instanceof HTMLOpeningTag)
 									&& ((HTMLOpeningTag) elem).getName().equalsIgnoreCase("script")); 
@@ -446,5 +483,4 @@ public class HTMLParser
 	{
 		return list;
 	}
-
 }

@@ -1,26 +1,22 @@
 package html;
-/*
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;*/
+
 import java.util.LinkedList;
 import java.util.Vector;
 
 import html.exceptions.HTMLParsingException;
-import html.parser.HTMLParser;;
+import html.parser.HTMLParser;
 
 /**
- * A class for representing a HTML page 
+ * A class for representing an HTML page 
  * @author Romain Mormont
  */
 public class HTMLPage implements Cloneable
 {
+	private boolean links_filtered = false;
 	private LinkedList<HTMLElement> list;
 	
 	/**
-	 * Constructs a HTMLPage object 
+	 * Constructs an HTMLPage object 
 	 * @param html the html code of the page
 	 * @throws HTMLParsingException if an error occured while parsing the code
 	 */
@@ -32,7 +28,7 @@ public class HTMLPage implements Cloneable
 	
 	/**
 	 * Returns all the content elements of the page (with or without the javascript code)
-	 * @param the content in script tags are added to the vector, they're not otherwise
+	 * @param add_script if true then the content in script tags are added to the vector, it's not otherwise
 	 * @return a Vector of HTMLContent objects containing all the content elements of the page
 	 */
 	public Vector<HTMLContent> getContentElements(boolean add_script)
@@ -59,7 +55,7 @@ public class HTMLPage implements Cloneable
 	}	
 	
 	/**
-	 * Returns the html code of the page
+	 * Converts an HTMLPage object to a String
 	 * @return a String containing the html code of the page
 	 */
 	public String toString()
@@ -101,8 +97,9 @@ public class HTMLPage implements Cloneable
 	
 	/**
 	 * Makes a deep copy of the HTMLPage object
+	 * @return a copy of the HTMLPage object
 	 */
-	public Object clone() throws CloneNotSupportedException
+	public synchronized Object clone() throws CloneNotSupportedException
 	{
 		HTMLPage page = (HTMLPage) super.clone();
 		
@@ -113,6 +110,28 @@ public class HTMLPage implements Cloneable
 		return page;
 	}
 	
+	/**
+	 * Returns true if the links were filtered
+	 * @return true if the links were filtered, false otherwise
+	 */
+	public boolean linksFiltered()
+	{
+		return links_filtered;
+	}
+	
+	/**
+	 * Sets te links_filtered flag which indicates that the links have been filtered
+	 * @param links_filtered the new value of the flag (true, filtered ; false, not filtered)
+	 */
+	public void setLinkFiltered(boolean links_filtered)
+	{
+		if(this.links_filtered && !links_filtered)
+			System.err.println("Try to unset the flag of link filtering while links were already filtered");
+		
+		this.links_filtered = links_filtered;
+	}
+	
+	/** TODO : remove this method */
 	public void print()
 	{
 		for(HTMLElement elem : list)

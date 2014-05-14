@@ -7,29 +7,36 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A class for decoding a request from the client to the gateway
+ * A class for decoding a request from the client.
+ * This class provides methods for accessing arguments of the request ("s", "forceRefresh").
  * @author Romain Mormont
  */
 public class GatewayRequestDecoder 
 {
 	private String remote_address = null;
 	private HTTPRequest http_req = null;
-	private HashMap<String, String> path_params = null;
+	private HashMap<String, String> params = null;
 	
-	private void disp()
+	// TODO : remove this
+	private void debug()
 	{
 		System.out.println("\n# DEBUG # GatewayRequestDecoder");
-		System.out.println("# remote : " + remote_address + "\n");
+		System.out.println("# remote : " + remote_address);
+		System.out.println("# force  : " + params.containsKey("forceRefresh") + " (val: " + params.get("forceRefresh") + ")\n");
 	}
 	
+	/**
+	 * Constructs a GatewayRequestDecoder from the received http request
+	 * @param request the request received by the gateway
+	 */
 	public GatewayRequestDecoder(HTTPRequest request)
 	{
 		http_req = request;
-		path_params = new HashMap<String, String>();
+		params = new HashMap<String, String>();
 
 		parsePath();
 		parseRemoteAddress();
-		//disp();
+		debug();
 	}
 	
 	/**
@@ -39,10 +46,10 @@ public class GatewayRequestDecoder
 	 */
 	private void parseRemoteAddress() 
 	{
-		if(!path_params.containsKey("s"))
+		if(!params.containsKey("s"))
 			return;
 		
-		remote_address = decodeURL(path_params.get("s"));
+		remote_address = decodeURL(params.get("s"));
 	}
 
 	/**
@@ -51,12 +58,12 @@ public class GatewayRequestDecoder
 	 */
 	private void parsePath()
 	{
+		// regex for extracting the request parameters
 		String regex = "^(?:/?\\?)?((?:&?[\\w%~\\.=\\-]*)*)(#[\\w%~\\.=]*)?$";
 		Pattern p = Pattern.compile(regex);
-
 		Matcher m = p.matcher(http_req.getPath());
 		
-		if(!m.find())
+		if(!m.find()) // no param
 			return;
 		
 		String[] args_array = m.group(1).split("&");
@@ -68,9 +75,9 @@ public class GatewayRequestDecoder
 				String[] arg_exploded = arg.split("=", 2); // split arg name and value
 				
 				if(arg_exploded.length == 1)
-					path_params.put(arg_exploded[0], "");
+					params.put(arg_exploded[0], "");
 				else
-					path_params.put(arg_exploded[0], arg_exploded[1]);
+					params.put(arg_exploded[0], arg_exploded[1]);
 			}
 		}
 	}
@@ -83,9 +90,10 @@ public class GatewayRequestDecoder
 	private String decodeURL(String url)
 	{
 		try 
-		{	if(!url.startsWith("http"))
+		{	
+			if(!url.startsWith("http"))
 				url = "http%3A%2F%2F" + url;
-		
+			
 			return new URI(url).getPath();
 		} 
 		catch (URISyntaxException e) 
@@ -101,7 +109,7 @@ public class GatewayRequestDecoder
 	 */
 	public boolean refreshIsForced()
 	{
-		return (path_params.containsKey("forceRefresh") && path_params.get("forceRefresh") == "true");
+		return (params.containsKey("forceRefresh") && params.get("forceRefresh") == "true");
 	}
 	
 	/**

@@ -16,7 +16,6 @@ public class PacketAskCommand extends ConfigurationPacketSender {
 	/**
 	 * Construct a packet for asking client to enter a command
 	 * @param os an output stream (from the Socket)
-	 * @param message a String containing the message to display before requesting command
 	 * @throws IOException if an I/O error occurs
 	 */
 	public PacketAskCommand(OutputStream os) throws IOException {

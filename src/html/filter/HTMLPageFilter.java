@@ -9,25 +9,42 @@ import html.HTMLOpeningTag;
 import html.HTMLPage;
 
 /**
- * A class for filtering an html page
+ * A class for filtering links and keywords of an html page 
  * @author Fabrice Servais & Romain Mormont
  */
 public class HTMLPageFilter 
 {
-	private FilterStatus status;
+	private PageGatewayStatus status; // status of the page
+	private boolean status_determined; // true if the status was already determined, false otherwise
 	private HTMLPage page;
-	private URL url;
-	private Vector<String> restricted_keywords;
+	private URL url; // url of the page
+	private String gateway_ip; // ip/hostname of the gateway server
+	private Vector<String> restricted_keywords; // contains the restricted keywords
 	
-	public HTMLPageFilter(HTMLPage page, URL url, WordList wordlist)
+	/**
+	 * Constructs an HTMLPageFilter object.
+	 * @param page an HTMLPage object representing the page that must be filtered
+	 * @param url the url of the page
+	 * @param wordlist a Wordlist object containing the restricted keywords
+	 */
+	public HTMLPageFilter(HTMLPage page, URL url, WordList wordlist, String gateway_ip)
 	{
 		this.page = page;
 		this.url = url;
 		this.restricted_keywords = wordlist.getVector();
-		
+		this.status_determined = false;
+		this.gateway_ip = gateway_ip;
+	}
+	
+	/**
+	 * Determine the status of the page 
+	 */
+	private void determineStatus()
+	{
 		determineStatusFromURL(); // checks url
-		if(status != FilterStatus.PAGE_REFUSED)
+		if(status != PageGatewayStatus.PAGE_REFUSED)
 			determineStatusFromPage(); // checks html content
+		status_determined = true;
 	}
 	
 	/**
@@ -42,9 +59,7 @@ public class HTMLPageFilter
 		
 		// build a big string containing only the contents of the page
 		for(HTMLContent content : contents)
-		{
 			sb.append(content.toString());
-		}
 		
 		String pageContent = sb.toString();
 		int keyword_in_page = 0;
@@ -66,20 +81,20 @@ public class HTMLPageFilter
 				if(keyword_in_page >= 3)
 					System.out.println("Third keyword in the page");
 				
-				status = FilterStatus.PAGE_REFUSED;
+				status = PageGatewayStatus.PAGE_REFUSED;
 				return;
 			}
 		}
 		
 		// checks status criteria
 		if(keyword_in_page == 0)
-			status = FilterStatus.PAGE_OK;
+			status = PageGatewayStatus.PAGE_OK;
 		else 
-			status = FilterStatus.PAGE_NEED_ALTERATION;
+			status = PageGatewayStatus.PAGE_NEED_ALTERATION;
 		
-		// DEBUG
+		// TODO : remove DEBUG
 		String s;
-		if(status == FilterStatus.PAGE_NEED_ALTERATION)
+		if(status == PageGatewayStatus.PAGE_NEED_ALTERATION)
 			s = "alter";
 		else
 			s = "ok";
@@ -99,11 +114,24 @@ public class HTMLPageFilter
 			if(url_string.contains(keyword))
 			{	
 				System.out.println("Keyword in url : '" + keyword + "'");
-				status = FilterStatus.PAGE_REFUSED;
+				status = PageGatewayStatus.PAGE_REFUSED;
 				return;
 			}
 		
-		status = FilterStatus.PAGE_OK;
+		status = PageGatewayStatus.PAGE_OK;
+	}
+	
+	/**
+	 * Returns the number of occurences of a substring in a string
+	 * @param str a String in which the occurences will be searched
+	 * @param substr a String containing the substring
+	 * @return the number of occurrence of the substring in the string
+	 */
+	private int countOccurrence(String str, String substr)
+	{
+		int strlen = str.length(),
+			substrlen = substr.length();
+		return (strlen - str.replace(substr, "").length()) / substrlen;
 	}
 	
 	/**
@@ -113,8 +141,10 @@ public class HTMLPageFilter
 	 *   - PAGE_REFUSED
 	 * @return the status of the page
 	 */
-	public FilterStatus getStatus()
+	public PageGatewayStatus getStatus()
 	{
+		if(!status_determined)
+			determineStatus();
 		return status;
 	}
 	
@@ -124,15 +154,14 @@ public class HTMLPageFilter
 	 */
 	public String getFilteredPage()
 	{
-		if(status == FilterStatus.PAGE_REFUSED){
+		if(!status_determined)
+			determineStatus();
+		
+		if(status == PageGatewayStatus.PAGE_REFUSED)
 			return getRefuseAccessPage();
-		}
 		else
-		{
-			System.out.println("Filter links...");
-			filterLinks();
-			
-			if(status == FilterStatus.PAGE_OK)
+		{			
+			if(status == PageGatewayStatus.PAGE_OK)
 				return page.toString();
 			else 
 			{
@@ -144,12 +173,28 @@ public class HTMLPageFilter
 	}
 	
 	/**
-	 * Filters the "href" or "src" attribute of "a", "frame" and "link" tags of a page
+	 * Filters the restricted keywords on the html page
 	 */
-	private void filterLinks()
+	public void filterRestrictedWords()
 	{
-		//System.out.println(page.toString());
-		//page.print();
+		Vector<HTMLContent> vec = page.getContentElements(false);
+		
+		for(HTMLContent text : vec) // replace keywords
+			for(String word : restricted_keywords)
+				text.replaceWord(word, '*');
+	}
+	
+	/**
+	 * Filters the "href" or "src" attribute of "a", "frame", "scripts" and "link" tags of a page
+	 */
+	public void filterLinks()
+	{
+		// checks if the links must be filtered
+		if(page.linksFiltered())
+		{
+			System.err.println("This page was already filtered");
+			return;
+		}
 		
 		// find the absolute path of the page
 		URL base_url = null;
@@ -169,8 +214,6 @@ public class HTMLPageFilter
 			System.err.println(e.getMessage());
 		}
 		
-		//System.out.println("Base : " + base_url.toString());
-		
 		// filters tags
 		filterAttribute("a", "href", base_url, true);
 		filterAttribute("link", "href", base_url, false);
@@ -178,7 +221,7 @@ public class HTMLPageFilter
 		filterAttribute("img", "src", base_url, false);
 		filterAttribute("script","src", base_url, false);
 		
-		//System.out.println("out");
+		page.setLinkFiltered(true);
 	}
 	
 	
@@ -198,7 +241,7 @@ public class HTMLPageFilter
 		
 		tags.addAll(page.getOpeningTagElements(tag_name));
 		
-		int i = 0;
+		//int i = 0;
 		// run through the "tag_name" tags of the page
 		for(HTMLOpeningTag tag : tags)
 		{
@@ -210,15 +253,16 @@ public class HTMLPageFilter
 				
 				if(encode)
 				{	
-					lf = new LinkFilter(base_url, attribute_value);
-					tag.setAttributeValue(attribute_name, "http://localhost:8005/?s=" 
-																+ lf.getFilteredLink());
+					lf = new LinkFilter(base_url, attribute_value, gateway_ip);
+					tag.setAttributeValue(attribute_name, lf.getFilteredLink());
 				}
 				else
 				{
-					lf = new LinkFilter(base_url, attribute_value, false);
+					lf = new LinkFilter(base_url, attribute_value, gateway_ip, false);
 					tag.setAttributeValue(attribute_name, lf.getFilteredLink());
 				}
+
+				/** TODO : remove this */
 				
 				/*System.out.println("\n[" + tag_name + "] n°" + (++i));
 				System.out.println("  URL  :  " + url.toString());
@@ -226,70 +270,13 @@ public class HTMLPageFilter
 				System.out.println("  new  :  " + lf.getFilteredLink());
 				*/
 				
-				 
 				//System.out.println("set ok!!\n");
 			}
-			else
-				System.err.println("\"" + tag_name + "\"" + " with no \"" + attribute_name + "\"");
 		}	
 	}
 
-	/*
-	private void filterImg()
-	{
-		for(HTMLOpeningTag img_tag : page.getOpeningTagElements("img"))
-		{
-			String srcValue = img_tag.getAttributeValue("src");
-			if(srcValue == null)
-				continue;
-			
-			try
-			{
-				new URL(srcValue);
-				// If MalformedURLException not caught -> Absolute link -> OK
-			}
-			catch(MalformedURLException e)
-			{
-				// srcValue is a relative link OR begin with "www"
-				if(!srcValue.startsWith("www"))
-				{
-					//System.out.println("IMAGE : getProtocol : " + url.getProtocol() + " --- getHost : " + url.getHost() + " --- getPath : " + url.getPath() + " --- cond : " + ((url.getPath().endsWith("/") == srcValue.startsWith("/")) && url.getPath().endsWith("/") ? "/" : "") + " --- srcValue : " + srcValue);
-					img_tag.setAttributeValue("src", url.getProtocol() + "://" + url.getHost() + url.getPath() + (url.getPath().endsWith("/") || srcValue.startsWith("/") ? "" : "/") + srcValue);
-				}
-			}
-		}
-	}
-	*/
-
-	/**
-	 * Returns the number of occurences of a substring in a string
-	 * @param str a String in which the occurences will be searched
-	 * @param substr a String containing the substring
-	 * @return the number of occurrence of the substring in the string
-	 */
-	private int countOccurrence(String str, String substr)
-	{
-		int strlen = str.length(),
-			substrlen = substr.length();
-		return (strlen - str.replace(substr, "").length()) / substrlen;
-	}
-
-	/**
-	 * Filters the restricted keywords on the html page
-	 */
-	public void filterRestrictedWords()
-	{
-		Vector<HTMLContent> vec = page.getContentElements(false);
-		
-		for(HTMLContent text : vec) // replace keywords
-			for(String word : restricted_keywords)
-				text.replaceWord(word, '*');
-	}
-	
-	
 	private String getRefuseAccessPage() 
 	{
 		return "pas bon";
 	}
-
 }

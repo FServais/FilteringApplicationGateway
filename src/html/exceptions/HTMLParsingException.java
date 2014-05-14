@@ -1,9 +1,8 @@
 package html.exceptions;
 
 /**
- * A class for parsing error of html code
+ * An exception class for dealing with the parsing error
  * @author Romain
- *
  */
 public class HTMLParsingException extends Exception 
 {

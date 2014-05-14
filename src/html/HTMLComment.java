@@ -1,15 +1,16 @@
 package html;
 
 /**
- * @author Romain Mormont
  * A class for representing an HTML comment
+ * @author Romain Mormont
  */
 public class HTMLComment extends HTMLElement implements  Cloneable {
-	String comment; // Content
+	
+	String comment; // comment content
 	
 	/**
 	 * Constructs a HTMLElement based on the comment
-	 * @param comment a String containing the comment
+	 * @param comment a String containing the comment content
 	 */
 	public HTMLComment(String comment)
 	{
@@ -17,7 +18,7 @@ public class HTMLComment extends HTMLElement implements  Cloneable {
 	}
 	
 	/**
-	 * Returns the comment as a String
+	 * Converts the HTMLComment object to a String
 	 * @return a String containing the comment tag with its content
 	 */
 	public String toString()
@@ -26,7 +27,8 @@ public class HTMLComment extends HTMLElement implements  Cloneable {
 	}
 	
 	/**
-	 * Makes a deep copy of the HTMLPage object
+	 * Makes a deep copy of the HTMLComment object
+	 * @return a copy of the HTMLComment object
 	 */
 	public Object clone() throws CloneNotSupportedException
 	{

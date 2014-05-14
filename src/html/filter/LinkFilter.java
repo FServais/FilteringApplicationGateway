@@ -16,18 +16,21 @@ public class LinkFilter
 	private String link;
 	private boolean need_encode = false;
 	private String correct_link;
+	private String gateway_ip;
 	
 	/**
 	 * Create a link filter object
 	 * @param url the absolute URL of the current page
 	 * @param link the raw link
+	 * @param gateway_ip the ip address/hostname of the gateway server
 	 * @param need_encode true if the url must be encoded
 	 */
-	public LinkFilter(URL url, String link, boolean need_encode)
+	public LinkFilter(URL url, String link, String gateway_ip, boolean need_encode)
 	{
 		this.url = url;
 		this.link = link;
 		this.need_encode = need_encode;
+		this.gateway_ip = gateway_ip;
 		this.correct_link = buildCorrectLink();
 	}
 	
@@ -36,9 +39,9 @@ public class LinkFilter
 	 * @param url the absolute URL of the current page
 	 * @param link the raw link
 	 */
-	public LinkFilter(URL url, String link)
+	public LinkFilter(URL url, String link, String gateway_ip)
 	{
-		this(url, link, true);
+		this(url, link, gateway_ip, true);
 	}
 	
 	/**
@@ -51,8 +54,9 @@ public class LinkFilter
 	}
 	
 	/**
-	 * Returns the absolute link
-	 * @return the absolute link
+	 * Returns an absolute link of a ressource for a given link and its absolute url.
+	 * If the flag 'need_encode' is set, then the returned link is encoded.
+	 * @return an absolute link, null on error
 	 */
 	private String buildCorrectLink()
 	{
@@ -69,48 +73,24 @@ public class LinkFilter
 		 * The cases that must be checked are all the ones starting with another char sequence
 		 */
 		String new_url = null;
-		
-		//System.out.println("Link : " + link);
-		//System.out.print("[CORR] ");
+	
+
 		if(link.isEmpty()) // use the current url
-		{
-			//System.out.print("empty : ");
 			new_url = url.toString();
-		}
-		else if(link.startsWith("mailto:") 
-				|| link.startsWith("javascript:")) // mailto: or javascript: no treatment needed
-		{
-			//System.out.print("mailto|javascript : " + link);
+		else if(link.startsWith("mailto:") || link.startsWith("javascript:")) // mailto: or javascript: no treatment needed
 			return link;
-		}
 		else if(link.startsWith("#")) // link to itself
-		{
-			//System.out.print("# : ");
 			new_url = url.toString();
-		}
 		else if(link.startsWith("http")) // no specific treatment needed
-		{
-			//System.out.print("http : ");
 			new_url = link;
-		}
-		else if(link.startsWith("//"))
-		{
+		else if(link.startsWith("//")) // must be replaced by the current protocol
 			new_url = link.replaceFirst("//", url.getProtocol() + "://");
-		}
 		else if(link.startsWith("/")) // absolute path (need protocol + host)
-		{
 			new_url = url.getProtocol() + "://" + url.getHost() + link;
-			//System.out.print("absolute[b] : ");
-		}
 		else if(link.startsWith(".")) // relative path (need prev url)
-		{
-			System.out.print("relative[a] : ");
 			new_url = getCompleteURL();
-		}
 		else
 		{
-			//System.out.print("other");
-			
 			// regex matching relative path link
 			String regex = "^[\\w-]+(?:(?:/.*|\\.(?:[jx]?html?|ph(?:p[345]?|tml)|j(?:s(f|p[xa]?)?)" 
 						   + "|do|action|a(?:xd|s[pmh]?x?)|cgi|css|png|jpe?g|gif|pdf))(?:[\\?#].*)?)?$";
@@ -118,19 +98,13 @@ public class LinkFilter
 			Matcher m = p.matcher(link);
 			
 			if(m.matches())
-			{
-				//System.out.print("-match : ");
 				new_url = getCompleteURL();
-			}
 			else
 			{
-				System.err.print("-nomatch : ");
-				System.err.flush();
+				System.err.println("nomatch : " + link);
 				new_url = link;
 			}
 		}
-		
-		//System.out.println(new_url);
 
 		if(!need_encode) // no need for encoding
 			return new_url;
@@ -150,21 +124,19 @@ public class LinkFilter
 			e.printStackTrace();
 		}
 		
-		return final_url;
+		return "http://" + gateway_ip + ":8005/?s=" + final_url;
 	}
 	
 	/**
-	 * Returns the complete URL from for a relative URL link
-	 * @return the complete link
+	 * Builds an complete URL based on the absolute url and the link
+	 * The link must be a relative path to a ressource.
+	 * @return a complete link
 	 */
 	private String getCompleteURL()
 	{
 		StringBuilder sb = new StringBuilder();
 		
 		sb.append(url.getProtocol() + "://" + url.getHost());
-		
-		//System.out.println("real path : " + url.getPath());
-		//System.out.println("real link : " + link);
 		
 		int last_slash = url.getPath().lastIndexOf("/");
 		
@@ -173,14 +145,15 @@ public class LinkFilter
 			String file_from_path = url.getPath().substring(last_slash + 1),
 				   path = url.getPath().substring(0, last_slash);
 			
-			//System.out.println("split path : " + path);
-			//System.out.println("split file : " + file_from_path);
-			
+			/**
+			 * Cases when the last part of the path (of the absolute url) is not needed
+			 * 	 - this last part is empty
+			 *   - or it corresponds to a file 
+			 */
 			if(file_from_path.length() == 0 || 
 					(file_from_path.equals("index") || file_from_path.contains("."))) 
 			{
 				sb.append(path + "/" + link);
-				//System.out.println("Final : " + sb.toString());
 				return sb.toString();
 			}	
 		}
@@ -191,7 +164,7 @@ public class LinkFilter
 			sb.append("/");
 		
 		sb.append(link);
-		//System.out.println("Final : " + sb.toString());
+
 		return sb.toString();
 	}
 	
