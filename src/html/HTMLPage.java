@@ -31,7 +31,7 @@ public class HTMLPage implements Cloneable
 	 * @param add_script if true then the content in script tags are added to the vector, it's not otherwise
 	 * @return a Vector of HTMLContent objects containing all the content elements of the page
 	 */
-	public Vector<HTMLContent> getContentElements(boolean add_script)
+	public synchronized Vector<HTMLContent> getContentElements(boolean add_script)
 	{
 		Vector<HTMLContent> vec = new Vector<HTMLContent>();
 		boolean in_javascript = false;
@@ -58,7 +58,7 @@ public class HTMLPage implements Cloneable
 	 * Converts an HTMLPage object to a String
 	 * @return a String containing the html code of the page
 	 */
-	public String toString()
+	public synchronized String toString()
 	{
 		StringBuilder sb = new StringBuilder();
 		
@@ -72,7 +72,7 @@ public class HTMLPage implements Cloneable
 	 * Returns all the content elements of the page without the javascript code
 	 * @return a Vector of HTMLContent objects containing all the content elements of the page (except javascript)
 	 */
-	public Vector<HTMLContent> getContentElements()
+	public synchronized Vector<HTMLContent> getContentElements()
 	{
 		return getContentElements(false);
 	}
@@ -83,7 +83,7 @@ public class HTMLPage implements Cloneable
 	 * @param name a String containing the name of the desired tag or "*"
 	 * @return a Vector of HTMLOpeningTag containing the desired tags
 	 */
-	public Vector<HTMLOpeningTag> getOpeningTagElements(String name)
+	public synchronized Vector<HTMLOpeningTag> getOpeningTagElements(String name)
 	{
 		Vector<HTMLOpeningTag> vec = new Vector<HTMLOpeningTag>();
 		
@@ -114,7 +114,7 @@ public class HTMLPage implements Cloneable
 	 * Returns true if the links were filtered
 	 * @return true if the links were filtered, false otherwise
 	 */
-	public boolean linksFiltered()
+	public synchronized boolean linksFiltered()
 	{
 		return links_filtered;
 	}
@@ -123,7 +123,7 @@ public class HTMLPage implements Cloneable
 	 * Sets te links_filtered flag which indicates that the links have been filtered
 	 * @param links_filtered the new value of the flag (true, filtered ; false, not filtered)
 	 */
-	public void setLinkFiltered(boolean links_filtered)
+	public synchronized void setLinkFiltered(boolean links_filtered)
 	{
 		if(this.links_filtered && !links_filtered)
 			System.err.println("Try to unset the flag of link filtering while links were already filtered");

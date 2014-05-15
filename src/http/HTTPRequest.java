@@ -1,6 +1,6 @@
 package http;
 
-import http.exceptions.BadRequestException;
+import http.exceptions.RequestParsingException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,10 +24,10 @@ public class HTTPRequest
 	/**
 	 * Initializes the http request object from the socket input stream
 	 * @param s an initialized socket 
-	 * @throws BadRequestException if an error occurs while parsing the request
+	 * @throws RequestParsingException if an error occurs while parsing the request
 	 * @throws IOException if an error occurs while reading from the socket
 	 */
-	public HTTPRequest(Socket s) throws IOException, BadRequestException
+	public HTTPRequest(Socket s) throws IOException, RequestParsingException
 	{
 		init();
 		getRequest(s);
@@ -37,10 +37,10 @@ public class HTTPRequest
 	/**
 	 * Get the request from the socket input stream
 	 * @param socket an initialized socket 
-	 * @throws BadRequestException if an error occurs while parsing the request
+	 * @throws RequestParsingException if an error occurs while parsing the request
 	 * @throws IOException if an error occurs while reading from the socket
 	 */
-	private void getRequest(Socket socket) throws IOException, BadRequestException 
+	private void getRequest(Socket socket) throws IOException, RequestParsingException 
 	{
 		// reads the HTTP request
 		InputStreamReader isr = new InputStreamReader(socket.getInputStream());
@@ -103,9 +103,9 @@ public class HTTPRequest
 	/**
 	 * Parses the request line of the http request (1st line)
 	 * @param line a String containing the request line
-	 * @throws BadRequestException if an error happens during parsing
+	 * @throws RequestParsingException if an error happens during parsing
 	 */
-	private void parseRequestLine(String line) throws BadRequestException
+	private void parseRequestLine(String line) throws RequestParsingException
 	{
 		// regex that splits the request line into three groups
 		String regex = "^([A-Z]{3,7})\\s+(.+)\\s+(.+)$";
@@ -113,7 +113,7 @@ public class HTTPRequest
 		Matcher m = p.matcher(line);
 		
 		if(!m.matches())
-			throw new BadRequestException("Failure while parsing request line");
+			throw new RequestParsingException("Failure while parsing request line");
 		
 		method = m.group(1);
 		path = m.group(2);

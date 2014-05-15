@@ -13,9 +13,10 @@ import java.util.regex.Pattern;
  */
 public class GatewayRequestDecoder 
 {
-	private String remote_address = null;
-	private HTTPRequest http_req = null;
-	private HashMap<String, String> params = null;
+	private String remote_address;
+	private HTTPRequest http_req;
+	private HashMap<String, String> params;
+	private boolean is_acceptable_file = true;
 	
 	// TODO : remove this
 	private void debug()
@@ -36,7 +37,9 @@ public class GatewayRequestDecoder
 
 		parsePath();
 		parseRemoteAddress();
-		//debug();
+		//debug();		
+
+		checkPath();
 	}
 	
 	/**
@@ -80,6 +83,23 @@ public class GatewayRequestDecoder
 					params.put(arg_exploded[0], arg_exploded[1]);
 			}
 		}
+	}
+	
+	/**
+	 * Checks if the path is a path to a unsupported file type 
+	 * unsupported => pdf, gzip, gz, tgz, tar.gz, zip, rar,...
+	 */
+	private void checkPath()
+	{
+		if(remote_address == null)
+			return;
+		
+		// regex for finding a forbidden file extension in the url
+		String regex = "\\.(pdf|(tar\\.|t)?gz(ip)?|zip|rar)(\\?.+)?$";
+		Pattern p = Pattern.compile(regex);
+		Matcher m = p.matcher(remote_address);
+		
+		is_acceptable_file = !m.find();
 	}
 	
 	/**
@@ -129,5 +149,14 @@ public class GatewayRequestDecoder
 	public boolean validRequest()
 	{
 		return remote_address != null;
+	}
+	
+	/**
+	 * Returns true if the file to which the path points to can be managed by the gateway
+	 * @return true if the file to which the path points to can be managed by the gateway, false otherwise
+	 */
+	public boolean fileTypeIsOk()
+	{
+		return is_acceptable_file;
 	}
 }

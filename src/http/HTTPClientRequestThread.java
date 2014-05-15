@@ -1,20 +1,21 @@
 package http;
 
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 
 import html.HTMLPage;
 import html.exceptions.HTMLParsingException;
 import html.filter.HTMLPageFilter;
-import html.filter.PageGatewayStatus;
-import http.exceptions.BadRequestException;
+import http.exceptions.BadFileRequestException;
+import http.exceptions.HTTPMethodNotSupportedException;
+import http.exceptions.InvalidRequestException;
+import http.exceptions.RequestParsingException;
 import http.exceptions.RemoteConnectionException;
 import datastructures.Cache;
 import datastructures.WordList;
@@ -57,15 +58,17 @@ public class HTTPClientRequestThread extends Thread {
 			duration = (System.currentTimeMillis() - begin);
 			msg("Request received (" + duration  + " ms)"); 
 			
+			if(!request.getMethod().equals("HEAD") && !request.getMethod().equals("GET"))
+				throw new HTTPMethodNotSupportedException("Bad http method : " + request.getMethod());
+			
 			// Decode the request : get URL
 			GatewayRequestDecoder grd = new GatewayRequestDecoder(request);
 			
-			if(!grd.validRequest())
-			{	
-				// TODO implement response to this error
-				error_msg("Invalid request : path cannot be handled " + request.getPath() + "\n"); 
-				return;
-			}
+			if(!grd.validRequest()) // if path is erroneous
+				throw new InvalidRequestException("path cannot be handled : " + grd.getUrl());
+			
+			if(!grd.fileTypeIsOk()) // checks if the file can be managed
+				throw new BadFileRequestException("file format can't be managed : " + grd.getUrl());
 
 			URL request_url = new URL(grd.getUrl());
 			
@@ -126,24 +129,55 @@ public class HTTPClientRequestThread extends Thread {
 
 			msg("Start writing (" + duration + " ms)");
 			
-			HTTPResponse httpResponse = new HTTPResponse(filtered_page);		
-			httpResponse.send(socket);
-			Z
+			new HTTPResponse(filtered_page).send(socket);
+			
 			duration = System.currentTimeMillis() - begin;
 			msg("End writing (" + duration + " ms)\n");
 		}
-		catch (RemoteConnectionException e)
+		catch (RequestParsingException e) // cannot parse client request
 		{
+			try { // bad request
+				new HTTPResponse(400).send(socket);
+			} catch (IOException e1) { }
+			
+			error_msg("Error while parsing the http request");
+		}
+		catch (HTTPMethodNotSupportedException e)
+		{
+			try { // not implemented
+				new HTTPResponse(501).send(socket);
+			} catch (IOException e1) { }
+			
 			error_msg(e.getMessage());
 		}
-		catch (MalformedURLException e)
+		catch (InvalidRequestException e) // invalid request from client
 		{
-			error_msg("Bad url : " + e.getMessage());
+			try { // bad request
+				new HTTPResponse(400).send(socket);
+			} catch (IOException e1) { }
+			
+			error_msg("Invalid request : " + e.getMessage()); 
 		}
-		catch (BadRequestException e)
+		catch (BadFileRequestException e) // file format requested cannot be handled
 		{
-			e.printStackTrace();
-			error_msg("Error while parsing the http request");
+			try { // not implemented
+				new HTTPResponse(501).send(socket);
+			} catch (IOException e1) { }
+			
+			error_msg(e.getMessage());
+		}
+		catch (RemoteConnectionException e) // cannot get page from remote
+		{
+			// HTTP response already handled in the method getPageFromRemote
+			error_msg("Remote connection error : " + e.getMessage());
+		}
+		catch (HTMLParsingException e) // error while parsing the html code
+		{
+			try { // internal error
+				new HTTPResponse(500).send(socket);
+			} catch (IOException e1) { }
+			
+			error_msg("Error while parsing the html page " + e.getMessage());
 		}
 		catch (IOException e) 
 		{
@@ -152,6 +186,10 @@ public class HTTPClientRequestThread extends Thread {
 		}
 		catch (Exception e)
 		{
+			try {
+				new HTTPResponse(HTTPResponse.INTERNAL_SERVER_ERROR_500).send(socket);
+			} catch (IOException e1) { }
+			
 			e.printStackTrace();
 			error_msg("Exception : " + e.getMessage());
 		}
@@ -171,17 +209,20 @@ public class HTTPClientRequestThread extends Thread {
 	 * loaded from the remote server
 	 * @param url an URL object from which the content must be gathered
 	 * @return an HTMLPage object containing the page of the remote
-	 * @throws RemoteConnectionException exception thrown on parsing error or on connection failure
+	 * @throws RemoteConnectionException if a connection failure happens
+	 * @throws HTMLParsingException if an error occurs while parsing
 	 */
-	private HTMLPage getPageFromRemote(URL url) throws RemoteConnectionException
+	private HTMLPage getPageFromRemote(URL url) throws RemoteConnectionException, HTMLParsingException
 	{
 		HttpURLConnection huc = null;
 		try
 		{			
 			// connect to the remote
 			huc = (HttpURLConnection) url.openConnection();
-			
+			huc.setConnectTimeout(5000);
+			huc.setReadTimeout(10000);
 			huc.setRequestMethod("GET");
+			huc.connect();
 			
 			// get the streams associated with the connection
 			InputStreamReader isr = new InputStreamReader(huc.getInputStream());
@@ -199,17 +240,25 @@ public class HTTPClientRequestThread extends Thread {
 			// create page
 			return new HTMLPage(response.toString());
 		}
-		catch(IOException | HTMLParsingException e)
+		catch(SocketTimeoutException e)
 		{
 			try {
-				new HTTPResponse(huc.getResponseCode()).send(socket);
-				message("HTTP Error : " + huc.getResponseCode());
-			} catch (IOException e1) {
-				message("Getting response code error");
-			}
+				new HTTPResponse(HTTPResponse.GATEWAY_TIMEOUT_504).send(socket);
+				error_msg("Timeout from remote");
+			} catch (IOException e1) { }
 			
-			throw new RemoteConnectionException("Cannot get targeted page from remote website : " + e.getMessage());
+			throw new RemoteConnectionException("Cannot get page from remote server : " + e.getMessage());
 		}
+		catch(IOException e)
+		{
+			try {
+				new HTTPResponse(502/*HTTPResponse.BAD_GATEWAY_502*/).send(socket);
+				error_msg("HTTP Error from remote : " + huc.getResponseCode());
+			} catch (IOException e1) { }	
+			
+			throw new RemoteConnectionException("Cannot get page from remote server : " + e.getMessage());
+		}
+		
 	}
 	
 	/**

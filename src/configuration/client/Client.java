@@ -7,7 +7,7 @@ import configuration.exceptions.ConnectionLostException;
 import configuration.packets.*;
 
 /**
- * Client program.
+ * Client program
  * @author Fabrice Servais & Romain Mormont
  */
 public class Client 

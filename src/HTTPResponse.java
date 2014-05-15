@@ -11,16 +11,9 @@ public class HTTPResponse {
 	
 	
 	// Response codes
-	public static final String OK_200, 
-								MOVED_PERMANENTLY_301, 
-								MOVED_TEMPORARILY_302, 
-								BAD_REQUEST_400,
-								FORBIDDEN_403, 
-								NOT_FOUND_404, 
-								INTERNAL_SERVER_ERROR_500, 
-								NOT_IMPLEMENTED_501, 
-								BAD_GATEWAY_502,
-								GATEWAY_TIMEOUT_504;
+	public static final String OK_200, MOVED_PERMANENTLY_301, MOVED_TEMPORARILY_302, FORBIDDEN_403, 
+								NOT_FOUND_404, INTERNAL_SERVER_ERROR_500, NOT_IMPLEMENTED_501;
+	
 	
 	private String content;
 	private int content_length;
@@ -38,13 +31,10 @@ public class HTTPResponse {
 		OK_200 = "200 OK";
 		MOVED_PERMANENTLY_301 = "301 Moved Permanently";
 		MOVED_TEMPORARILY_302 = "302 Moved Temporarily"; 
-		BAD_REQUEST_400 = "400 Bad Request";
 		FORBIDDEN_403 = "403 Forbidden";
 		NOT_FOUND_404 = "404 Not Found"; 
 		INTERNAL_SERVER_ERROR_500 = "500 Internal Server Error";
 		NOT_IMPLEMENTED_501 = "501 Not Implemented";
-		BAD_GATEWAY_502 = "502 Bad Gateway";
-		GATEWAY_TIMEOUT_504 = "504 Gateway Timeout";
 	}
 	
 	/**
@@ -143,9 +133,6 @@ public class HTTPResponse {
 			case 302:
 				code_message = HTTPResponse.MOVED_TEMPORARILY_302;
 				break;
-			case 400:
-				code_message = HTTPResponse.BAD_REQUEST_400;
-				break;
 			case 403:
 				code_message = HTTPResponse.FORBIDDEN_403;
 				break;
@@ -157,12 +144,6 @@ public class HTTPResponse {
 				break;
 			case 501:
 				code_message = HTTPResponse.NOT_IMPLEMENTED_501;
-				break;
-			case 502:
-				code_message = HTTPResponse.BAD_GATEWAY_502;
-				break;
-			case 504:
-				code_message = HTTPResponse.GATEWAY_TIMEOUT_504;
 				break;
 			default:
 				code_message = code + " (Not implemented error)";
