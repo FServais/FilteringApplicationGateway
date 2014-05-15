@@ -118,7 +118,7 @@ public class HTTPClientRequestThread extends Thread {
 			duration = System.currentTimeMillis() - begin;
 			msg("Start filtering keywords (" + duration + " ms)");
 			HTMLPageFilter hpl = new HTMLPageFilter(cloned_page, request_url, wordlist, gateway_ip);
-			String filtered_page = hpl.getFilteredPage();
+			String filtered_page = hpl.getFilteredPage(socket.getRemoteSocketAddress());
 			duration = System.currentTimeMillis() - begin;
 			msg("End filtering keywords (" + duration + " ms)");
 			
@@ -126,9 +126,9 @@ public class HTTPClientRequestThread extends Thread {
 
 			msg("Start writing (" + duration + " ms)");
 			
-			HTTPResponse httpResponse = new HTTPResponse(filtered_page);		
-			httpResponse.send(socket);
-			Z
+			HTTPResponse httpResponse = new HTTPResponse(filtered_page);					
+			httpResponse.send(socket, request.getMethod());
+			
 			duration = System.currentTimeMillis() - begin;
 			msg("End writing (" + duration + " ms)\n");
 		}
@@ -202,10 +202,10 @@ public class HTTPClientRequestThread extends Thread {
 		catch(IOException | HTMLParsingException e)
 		{
 			try {
-				new HTTPResponse(huc.getResponseCode()).send(socket);
-				message("HTTP Error : " + huc.getResponseCode());
+				new HTTPResponse(huc.getResponseCode()).send(socket, "GET"); // "GET" -> Display error page
+				msg("HTTP Error : " + huc.getResponseCode());
 			} catch (IOException e1) {
-				message("Getting response code error");
+				msg("Getting response code error");
 			}
 			
 			throw new RemoteConnectionException("Cannot get targeted page from remote website : " + e.getMessage());
