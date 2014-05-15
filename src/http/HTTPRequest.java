@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 /**
  * A class for representing an HTTP request
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class HTTPRequest
 {

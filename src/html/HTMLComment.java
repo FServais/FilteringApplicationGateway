@@ -2,7 +2,7 @@ package html;
 
 /**
  * A class for representing an HTML comment
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class HTMLComment extends HTMLElement implements  Cloneable {
 	

@@ -4,7 +4,7 @@ import java.util.Vector;
 
 /**
  * A class for representing an HTML opening tag.
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class HTMLOpeningTag extends HTMLElement implements Cloneable
 {

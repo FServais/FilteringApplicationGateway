@@ -2,7 +2,7 @@ package configuration.exceptions;
 
 /**
  * Exception for connection lost with server or client
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class ConnectionLostException extends Exception 
 {

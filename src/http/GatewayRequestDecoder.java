@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 /**
  * A class for decoding a request from the client.
  * This class provides methods for accessing arguments of the request ("s", "forceRefresh").
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class GatewayRequestDecoder 
 {

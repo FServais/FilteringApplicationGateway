@@ -2,7 +2,7 @@ package html;
 
 /**
  * A class for representing html content (everything which is not a tag)
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class HTMLContent extends HTMLElement {
 	String data; // Content

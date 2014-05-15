@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.Locale;
 /**
  * A class for representing users
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class User
 {

@@ -2,7 +2,7 @@ package html.parser;
 
 /**
  * Enumeration containing the states of the html tag attributes parser
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public enum StateAttr 
 {

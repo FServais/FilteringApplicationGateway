@@ -2,7 +2,7 @@ package configuration.exceptions;
 
 /**
  * Exception for a not found user
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class UserNotFoundException extends Exception 
 {

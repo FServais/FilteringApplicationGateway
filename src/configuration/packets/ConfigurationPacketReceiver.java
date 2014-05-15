@@ -11,7 +11,7 @@ import configuration.exceptions.ConnectionLostException;
 /**
  * A class for deconstructing a packet (having the configuration described in the 
  * enum SPInstr) received from the client or the server.
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  * @see SPInstr, ConfigurationPacketSender
  */
 public class ConfigurationPacketReceiver {

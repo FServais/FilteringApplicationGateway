@@ -4,7 +4,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * A class for sending message to the displayer thread
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class DisplayerMessageSender {
 	private LinkedBlockingQueue<DisplayerMessage> msgQueue;

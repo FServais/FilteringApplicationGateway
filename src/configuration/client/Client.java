@@ -8,7 +8,7 @@ import configuration.packets.*;
 
 /**
  * Client program.
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class Client 
 {

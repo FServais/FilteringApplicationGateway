@@ -9,7 +9,7 @@ import java.io.OutputStream;
 
 /**
  * A class for constructing and sending a packet for asking end of connection
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class PacketSendClose extends ConfigurationPacketSender {
 	private String message = null;

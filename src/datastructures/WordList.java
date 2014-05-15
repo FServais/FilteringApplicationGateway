@@ -15,7 +15,7 @@ import java.util.Vector;
  *
  * This class is synchronized.
  * 
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class WordList 
 {

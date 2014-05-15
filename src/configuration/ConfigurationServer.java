@@ -9,7 +9,7 @@ import datastructures.*;
 import displayer.DisplayerMessage;
 /**
  * Server program
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class ConfigurationServer extends Thread
 {

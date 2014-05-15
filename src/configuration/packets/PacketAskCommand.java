@@ -9,7 +9,7 @@ import java.io.OutputStream;
 
 /**
  * A class for constructing and sending a packet for asking client to enter a command
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class PacketAskCommand extends ConfigurationPacketSender {
 	private String message = null;

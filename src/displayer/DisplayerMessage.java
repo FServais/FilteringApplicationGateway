@@ -2,7 +2,7 @@ package displayer;
 
 /**
  * A class for representing a message to be displayed by the displayer thread
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class DisplayerMessage {
 	private String msg;

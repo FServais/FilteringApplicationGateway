@@ -14,7 +14,7 @@ import java.util.Vector;
 
 /**
  * A class for parsing html code
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class HTMLParser
 {

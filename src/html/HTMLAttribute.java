@@ -2,7 +2,7 @@ package html;
 
 /**
  * A class for representing an HTML attribute
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class HTMLAttribute implements Cloneable
 {

@@ -8,7 +8,7 @@ import html.parser.HTMLParser;
 
 /**
  * A class for representing an HTML page 
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class HTMLPage implements Cloneable
 {

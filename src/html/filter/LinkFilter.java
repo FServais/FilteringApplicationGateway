@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 /**
  * A class for filtering links
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class LinkFilter 
 {

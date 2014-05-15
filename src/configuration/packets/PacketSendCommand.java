@@ -9,7 +9,7 @@ import java.io.OutputStream;
 
 /**
  * A class for constructing and sending a packet containing a user command
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class PacketSendCommand extends ConfigurationPacketSender {
 	private String command = null;

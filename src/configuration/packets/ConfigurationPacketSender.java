@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 /**
  * A abstract class for constructing and sending a configuration packet to server or client
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public abstract class ConfigurationPacketSender {
 	protected OutputStream os;

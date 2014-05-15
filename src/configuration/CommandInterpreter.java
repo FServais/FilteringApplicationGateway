@@ -5,7 +5,7 @@ package configuration;
 import java.util.regex.PatternSyntaxException;
 /**
  * A class for interpreting configuration commands
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class CommandInterpreter {
 	private String command = null;

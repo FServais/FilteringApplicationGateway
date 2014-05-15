@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 /**
  * A class for constructing and sending a packet for asking client for authentication
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class PacketAskAuthentication extends ConfigurationPacketSender {
 	private String message;

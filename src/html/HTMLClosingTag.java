@@ -1,7 +1,7 @@
 package html;
 /**
  * A class for representing an html closing tag
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class HTMLClosingTag extends HTMLElement implements Cloneable {
 	private String tag_name;

@@ -21,7 +21,7 @@ package configuration.packets;
  *  <li>WAIT_AUTH</li>
  *  <li>CLOSE</li>
  * </ul>
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public enum SPInstr {
 	/**

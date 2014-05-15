@@ -17,7 +17,7 @@ import displayer.DisplayerMessageSender;
 
 /**
  * A class for executing a client session on its own thread (for configuring the gateway)
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class ConfigServerThread implements Runnable {
 	private WordList wordlist = null; // rejected words list

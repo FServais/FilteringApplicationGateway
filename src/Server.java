@@ -14,7 +14,7 @@ import http.HTTPServer;
 
 /**
  * Class representing the server of the Gateway
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  *
  */
 public class Server

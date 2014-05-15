@@ -6,7 +6,7 @@ import configuration.exceptions.UserNotFoundException;
 
 /**
  * A class for dealing with a list of users. This class is synchronized.
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class UserMap {
 	private Hashtable<String, User> map;

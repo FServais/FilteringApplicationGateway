@@ -5,7 +5,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * A class for displaying message from server threads arriving in a queue.
  * This class follows the singleton pattern.
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class Displayer extends Thread {
 	private LinkedBlockingQueue<DisplayerMessage> lbq = null;

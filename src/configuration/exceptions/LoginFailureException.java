@@ -5,7 +5,7 @@ package configuration.exceptions;
 
 /**
  * Exception for login failure at server initialization
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class LoginFailureException extends Exception 
 {

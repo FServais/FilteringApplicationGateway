@@ -8,7 +8,7 @@ import java.io.ByteArrayOutputStream;
 
 /**
  * A class for constructing and sending a packet containing authentication data for the server
- * @author Romain Mormont
+ * @author Fabrice Servais & Romain Mormont
  */
 public class PacketSendAuthentication extends ConfigurationPacketSender {
 	String password = null, username = null;
