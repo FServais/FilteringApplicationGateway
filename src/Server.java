@@ -1,8 +1,8 @@
 
-
-
 import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import configuration.ConfigurationServer;
 
 import datastructures.WordList;
 import displayer.Displayer;
@@ -37,8 +37,8 @@ public class Server
 		wordlist.insert("concurrent");
 		wordlist.insert("database");
 		wordlist.insert("member");
-		//wordlist.insert("Université");
-		//wordlist.insert("université");
+		//wordlist.insert("UniversitÃ©");
+		//wordlist.insert("universitÃ©");
 		//wordlist.insert("University");
 		//wordlist.insert("university");
 
