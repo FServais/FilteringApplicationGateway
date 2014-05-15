@@ -52,6 +52,7 @@ public class HTTPClientRequestThread extends Thread {
 			
 			msg("New request (0 ms)");
 	
+			// get client rquest
 			HTTPRequest request = new HTTPRequest(socket);
 			String gateway_ip = request.getHeaderValue("Host");
 					
@@ -61,13 +62,13 @@ public class HTTPClientRequestThread extends Thread {
 			if(!request.getMethod().equals("HEAD") && !request.getMethod().equals("GET"))
 				throw new HTTPMethodNotSupportedException("Bad http method : " + request.getMethod());
 			
-			// Decode the request : get URL
+			// Decode the request : get URL and args
 			GatewayRequestDecoder grd = new GatewayRequestDecoder(request);
 			
 			if(!grd.validRequest()) // if path is erroneous
 				throw new InvalidRequestException("path cannot be handled : " + grd.getUrl());
 			
-			if(!grd.fileTypeIsOk()) // checks if the file can be managed
+			if(!grd.fileTypeIsOk()) // checks if the file type can be managed by the gateway
 				throw new BadFileRequestException("file format can't be managed : " + grd.getUrl());
 
 			URL request_url = new URL(grd.getUrl());
@@ -82,7 +83,7 @@ public class HTTPClientRequestThread extends Thread {
 			duration = System.currentTimeMillis() - begin;
 			msg("Starts getting the page (" + duration + " ms)");
 
-			// If already in cache and don't need to be refreshed (timeout) and don't have "forceRefresh" flag
+			// If already in cache and don't need to be refreshed (timeout) and don't have "forceRefresh" flag, then go to the cache
 			if(cache.isContained(request_url.toString()) && cache.getEntry(request_url.toString()).isValid() && !forceRefresh)
 			{
 				response_page = cache.getEntry(request_url.toString()).getData();
@@ -110,25 +111,27 @@ public class HTTPClientRequestThread extends Thread {
 				msg("Page cached (" + duration + " ms)");
 			}	
 			
+			// clone des pages
 			duration = System.currentTimeMillis() - begin;
 			msg("Start cloning (" + duration + " ms)");
 			HTMLPage cloned_page = (HTMLPage) response_page.clone();
-			
 			duration = System.currentTimeMillis() - begin;
 			msg("End cloning (" + duration + " ms)");
-			// filters page 
 			
+			// filters keywords in the page
 			duration = System.currentTimeMillis() - begin;
 			msg("Start filtering keywords (" + duration + " ms)");
+			
 			HTMLPageFilter hpl = new HTMLPageFilter(cloned_page, request_url, wordlist, gateway_ip);
 			String filtered_page = hpl.getFilteredPage();
+			
 			duration = System.currentTimeMillis() - begin;
 			msg("End filtering keywords (" + duration + " ms)");
 			
+			// sends response page to the client
 			duration = System.currentTimeMillis() - begin;
-
 			msg("Start writing (" + duration + " ms)");
-			
+	
 			new HTTPResponse(filtered_page).send(socket);
 			
 			duration = System.currentTimeMillis() - begin;
@@ -219,8 +222,8 @@ public class HTTPClientRequestThread extends Thread {
 		{			
 			// connect to the remote
 			huc = (HttpURLConnection) url.openConnection();
-			huc.setConnectTimeout(5000);
-			huc.setReadTimeout(10000);
+			huc.setConnectTimeout(2500);
+			huc.setReadTimeout(15000);
 			huc.setRequestMethod("GET");
 			huc.connect();
 			
@@ -242,8 +245,8 @@ public class HTTPClientRequestThread extends Thread {
 		}
 		catch(SocketTimeoutException e)
 		{
-			try {
-				new HTTPResponse(HTTPResponse.GATEWAY_TIMEOUT_504).send(socket);
+			try { // Gateway Timeout
+				new HTTPResponse(504).send(socket);
 				error_msg("Timeout from remote");
 			} catch (IOException e1) { }
 			
@@ -262,12 +265,12 @@ public class HTTPClientRequestThread extends Thread {
 	}
 	
 	/**
-	 * 
+	 * Sends a normal message to the displayer
 	 * @param msg
 	 */
 	void msg(String msg)
 	{
-		disp_sender.sendMessage("[" + connection_number + "] " + msg);
+		disp_sender.sendMessage("[GATEW][" + connection_number + "] " + msg);
 	}
 	
 	/**
@@ -276,6 +279,6 @@ public class HTTPClientRequestThread extends Thread {
 	 */
 	void error_msg(String msg)
 	{
-		disp_sender.sendErrorMessage("[" + connection_number + "] " + msg);
+		disp_sender.sendErrorMessage("[GATEW][" + connection_number + "] " + msg);
 	}
 }

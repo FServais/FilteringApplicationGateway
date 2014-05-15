@@ -51,7 +51,6 @@ public class HTMLParser
 		this.html = html;
 		this.list = new LinkedList<HTMLElement>();
 		
-		System.out.println(html.substring(0, 100));
 		if(do_parse)
 			parseHTML(html);
 	}

@@ -39,7 +39,7 @@ public class ConfigServerThread implements Runnable {
 		WELCOME = "\tGateway configuration platform";
 		BAD_AUTH = "Bad password or username : ";
 		BAD_COMMAND = "Bad command : ";
-		LOG_PREF = "[LOG] ";
+		LOG_PREF = "[CONFIG] ";
 	}
 
 	/**
