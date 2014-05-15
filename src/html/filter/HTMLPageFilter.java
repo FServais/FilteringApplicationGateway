@@ -159,7 +159,7 @@ public class HTMLPageFilter
 			determineStatus();
 		
 		if(status == PageGatewayStatus.PAGE_REFUSED)
-			return getRefuseAccessPage();
+			return getRefuseAccessPage("The page that you are trying to access is not authorize.");
 		else
 		{			
 			if(status == PageGatewayStatus.PAGE_OK)
@@ -275,8 +275,8 @@ public class HTMLPageFilter
 			}
 		}	
 	}
-
-	private String getRefuseAccessPage() 
+	
+	private String getRefuseAccessPage(String message) 
 	{
 		return "<!DOCTYPE html>"
 						+ "<html>"
@@ -290,17 +290,18 @@ public class HTMLPageFilter
 								+ "border-top: 1px solid rgba(214,60,54,0.6);"
 								+ "border-bottom: 1px solid rgba(214,60,54,0.6);"
 								+ "font-size: 14px;"
+								+ "margin-top: 20%;"
 							+ "}"
-							+ "p{margin-top: 20px;}"
+							+ "p{margin-top: 40px;}"
 							+ "</style>"
 							+ "<meta charset=\"UTF-8\"/> "
 							+ "<title>GATEWAY | Access denied</title>"
 						+ "</head>"
 						+ "<body>"
-							+ "<div id=\"error_head\">"
-								+ "<h1>***** ACCESS DENIED *****</h1>"
+							+ "<div id=\"error_head\"><h3>Gateway : </h3>"
+								+ "<h1>ACCESS DENIED</h1>"
 							+ "</div>"
-							+ "<p>The page that you are trying to access is not available.</p>"
+							+ "<p>"+ message +"</p>"
 						+ "</body>"
 						+ "</html>";
 	}

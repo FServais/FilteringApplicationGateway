@@ -147,7 +147,7 @@ public class HTTPResponse {
 				code_message = HTTPResponse.NOT_IMPLEMENTED_501;
 				break;
 			default:
-				code_message = HTTPResponse.NOT_FOUND_404;
+				code_message = code + " (Not implemented error)";
 		}
 		
 		return code_message;
@@ -167,7 +167,7 @@ public class HTTPResponse {
 						+ "border-top: 1px solid rgba(214,60,54,0.6);"
 						+ "border-bottom: 1px solid rgba(214,60,54,0.6);"
 						+ "font-size: 14px;" 
-						+ "margin-top: 25%;"
+						+ "margin-top: 20%;"
 					+ "}"
 					+ "p{margin-top: 20px;}"
 					+ "</style>"
@@ -177,7 +177,7 @@ public class HTTPResponse {
 	
 	private String getErrorPageEndHeader()
 	{
-		return  "</title></head><body><div id=\"error_head\"><h1>Error ";
+		return  "</title></head><body><div id=\"error_head\"><h3>Gateway : </h3><h1>Error ";
 	}
 	
 	private String getErrorPageEndTitle()
