@@ -31,7 +31,7 @@ public class HTTPRequest
 	{
 		init();
 		getRequest(s);
-		debug();
+		//debug();
 	}
 
 	/**
@@ -148,11 +148,11 @@ public class HTTPRequest
 	}
 	
 	/**
-	 * Returns the map containing the headers
-	 * @return a structure mapping header fields and values
+	 * Returns the value a header of given name
+	 * @return a String containing the value, null if the request didn't contain this header field
 	 */
-	public HashMap<String, String> getHeaders()
+	public String getHeaderValue(String header_name)
 	{
-		return headers;
+		return headers.containsKey(header_name) ? headers.get(header_name) : null;
 	}
 }

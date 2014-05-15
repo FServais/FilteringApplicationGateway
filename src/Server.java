@@ -4,6 +4,7 @@
 import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import configuration.ConfigurationServer;
 import datastructures.WordList;
 import displayer.Displayer;
 import displayer.DisplayerMessage;
@@ -21,7 +22,7 @@ public class Server
 	private WordList wordlist;
 	private LinkedBlockingQueue<DisplayerMessage> msgQueue = null;// Queue for outputting threads messages in std ouput
 	private Displayer displayerThread = null;
-	//private ConfigurationServer configThread = null;
+	private ConfigurationServer configThread = null;
 	private HTTPServer httpServer = null;
 
 	/**
@@ -55,9 +56,9 @@ public class Server
 		httpServer.start();			
 
 		// initalize thread for dealing with connection to the configuration platform
-		//configThread = new ConfigurationServer(msgQueue, wordlist, maxThreadConfig);
-		//configThread.setDaemon(true);
-		//configThread.start();	
+		configThread = new ConfigurationServer(msgQueue, wordlist, maxThreadConfig);
+		configThread.setDaemon(true);
+		configThread.start();	
 	}
 
 	public static void main(String args[])

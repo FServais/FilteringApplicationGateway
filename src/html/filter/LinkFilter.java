@@ -101,7 +101,7 @@ public class LinkFilter
 				new_url = getCompleteURL();
 			else
 			{
-				System.err.println("nomatch : " + link);
+				//System.err.println("nomatch : " + link);
 				new_url = link;
 			}
 		}
@@ -124,7 +124,7 @@ public class LinkFilter
 			e.printStackTrace();
 		}
 		
-		return "http://" + gateway_ip + ":8005/?s=" + final_url;
+		return "http://" + gateway_ip + "/?s=" + final_url;
 	}
 	
 	/**

@@ -12,7 +12,7 @@ import configuration.packets.*;
  */
 public class Client 
 {
-	private static final int PORT = 9040;
+	private static final int PORT = 9005;
 	private String server_address; 
 	private InputStream socketIS;
 	private OutputStream socketOS;

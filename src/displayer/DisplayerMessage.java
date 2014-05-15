@@ -1,18 +1,22 @@
 package displayer;
 
+/**
+ * A class for representing a message to be displayed by the displayer thread
+ * @author Romain Mormont
+ */
 public class DisplayerMessage {
-	private String msg = null;
-	private boolean isError = false;
+	private String msg;
+	private boolean isError;
 	
 	/**
 	 * Constructs a message for the Displayer 
 	 * @param msg a String containing the message
 	 * @param isError true if the message is an error message, false otherwise
 	 */
-	public DisplayerMessage(String msg, boolean isError)
+	public DisplayerMessage(String msg, boolean error)
 	{
 		this.msg = msg;
-		this.isError = isError;
+		this.isError = error;
 	}
 	
 	/**
@@ -21,7 +25,7 @@ public class DisplayerMessage {
 	 */
 	public DisplayerMessage(String msg)
 	{
-		this.msg = msg;
+		this(msg, false);
 	}
 	
 	/**

@@ -6,24 +6,25 @@ import java.net.Socket;
 import java.util.concurrent.*;
 
 import datastructures.*;
+import displayer.DisplayerMessage;
 /**
  * Server program
  * @author Romain Mormont
  */
 public class ConfigurationServer extends Thread
 {
-	private static final int PORT = 9040;
+	private static final int PORT = 9005;
 	private datastructures.WordList wordlist = null; // list of forbidden words
 	private UserMap usermap = null; // user map
 	private ExecutorService execServ = null; // thread pool for dealing with clients connection
 	private ServerSocket ss = null;
-	private LinkedBlockingQueue<String> msgQueue = null;// Queue for outputting threads messages in std ouput
+	private LinkedBlockingQueue<DisplayerMessage> msgQueue = null;// Queue for outputting threads messages in std ouput
 	
 	/**
 	 * Initializes the Server data
 	 * @throws IOException if ServerSocket connection initialization fails
 	 */
-	public ConfigurationServer(LinkedBlockingQueue<String> msgQueue, WordList wordlist, int maxThreads) 
+	public ConfigurationServer(LinkedBlockingQueue<DisplayerMessage> msgQueue, WordList wordlist, int maxThreads) 
 			throws IOException
 	{
 		this.wordlist = wordlist;

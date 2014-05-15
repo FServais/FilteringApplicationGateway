@@ -50,8 +50,7 @@ public class HTTPServer extends Thread
 			try
 			{
 				Socket client_gateway = ss.accept();
-				Runnable r = new HTTPClientRequestThread(++i, client_gateway, msgQueue, 
-															wordlist, cache, "localhost");
+				Runnable r = new HTTPClientRequestThread(++i, client_gateway, msgQueue, wordlist, cache);
 				threadPool.execute(r);
 			}
 			catch(IOException e)

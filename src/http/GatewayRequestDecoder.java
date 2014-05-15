@@ -36,7 +36,7 @@ public class GatewayRequestDecoder
 
 		parsePath();
 		parseRemoteAddress();
-		debug();
+		//debug();
 	}
 	
 	/**
@@ -109,7 +109,7 @@ public class GatewayRequestDecoder
 	 */
 	public boolean refreshIsForced()
 	{
-		return (params.containsKey("forceRefresh") && params.get("forceRefresh") == "true");
+		return (params.containsKey("forceRefresh") && params.get("forceRefresh").equals("true"));
 	}
 	
 	/**

@@ -70,7 +70,9 @@ public class HTMLPageFilter
 			String keyword = restricted_keywords.get(i);
 			
 			int count = countOccurrence(pageContent, keyword);
-			
+			System.out.println("//===================");
+			System.out.println("|| Words : " + keyword);
+			System.out.println("|| Count : " + count);
 			if(count > 0)
 				keyword_in_page++;
 			
@@ -165,7 +167,6 @@ public class HTMLPageFilter
 				return page.toString();
 			else 
 			{
-				System.out.println("Filter keywords...");
 				filterRestrictedWords();
 				return page.toString();
 			}

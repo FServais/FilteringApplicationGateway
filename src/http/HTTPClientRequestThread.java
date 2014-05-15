@@ -18,6 +18,7 @@ import http.exceptions.RemoteConnectionException;
 import datastructures.Cache;
 import datastructures.WordList;
 import displayer.DisplayerMessage;
+import displayer.DisplayerMessageSender;
 
 /**
  * Class that handle a connection from a client that request a page.
@@ -27,20 +28,18 @@ public class HTTPClientRequestThread extends Thread {
 	
 	private Socket socket;
 	private Cache<String, HTMLPage> cache;
-	private LinkedBlockingQueue<DisplayerMessage> msgQueue;
+	private DisplayerMessageSender disp_sender;
 	private WordList wordlist;
 	private int connection_number = 0;
-	private String gateway_ip;
 	
 	public HTTPClientRequestThread(int connection_number, Socket socket, LinkedBlockingQueue<DisplayerMessage> msgQueue, 
-									WordList wordlist, Cache<String, HTMLPage> cache, String gateway_ip)
+									WordList wordlist, Cache<String, HTMLPage> cache)
 	{
 		this.socket = socket;
 		this.cache = cache;
-		this.msgQueue = msgQueue;
+		this.disp_sender = new DisplayerMessageSender(msgQueue);
 		this.wordlist = wordlist;
 		this.connection_number = connection_number;
-		this.gateway_ip = gateway_ip;
 	}
 	
 	public void run()
@@ -49,12 +48,13 @@ public class HTTPClientRequestThread extends Thread {
 		{
 			long begin = System.currentTimeMillis(), duration;
 			
-			message("New request");
+			msg("New request (0 ms)");
 	
 			HTTPRequest request = new HTTPRequest(socket);
-			
+			String gateway_ip = request.getHeaderValue("Host");
+					
 			duration = (System.currentTimeMillis() - begin);
-			message("Request received (" + duration  + " ms)"); 
+			msg("Request received (" + duration  + " ms)"); 
 			
 			// Decode the request : get URL
 			GatewayRequestDecoder grd = new GatewayRequestDecoder(request);
@@ -62,13 +62,13 @@ public class HTTPClientRequestThread extends Thread {
 			if(!grd.validRequest())
 			{	
 				// TODO implement response to this error
-				message("Invalid request : path cannot be handled\n"); 
+				error_msg("Invalid request : path cannot be handled " + request.getPath() + "\n"); 
 				return;
 			}
 
 			URL request_url = new URL(grd.getUrl());
 			
-			message("Requested page : \"" + request_url.toString() + "\"");
+			msg("Requested page : \"" + request_url.toString() + "\"");
 			
 			// checks if "forceRefresh" flag is set
 			boolean forceRefresh = grd.refreshIsForced();
@@ -76,7 +76,7 @@ public class HTTPClientRequestThread extends Thread {
 			HTMLPage response_page;
 			
 			duration = System.currentTimeMillis() - begin;
-			message("Starts getting the page (" + duration + " ms)");
+			msg("Starts getting the page (" + duration + " ms)");
 
 			// If already in cache and don't need to be refreshed (timeout) and don't have "forceRefresh" flag
 			if(cache.isContained(request_url.toString()) && cache.getEntry(request_url.toString()).isValid() && !forceRefresh)
@@ -84,78 +84,78 @@ public class HTTPClientRequestThread extends Thread {
 				response_page = cache.getEntry(request_url.toString()).getData();
 				
 				duration = System.currentTimeMillis() - begin;
-				message("Page retrieved (from cache : " + duration + " ms)");
+				msg("Page retrieved (from cache : " + duration + " ms)");
 			}
 			else // get page from remote server
 			{
 				response_page = getPageFromRemote(request_url);
 				
 				duration = System.currentTimeMillis() - begin;
-				message("Page retrieved (from remote : " + duration + " ms)");
+				msg("Page retrieved (from remote : " + duration + " ms)");
 				
 				// filters the link of the page
 				HTMLPageFilter filter = new HTMLPageFilter(response_page, request_url, wordlist, gateway_ip);
 				filter.filterLinks();
 				
 				duration = System.currentTimeMillis() - begin;
-				message("Page's links fitlered (" + duration + " ms)");
+				msg("Page's links fitlered (" + duration + " ms)");
 				
 				// add entry to the cache
 				cache.addEntry(request_url.toString(), response_page);
 				duration = System.currentTimeMillis() - begin;
-				message("Page cached (" + duration + " ms)");
+				msg("Page cached (" + duration + " ms)");
 			}	
 			
 			duration = System.currentTimeMillis() - begin;
-			message("Start cloning (" + duration + " ms)");
+			msg("Start cloning (" + duration + " ms)");
 			HTMLPage cloned_page = (HTMLPage) response_page.clone();
 			
 			duration = System.currentTimeMillis() - begin;
-			message("End cloning (" + duration + " ms)");
+			msg("End cloning (" + duration + " ms)");
 			// filters page 
 			
 			duration = System.currentTimeMillis() - begin;
-			message("Start filtering keywords (" + duration + " ms)");
+			msg("Start filtering keywords (" + duration + " ms)");
 			HTMLPageFilter hpl = new HTMLPageFilter(cloned_page, request_url, wordlist, gateway_ip);
 			String filtered_page = hpl.getFilteredPage();
 			duration = System.currentTimeMillis() - begin;
-			message("End filtering keywords (" + duration + " ms)");
+			msg("End filtering keywords (" + duration + " ms)");
 			
 			duration = System.currentTimeMillis() - begin;
-			message("Start writing (" + duration + " ms)");
+			msg("Start writing (" + duration + " ms)");
 			writeResponse(HTTP.OK_HEADERS, filtered_page);
 			duration = System.currentTimeMillis() - begin;
-			message("End writing (" + duration + " ms)\n");
+			msg("End writing (" + duration + " ms)\n");
 		}
 		catch (RemoteConnectionException e)
 		{
-			message(e.getMessage(), true);
+			error_msg(e.getMessage());
 		}
 		catch (MalformedURLException e)
 		{
-			message("Bad url : " + e.getMessage(), true);
+			error_msg("Bad url : " + e.getMessage());
 		}
 		catch (BadRequestException e)
 		{
 			e.printStackTrace();
-			message("Error while parsing the http request", true);
+			error_msg("Error while parsing the http request");
 		}
 		catch (IOException e) 
 		{
 			e.printStackTrace();
-			message("Error while getting the response page", true);
+			error_msg("Error while getting the response page");
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			message("Exception : " + e.getMessage(), true);
+			error_msg("Exception : " + e.getMessage());
 		}
 		finally
 		{
 			try {
 				socket.close();
 			} catch (IOException e) {
-				message("Closing socket failed", true);
+				error_msg("Closing socket failed");
 			}
 		}
 	}// End run
@@ -221,12 +221,21 @@ public class HTTPClientRequestThread extends Thread {
 		}
 	}
 	
-	void message(String msg)
+	/**
+	 * 
+	 * @param msg
+	 */
+	void msg(String msg)
 	{
-		message(msg, false);
+		disp_sender.sendMessage("[" + connection_number + "] " + msg);
 	}
-	void message(String msg, boolean error)
+	
+	/**
+	 * 
+	 * @param msg
+	 */
+	void error_msg(String msg)
 	{
-		msgQueue.add(new DisplayerMessage("[" + connection_number + "] " + msg, error));
+		disp_sender.sendErrorMessage("[" + connection_number + "] " + msg);
 	}
 }

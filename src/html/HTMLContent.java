@@ -45,7 +45,7 @@ public class HTMLContent extends HTMLElement {
 	{
 		String rep = getUnicharString(rep_char, substr.length());
 		
-		data = data.replaceAll("(?i)" + substr, rep);
+		data = data.replaceAll(substr, rep);
 	}
 	
 	/**

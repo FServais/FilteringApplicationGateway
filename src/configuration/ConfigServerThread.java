@@ -12,6 +12,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import configuration.exceptions.*;
 import configuration.packets.*;
 import datastructures.*;
+import displayer.DisplayerMessage;
+import displayer.DisplayerMessageSender;
 
 /**
  * A class for executing a client session on its own thread (for configuring the gateway)
@@ -26,8 +28,8 @@ public class ConfigServerThread implements Runnable {
 	private Socket socket = null; // the socket object
 	private InputStream is = null; // the input stream object associated with the socket
 	private OutputStream os = null; // the output stream object associated with the socket
-	private LinkedBlockingQueue<String> blockingQueue = null; // queue for outputting message
-															// on the server terminal
+	private DisplayerMessageSender disp_sender = null; // object for sending message to 
+															// output on the server terminal
 	private final static String NEWLINE = System.lineSeparator();
 
 	private static final String WELCOME, BAD_AUTH, BAD_COMMAND, LOG_PREF;
@@ -48,12 +50,12 @@ public class ConfigServerThread implements Runnable {
 	 *            the server
 	 * @param usermap a UserMap that contains all data about users
 	 * @param socket a initialized Socket for communicating with the Client
-	 * @param blockingQueue  a Queue for outputting messages on server terminal
+	 * @param msgQueue  a Queue for outputting messages on server terminal
 	 * @throws NullPointerException if either wordlist or usermap are null
 	 * @throws IOException if an I/O error relative to the Socket occurs
 	 */
 	public ConfigServerThread(WordList wordlist, UserMap usermap, Socket socket,
-						LinkedBlockingQueue<String> blockingQueue) 
+						LinkedBlockingQueue<DisplayerMessage> disp_sender) 
 			throws IOException 
 	{
 		// store data about restricted words and users
@@ -66,7 +68,7 @@ public class ConfigServerThread implements Runnable {
 		this.os = socket.getOutputStream();
 
 		// store the queue object for outputting messages
-		this.blockingQueue = blockingQueue;
+		this.disp_sender = new DisplayerMessageSender(disp_sender);
 	}
 
 	/**
@@ -86,10 +88,9 @@ public class ConfigServerThread implements Runnable {
 				(new PacketSendClose(os, "Login has failed - close connection"))
 						.sendPacket();
 				// print a message on the server terminal
-				blockingQueue.put(LOG_PREF + "Login has failed from address '"
-						+ socket.getRemoteSocketAddress() + "'");
-				
-			} catch (IOException | InterruptedException e1) {
+				disp_sender.sendMessage(LOG_PREF + "Login has failed from address '"
+											+ socket.getRemoteSocketAddress() + "'");
+			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
 		} catch (ConnectionLostException e) { // connection lost with the client
@@ -101,13 +102,7 @@ public class ConfigServerThread implements Runnable {
 			else
 				message = "Connection lost with client '" + username + "'";
 
-			try 
-			{
-				blockingQueue.put(LOG_PREF + message);
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
-			}
-			
+			disp_sender.sendMessage(LOG_PREF + message);
 		} catch (IOException e) {
 			//e.printStackTrace();
 		} finally {
@@ -196,10 +191,8 @@ public class ConfigServerThread implements Runnable {
 			}
 
 			// write message on server terminal
-			blockingQueue.put(LOG_PREF + "User '" + username + "' is connected");
-		} catch (IOException | InterruptedException e) {
-			
-		}
+			disp_sender.sendMessage(LOG_PREF + "User '" + username + "' is connected");
+		} catch (IOException e) { }
 	}
 
 	/**
@@ -228,7 +221,7 @@ public class ConfigServerThread implements Runnable {
 						wordlist.insert(cmdInt.getArg());
 						answerMsg = "Word '" + cmdInt.getArg() + "' added to the list";
 						// writes message to server terminal 
-						blockingQueue.offer(LOG_PREF + "Word added. List now counts " + wordlist.size() + " elements (user : " + username + ").");
+						disp_sender.sendMessage(LOG_PREF + "Word added. List now counts " + wordlist.size() + " elements (user : " + username + ").");
 					}
 				} else if (cmdInt.cmdIsDelete()) // DEL
 				{
@@ -238,7 +231,7 @@ public class ConfigServerThread implements Runnable {
 					else {
 						answerMsg = "Word '" + cmdInt.getArg() + "' deleted from the list";
 						wordlist.remove(cmdInt.getArg());
-						blockingQueue.offer(LOG_PREF + "Word deleted. List now counts " + wordlist.size() + " elements (user : " + username + ").");
+						disp_sender.sendMessage(LOG_PREF + "Word deleted. List now counts " + wordlist.size() + " elements (user : " + username + ").");
 					}
 				} else if (cmdInt.cmdIsList()) // LIST
 				{
@@ -258,13 +251,13 @@ public class ConfigServerThread implements Runnable {
 					answerMsg = "Client request for closing the connection";
 					
 					// write message on server terminal
-					blockingQueue.offer(LOG_PREF + "User '" + username + "' has quit.");
+					disp_sender.sendMessage(LOG_PREF + "User '" + username + "' has quit.");
 					
 				} else {
 					
 					String message = BAD_COMMAND + "'" + cmdInt.getCmd() + "' is unknown";
 					// write message on server terminal
-					blockingQueue.offer(LOG_PREF + message + " (user : " + username + ").");
+					disp_sender.sendMessage(LOG_PREF + message + " (user : " + username + ").");
 					answerMsg = message;
 				}
 
