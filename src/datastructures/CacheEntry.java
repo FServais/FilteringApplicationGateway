@@ -17,7 +17,7 @@ public class CacheEntry<K>
 	{
 		this.data = data;
 		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.DATE, 1); // 24h before need refeshing
+		cal.add(Calendar.HOUR, 1); // 24h before need refreshing
 		this.timeout = cal.getTime();
 	}
 	

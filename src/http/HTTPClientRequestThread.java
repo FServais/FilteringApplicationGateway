@@ -13,6 +13,7 @@ import java.io.PrintWriter;
 import html.HTMLPage;
 import html.exceptions.HTMLParsingException;
 import html.filter.HTMLPageFilter;
+import html.filter.PageGatewayStatus;
 import http.exceptions.BadRequestException;
 import http.exceptions.RemoteConnectionException;
 import datastructures.Cache;
@@ -122,8 +123,12 @@ public class HTTPClientRequestThread extends Thread {
 			msg("End filtering keywords (" + duration + " ms)");
 			
 			duration = System.currentTimeMillis() - begin;
+
 			msg("Start writing (" + duration + " ms)");
-			writeResponse(HTTP.OK_HEADERS, filtered_page);
+			
+			HTTPResponse httpResponse = new HTTPResponse(filtered_page);		
+			httpResponse.send(socket);
+			Z
 			duration = System.currentTimeMillis() - begin;
 			msg("End writing (" + duration + " ms)\n");
 		}
@@ -160,28 +165,6 @@ public class HTTPClientRequestThread extends Thread {
 		}
 	}// End run
 	
-	/**
-	 * 
-	 * @param headers
-	 * @param content
-	 * @throws IOException
-	 */
-	private void writeResponse(String headers, String content) throws IOException
-	{
-		PrintWriter out = new PrintWriter(socket.getOutputStream()); 
-		
-		if(headers.equals(HTTP.OK_HEADERS))
-			out.print(headers + content.length());
-		else
-			out.print(headers);
-		
-		out.print(HTTP.END_OF_HEADERS);
-		out.print(content);
-		out.print(HTTP.LINEBREAK);
-		
-		out.flush();
-		out.close();
-	}
 	
 	/**
 	 * This method connects to the url and returns an HTMLPage representing the content
@@ -192,10 +175,11 @@ public class HTTPClientRequestThread extends Thread {
 	 */
 	private HTMLPage getPageFromRemote(URL url) throws RemoteConnectionException
 	{
+		HttpURLConnection huc = null;
 		try
 		{			
 			// connect to the remote
-			HttpURLConnection huc = (HttpURLConnection) url.openConnection();
+			huc = (HttpURLConnection) url.openConnection();
 			
 			huc.setRequestMethod("GET");
 			
@@ -217,6 +201,13 @@ public class HTTPClientRequestThread extends Thread {
 		}
 		catch(IOException | HTMLParsingException e)
 		{
+			try {
+				new HTTPResponse(huc.getResponseCode()).send(socket);
+				message("HTTP Error : " + huc.getResponseCode());
+			} catch (IOException e1) {
+				message("Getting response code error");
+			}
+			
 			throw new RemoteConnectionException("Cannot get targeted page from remote website : " + e.getMessage());
 		}
 	}

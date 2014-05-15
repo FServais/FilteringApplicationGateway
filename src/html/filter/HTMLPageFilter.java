@@ -20,6 +20,7 @@ public class HTMLPageFilter
 	private URL url; // url of the page
 	private String gateway_ip; // ip/hostname of the gateway server
 	private Vector<String> restricted_keywords; // contains the restricted keywords
+
 	
 	/**
 	 * Constructs an HTMLPageFilter object.
@@ -160,7 +161,7 @@ public class HTMLPageFilter
 			determineStatus();
 		
 		if(status == PageGatewayStatus.PAGE_REFUSED)
-			return getRefuseAccessPage();
+			return getRefuseAccessPage("The page that you are trying to access is not authorize.");
 		else
 		{			
 			if(status == PageGatewayStatus.PAGE_OK)
@@ -265,7 +266,7 @@ public class HTMLPageFilter
 
 				/** TODO : remove this */
 				
-				/*System.out.println("\n[" + tag_name + "] n°" + (++i));
+				/*System.out.println("\n[" + tag_name + "] nï¿½" + (++i));
 				System.out.println("  URL  :  " + url.toString());
 				System.out.println("  Link : " + attribute_value);
 				System.out.println("  new  :  " + lf.getFilteredLink());
@@ -275,9 +276,34 @@ public class HTMLPageFilter
 			}
 		}	
 	}
-
-	private String getRefuseAccessPage() 
+	
+	private String getRefuseAccessPage(String message) 
 	{
-		return "pas bon";
+		return "<!DOCTYPE html>"
+						+ "<html>"
+						+ "<head>"
+							+ "<style type=\"text/css\">"
+							+ "body{ background-color: #F7F7F7; font-family:\"Trebuchet MS\", Arial, Verdana, sans-serif; }"
+							+ "#error_head"
+							+ "{"
+								+ "color:rgba(214,60,54,1);"
+								+ "text-align: center;"
+								+ "border-top: 1px solid rgba(214,60,54,0.6);"
+								+ "border-bottom: 1px solid rgba(214,60,54,0.6);"
+								+ "font-size: 14px;"
+								+ "margin-top: 20%;"
+							+ "}"
+							+ "p{margin-top: 40px;}"
+							+ "</style>"
+							+ "<meta charset=\"UTF-8\"/> "
+							+ "<title>GATEWAY |Â Access denied</title>"
+						+ "</head>"
+						+ "<body>"
+							+ "<div id=\"error_head\"><h3>Gateway : </h3>"
+								+ "<h1>ACCESS DENIED</h1>"
+							+ "</div>"
+							+ "<p>"+ message +"</p>"
+						+ "</body>"
+						+ "</html>";
 	}
 }
