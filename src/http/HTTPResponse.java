@@ -90,8 +90,8 @@ public class HTTPResponse {
 	{
 		return "<!DOCTYPE html><html><head><style type=\"text/css\">" +
 				"body{ background-color: #F7F7F7; font-family:\"Trebuchet MS\", Arial, Verdana, sans-serif; }"
-					+ "#error_head{color:rgba(214,60,54,1); text-align: center; border-top: 1px solid rgba(214,60,54,0.6);"
-						+ "border-bottom: 1px solid rgba(214,60,54,0.6); font-size: 14px; margin-top: 20%;}"
+					+ "#error_head{color:rgba(214,60,54,1); text-align: center; margin-left:auto; margin-right:auto;"
+						+ "border: 1px solid rgba(214,60,54,0.6); font-size: 14px; margin-top: 20%; width:35%;}"
 					+ "p{margin-top: 20px;}"
 					+ "</style><meta charset=\"UTF-8\"/><title>";
 	} 
@@ -177,15 +177,25 @@ public class HTTPResponse {
 	 */
 	public void setResponseCode(String code)
 	{
-		response_code = code;
+		this.response_code = code;
 	}
 	
 	/**
-	 * Send an HTTP response through the socket, depending of the code of the response.
+	 * Set the content_length field (practical for HEAD response)
+	 * @param new_length New length
+	 */
+	public void setContentLength(int new_length)
+	{
+		this.content_length = new_length;
+	}
+	
+	/**
+	 * Send an HTTP response through the socket, depending of the code of the response and the method of the HTTP request.
 	 * @param socket Socket through which the message has to be sent.
+	 * @param method Method of the HTTP request
 	 * @throws IOException
 	 */
-	public void send(Socket socket) throws IOException
+	public void send(Socket socket, String method) throws IOException
 	{
 		StringBuilder sb = new StringBuilder();
 		PrintWriter out = new PrintWriter(socket.getOutputStream()); 
@@ -197,8 +207,8 @@ public class HTTPResponse {
 		
 		if(response_code != HTTPResponse.OK_200)
 		{
-			content = getErrorPage();
-			content_length = content.length();
+			this.content = getErrorPage();
+			this.content_length = content.length();
 		}
 		
 		sb.append(CONTENT_LENGTH);
@@ -216,8 +226,11 @@ public class HTTPResponse {
 		
 		sb.append(LINEBREAK);
 		
-		sb.append(content);
-		sb.append(LINEBREAK);
+		if(method.equals("GET"))
+		{
+			sb.append(content);
+			sb.append(LINEBREAK);
+		}
 		
 		out.print(sb.toString());		
 		

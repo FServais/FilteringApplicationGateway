@@ -83,6 +83,19 @@ Année académique 2013-2014\\
 \rule{1\linewidth}{1px}
 \newpage
 
+\section{Software architecture}
+Le problème a été divisé en différents sous-problèmes que nous allons expliciter dans leur ordre temporel.
+
+	\subsection{Initialisation du Gateway}
+Une instance de \texttt{Server} est créée au lancement de cette classe. Celle-ci crée une instance de \texttt{HTTPServer} et \texttt{ConfigurationServer} afin d'accepter les connexions entrantes vers le Gateway et la plate-forme de configuration. Elle récupère aussi le singleton \texttt{Displayer} servant à afficher des messages dans la console. Nous ne détaillerons pas la plate-forme de configuration.
+
+	\subsection{Récupération des connexions entrantes}
+La classe \texttt{HTTPServer} récupère les connexions entrantes et lance un thread (si possible par la thread-pool) pour chacune d'entre-elles par l'intermédiaire de la classe \texttt{HTTPClientRequestThread} et ce, après l'acceptation de connexion du socket.
+
+	\subsection{Gestion des requêtes}
+
+
+
 
 
 \end{document}

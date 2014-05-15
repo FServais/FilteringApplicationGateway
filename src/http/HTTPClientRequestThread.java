@@ -123,8 +123,9 @@ public class HTTPClientRequestThread extends Thread {
 			msg("Start filtering keywords (" + duration + " ms)");
 			
 			HTMLPageFilter hpl = new HTMLPageFilter(cloned_page, request_url, wordlist, gateway_ip);
-			String filtered_page = hpl.getFilteredPage();
-			
+
+			String filtered_page = hpl.getFilteredPage(socket.getRemoteSocketAddress());
+
 			duration = System.currentTimeMillis() - begin;
 			msg("End filtering keywords (" + duration + " ms)");
 			
@@ -255,7 +256,7 @@ public class HTTPClientRequestThread extends Thread {
 		catch(IOException e)
 		{
 			try {
-				new HTTPResponse(502/*HTTPResponse.BAD_GATEWAY_502*/).send(socket);
+				new HTTPResponse(502/*huc.getResponseCode()*/).send(socket, "GET");
 				error_msg("HTTP Error from remote : " + huc.getResponseCode());
 			} catch (IOException e1) { }	
 			

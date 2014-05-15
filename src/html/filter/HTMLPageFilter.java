@@ -1,6 +1,7 @@
 package html.filter;
 
 import java.net.MalformedURLException;
+import java.net.SocketAddress;
 import java.net.URL;
 import java.util.Vector;
 import datastructures.WordList;
@@ -155,13 +156,13 @@ public class HTMLPageFilter
 	 * Returns the html code of the filtered page (or not according to the status)
 	 * @return a String containing the html code of the page
 	 */
-	public String getFilteredPage()
+	public String getFilteredPage(SocketAddress ip)
 	{
 		if(!status_determined)
 			determineStatus();
 		
 		if(status == PageGatewayStatus.PAGE_REFUSED)
-			return getRefuseAccessPage("The page that you are trying to access is not authorize.");
+			return getRefuseAccessPage(ip);
 		else
 		{			
 			if(status == PageGatewayStatus.PAGE_OK)
@@ -277,33 +278,41 @@ public class HTMLPageFilter
 		}	
 	}
 	
-	private String getRefuseAccessPage(String message) 
+	private String getRefuseAccessPage(SocketAddress ip) 
 	{
-		return    "<!DOCTYPE html>"
-				+ "<html>"
-				+ "<head>"
-					+ "<style type=\"text/css\">"
-					+ "body{ background-color: #F7F7F7; font-family:\"Trebuchet MS\", Arial, Verdana, sans-serif; }"
-					+ "#error_head"
-					+ "{"
-						+ "color:rgba(214,60,54,1);"
-						+ "text-align: center;"
-						+ "border-top: 1px solid rgba(214,60,54,0.6);"
-						+ "border-bottom: 1px solid rgba(214,60,54,0.6);"
-						+ "font-size: 14px;"
-						+ "margin-top: 20%;"
-					+ "}"
-					+ "p{margin-top: 40px;}"
-					+ "</style>"
-					+ "<meta charset=\"UTF-8\"/> "
-					+ "<title>GATEWAY | Access denied</title>"
-				+ "</head>"
-				+ "<body>"
-					+ "<div id=\"error_head\"><h3>Gateway : </h3>"
-						+ "<h1>ACCESS DENIED</h1>"
-					+ "</div>"
-					+ "<p>"+ message +"</p>"
-				+ "</body>"
-				+ "</html>";
+		return "<!DOCTYPE html><html><head><style type=\"text/css\">" +
+				"body{ background-color: #F7F7F7; font-family:\"Trebuchet MS\", Arial, Verdana, sans-serif; }"
+					+ "#error_head{color:rgba(214,60,54,1); text-align: center; margin-left:auto; margin-right:auto;"
+						+ "border: 1px solid rgba(214,60,54,0.6); font-size: 14px; margin-top: 15%; width:35%;}"
+					+ "p{margin-top: 15px;}"
+					+ "#error_message{margin-top:2%; margin-left:auto; margin-right:auto; width:40%; border-bottom: 1px solid black;}"
+
+					+ "</style><meta charset=\"UTF-8\"/><title>GATEWAY | Access denied</title></head>"
+						+ "<body>"
+							+ "<div id=\"error_head\"><h3>Gateway : </h3>"
+								+ "<h1>ACCESS DENIED</h1>"
+							+ "</div>"
+							+ "<div id=\"error_message\">"
+							+ ipMessage(ip)
+							+ errorMessage()
+							+ "</div>"
+							+ "<p style=\"font-size:small;text-align:center;\">Please contact the network administrator if you think that this webpage shouldn't be blocked.</p>"
+						+ "</body>"
+						+ "</html>";
+	}
+	
+	private String ipMessage(SocketAddress ip)
+	{
+		if(ip == null)
+			return "";
+		
+		return "<p style=\"font-weight:bold;\">Your IP adress is : " + ip.toString() + "</p>";
+	}
+	
+	private String errorMessage()
+	{
+		return "<p>The access to this resource has been <em>blocked</em> by the network gateway because either : </p>"
+				+ "<ul><li>The address contains a restricted keyword</li><li>The webpage contains at least 3 distinct " +
+				"restricted keywords</li><li>The webpage contains at least 4 instances of the same restricted keyword</li></ul>";
 	}
 }
