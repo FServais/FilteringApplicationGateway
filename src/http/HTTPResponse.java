@@ -10,17 +10,14 @@ public class HTTPResponse {
 	private static final String CONTENT_LENGTH, CONTENT_TYPE, CHARSET;
 	
 	
-	// Error codes
+	// Response codes
 	public static final String OK_200, MOVED_PERMANENTLY_301, MOVED_TEMPORARILY_302, FORBIDDEN_403, 
 								NOT_FOUND_404, INTERNAL_SERVER_ERROR_500, NOT_IMPLEMENTED_501;
+	
 	
 	private String content;
 	private int content_length;
 	private String content_type, charset, response_code;
-	
-	// Error page
-	private String page_header;
-	private String page_content;
 	
 	static
 	{
@@ -49,14 +46,19 @@ public class HTTPResponse {
 		this(content, OK_200);
 	}
 	
+	/**
+	 * Construct an HTTP response from the response code. 
+	 * @param response_code HTTP response code
+	 */
 	public HTTPResponse(int code)
 	{
 		this(null, codeToString(code));
 	}
 	
 	/**
-	 * Construct an HTTP response from a page to return and .
-	 * @param content
+	 * Construct an HTTP response from a page to return and the response code (String).
+	 * @param content Page to return, null if none.
+	 * @param response_code String corresponding to the response code
 	 */
 	public HTTPResponse(String content, String response_code)
 	{
@@ -71,55 +73,52 @@ public class HTTPResponse {
 		charset = "UTF-8";
 	}
 	
-	/**
-	 * 
-	 * @param code
+	/*
+	 * ----- Parts of the error page -----
 	 */
-	public void setResponseCode(String code)
+	private String getErrorPageHeader()
 	{
-		response_code = code;
+		return "<!DOCTYPE html><html><head><style type=\"text/css\">" +
+				"body{ background-color: #F7F7F7; font-family:\"Trebuchet MS\", Arial, Verdana, sans-serif; }"
+					+ "#error_head{color:rgba(214,60,54,1); text-align: center; border-top: 1px solid rgba(214,60,54,0.6);"
+						+ "border-bottom: 1px solid rgba(214,60,54,0.6); font-size: 14px; margin-top: 20%;}"
+					+ "p{margin-top: 20px;}"
+					+ "</style><meta charset=\"UTF-8\"/><title>";
+	} 
+	
+	private String getErrorPageEndHeader()
+	{
+		return  "</title></head><body><div id=\"error_head\"><h3>Gateway : </h3><h1>Error ";
 	}
 	
-	public void send(Socket socket) throws IOException
+	private String getErrorPageEndTitle()
 	{
-		StringBuilder sb = new StringBuilder();
-		PrintWriter out = new PrintWriter(socket.getOutputStream()); 
-		
-		sb.append(PROTOCOL);
-		sb.append(" ");
-		sb.append(response_code);
-		sb.append(LINEBREAK);
-		
-		if(response_code != HTTPResponse.OK_200)
-		{
-			content = getErrorPage(response_code);
-			content_length = content.length();
-		}
-		
-		sb.append(CONTENT_LENGTH);
-		sb.append(" ");
-		sb.append(content_length);
-		sb.append(LINEBREAK);
-		
-		sb.append(CONTENT_TYPE);
-		sb.append(" ");
-		sb.append(content_type);
-		sb.append("; ");
-		sb.append(CHARSET);
-		sb.append(charset);
-		sb.append(LINEBREAK);
-		
-		sb.append(LINEBREAK);
-		
-		sb.append(content);
-		sb.append(LINEBREAK);
-		
-		out.print(sb.toString());		
-		
-		out.flush();
-		out.close();
+		return " </h1></div><p>";
 	}
 	
+	private String getErrorPageEndContent()
+	{
+		return "</p></body></html>";
+	}
+	/*
+	 * ----------------------------------
+	 */
+	
+	/**
+	 * Get an error page depending of the response code.
+	 * @return Error page
+	 */
+	private String getErrorPage() 
+	{
+		return getErrorPageHeader() + response_code + getErrorPageEndHeader() + response_code.toUpperCase() + getErrorPageEndTitle()
+				+ getErrorPageEndContent();
+	}
+	
+	/**
+	 * Convert a integer representing the code of the response to the corresponding String code.
+	 * @param code Code of the response
+	 * @return Corresponding String
+	 */
 	public static String codeToString(int code)
 	{
 		String code_message;
@@ -153,46 +152,57 @@ public class HTTPResponse {
 		return code_message;
 	}
 	
-	private String getErrorPageHeader()
+	/**
+	 * Set the response code (String) of the response.
+	 * @param code (String) New code.
+	 */
+	public void setResponseCode(String code)
 	{
-		return "<!DOCTYPE html>"
-				+ "<html>"
-				+ "<head>"
-					+ "<style type=\"text/css\">"
-					+ "body{ background-color: #F7F7F7; font-family:\"Trebuchet MS\", Arial, Verdana, sans-serif; }"
-					+ "#error_head"
-					+ "{"
-						+ "color:rgba(214,60,54,1);"
-						+ "text-align: center;"
-						+ "border-top: 1px solid rgba(214,60,54,0.6);"
-						+ "border-bottom: 1px solid rgba(214,60,54,0.6);"
-						+ "font-size: 14px;" 
-						+ "margin-top: 20%;"
-					+ "}"
-					+ "p{margin-top: 20px;}"
-					+ "</style>"
-					+ "<meta charset=\"UTF-8\"/> "
-					+ "<title>";
-	} 
-	
-	private String getErrorPageEndHeader()
-	{
-		return  "</title></head><body><div id=\"error_head\"><h3>Gateway : </h3><h1>Error ";
+		response_code = code;
 	}
 	
-	private String getErrorPageEndTitle()
+	/**
+	 * Send an HTTP response through the socket, depending of the code of the response.
+	 * @param socket Socket through which the message has to be sent.
+	 * @throws IOException
+	 */
+	public void send(Socket socket) throws IOException
 	{
-		return " </h1></div><p>";
-	}
-	
-	private String getErrorPageEndContent()
-	{
-		return "</p></body></html>";
-	}
-	
-	private String getErrorPage(String response_code) 
-	{
-		return getErrorPageHeader() + response_code + getErrorPageEndHeader() + response_code.toUpperCase() + getErrorPageEndTitle()
-				+ getErrorPageEndContent();
+		StringBuilder sb = new StringBuilder();
+		PrintWriter out = new PrintWriter(socket.getOutputStream()); 
+		
+		sb.append(PROTOCOL);
+		sb.append(" ");
+		sb.append(response_code);
+		sb.append(LINEBREAK);
+		
+		if(response_code != HTTPResponse.OK_200)
+		{
+			content = getErrorPage();
+			content_length = content.length();
+		}
+		
+		sb.append(CONTENT_LENGTH);
+		sb.append(" ");
+		sb.append(content_length);
+		sb.append(LINEBREAK);
+		
+		sb.append(CONTENT_TYPE);
+		sb.append(" ");
+		sb.append(content_type);
+		sb.append("; ");
+		sb.append(CHARSET);
+		sb.append(charset);
+		sb.append(LINEBREAK);
+		
+		sb.append(LINEBREAK);
+		
+		sb.append(content);
+		sb.append(LINEBREAK);
+		
+		out.print(sb.toString());		
+		
+		out.flush();
+		out.close();
 	}
 }

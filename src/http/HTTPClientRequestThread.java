@@ -201,8 +201,11 @@ public class HTTPClientRequestThread extends Thread {
 		catch(IOException | HTMLParsingException e)
 		{
 			try {
-				new HTTPResponse(huc.getResponseCode()).send(socket);		
-			} catch (IOException e1) { }
+				new HTTPResponse(huc.getResponseCode()).send(socket);
+				message("HTTP Error : " + huc.getResponseCode());
+			} catch (IOException e1) {
+				message("Getting response code error");
+			}
 			
 			throw new RemoteConnectionException("Cannot get targeted page from remote website : " + e.getMessage());
 		}
