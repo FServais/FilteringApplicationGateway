@@ -195,6 +195,27 @@ Le seul moment où le cache est modifié est lors l'insertion ou la mise à jour
 \paragraph{}
 On peut noter aussi que le clonage de l'élément contenu dans le cache ajoute un niveau de sécurité supplémentaire car, lorsque l'on modifie la page, le cache n'est pas modifié, cela n'a donc pas d'incidence sur les autres threads.
 
+\section{Limits and possible improvements}
+
+	\subsection{Sécurité}
+Les scripts Javascript sont ignorés, or ceux-ci pourraient amener des mots-clés interdits ou des liens qui ne seront donc pas redirigés vers le \textit{Gateway}. Un parsage de ces scripts résoudrait le problème. 
+
+	\subsection{Utilisation}
+Certains types de fichiers ne sont pas accessibles depuis le \textit{Gateway} (e.g. pdf, zip,...) et les images bypassent celui-ci. On pourrait améliorer le \textit{Gateway} en implémentation une gestion de ces fichiers.
+\paragraph{}
+Les requêtes autres que GET ou HEAD ne sont pas gérées. Une amélioration possible serait de toutes les implémenter.
+
+\section{Reference websites}
+
+	\subsection{Succès}
+
+	\subsection{Échecs}
+
+
+
+
+
+
 \newpage
 \appendix
 \section{Machine d'états}
