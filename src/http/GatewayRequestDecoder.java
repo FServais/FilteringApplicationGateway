@@ -19,13 +19,13 @@ public class GatewayRequestDecoder
 	private boolean is_acceptable_file = true;
 	
 	// TODO : remove this
-	private void debug()
+	/*private void debug()
 	{
 		System.out.println("\n# DEBUG # GatewayRequestDecoder");
 		System.out.println("# remote : " + remote_address);
 		System.out.println("# force  : " + params.containsKey("forceRefresh") + " (val: " + params.get("forceRefresh") + ")\n");
 	}
-	
+	*/
 	/**
 	 * Constructs a GatewayRequestDecoder from the received http request
 	 * @param request the request received by the gateway

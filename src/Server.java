@@ -13,7 +13,6 @@ import http.HTTPServer;
 /**
  * Class representing the server of the Gateway
  * @author Fabrice Servais & Romain Mormont
- *
  */
 public class Server
 {
@@ -33,13 +32,6 @@ public class Server
 			throws IOException
 	{
 		wordlist = new WordList();
-		wordlist.insert("concurrent");
-		wordlist.insert("database");
-		wordlist.insert("member");
-		//wordlist.insert("Université");
-		//wordlist.insert("université");
-		//wordlist.insert("University");
-		//wordlist.insert("university");
 
 		// initialize displayer thread
 		msgQueue = new LinkedBlockingQueue<DisplayerMessage>(); 

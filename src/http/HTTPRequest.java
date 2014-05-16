@@ -75,13 +75,13 @@ public class HTTPRequest
 	}
 	
 	// TODO : remove this
-	private void debug()
+	/*private void debug()
 	{
 		System.out.println("\n# DEBUG # HTTPRequest");
 		System.out.println("# method : " + method);
 		System.out.println("# path : " + path);
 		System.out.println("# version : " + version);
-	}
+	}*/
 	
 	/**
 	 * Parses a header field and value and adds it to the headers map

@@ -9,12 +9,16 @@
 \usepackage{graphicx}
 \usepackage[usenames,dvipsnames]{color}
 \usepackage{listings}
-%\usepackage{arydshln}
+\usepackage{arydshln}
 %\usepackage{slashbox}
 \usepackage{subfigure}
 %\usepackage{cancel}
 %\usepackage[bookmarks = false]{hyperref}
 \usepackage[left=2cm, right=2cm, top=2cm, bottom=2cm]{geometry}
+
+\newcommand{\ttsee}[1]{Voir \texttt{#1}\paragraph{}}
+\newcommand{\ttseek}[1]{Voir package \texttt{#1}\paragraph{}}
+
 
 % Initialisation de listings
 %\definecolor{mymauve}{rgb}{0.63,0.13,0.94}
@@ -82,20 +86,112 @@ Année académique 2013-2014\\
 }
 \rule{1\linewidth}{1px}
 \newpage
-
+\tableofcontents
+\newpage
 \section{Software architecture}
+\subsection{Structure générale}
 Le problème a été divisé en différents sous-problèmes que nous allons expliciter dans leur ordre temporel.
 
-	\subsection{Initialisation du Gateway}
+	\subsubsection{Initialisation du Gateway}
 Une instance de \texttt{Server} est créée au lancement de cette classe. Celle-ci crée une instance de \texttt{HTTPServer} et \texttt{ConfigurationServer} afin d'accepter les connexions entrantes vers le Gateway et la plate-forme de configuration. Elle récupère aussi le singleton \texttt{Displayer} servant à afficher des messages dans la console. Nous ne détaillerons pas la plate-forme de configuration.
 
-	\subsection{Récupération des connexions entrantes}
+	\subsubsection{Récupération des connexions entrantes}
 La classe \texttt{HTTPServer} récupère les connexions entrantes et lance un thread (si possible par la thread-pool) pour chacune d'entre-elles par l'intermédiaire de la classe \texttt{HTTPClientRequestThread} et ce, après l'acceptation de connexion du socket.
 
-	\subsection{Gestion des requêtes}
+	\subsubsection{Gestion des requêtes}
 
+\subsection{Interaction avec le HTML}
+Nous avons voulu éviter, lors du traitement des liens et des mots clés, de devoir manipuler une longue chaîne de caractère contenant le code HTML. Ainsi faciliter ces manipulations, nous avons développé un package \texttt{html} contenant une série de classes utiles. 
+\subsubsection{Éléments HTML}
+\ttseek{html}
+Tout d'abord, nous avons développé une classe \texttt{HTMLPage} qui contient notre représentation interne d'une page.
+Ensuite, nous avons développé une classe abstraite \texttt{HTMLElement} pour représenter un élément HTML et des classes héritant de cette dernière pour représenter les éléments concrets. Notre classification ainsi que les classes associées à chaque élément sont données dans la Table \ref{tab:htmlelement}.
+\begin{table}[h]
+	\center
+	\begin{tabular}{|c|p{0.33\linewidth}|c|}
+		\hline
+		\textbf{Élément} & \multicolumn{1}{c|}{\textbf{Forme}} & \textbf{Classe}\\
+		\hline
+		Balise ouvrante & \texttt{<tag\_name attr="value" ...>} & \texttt{HTMLOpeningTag}\\
+		\hline
+		Balise fermante & \texttt{</tag\_name>} & \texttt{HTMLClosingTag}\\
+		\hline
+		Balise commentaire & \texttt{<!-- ... -->} & \texttt{HTMLComment} \\
+		\hline
+		Contenu & Tout contenu ne se trouvant pas à l'intérieur d'une balise & \texttt{HTMLContent}\\
+		\hline
+		Attribut d'une balise ouvrante & \texttt{attr="value"} & \texttt{HTMLAttribute}\\
+		\hline
+	\end{tabular}
+	\caption{Classification des \texttt{HTMLElement}}
+	\label{tab:htmlelement}
+\end{table}
+\paragraph{} Ces classes définissent toutes des méthodes permettant de consulter ou de modifier leurs différentes caractéristiques. Par exemple, la classe \texttt{HTMLContent} définit une méthode permettant de remplacer chaque caractère d'un mot donné par un autre caractère. Ou encore, la classe \texttt{HTMLPage} définit une méthode permettant de récupérer toutes les balises ouvrantes ayant le même nom.
+\paragraph{}
+Notre représentation interne d'une page est une liste d'objets \texttt{HTMLElement}.
+\subsubsection{Parser}
+\ttseek{html.parser}
+Afin de pouvoir exploiter les outils définis précédemment, il est nécessaire de convertir un code HTML en objets. Pour ce faire nous avons développé la classe \texttt{HTMLParser} permettant de pratiquer une analyse lexicale du code sur base d'une machine d'états finie.
+\paragraph{}
+La classe est composée, entre autres, de plusieurs méthode chacune chargée de parser un élément HTML particulier (voir Table \ref{tab:htmlelement}) :
+\begin{itemize}
+	\item \texttt{parseOpeningTag} : balise ouvrante (machine d'états donnée dans la Figure \ref{ref:pars_opening})
+	\item \texttt{parseClosingTag} : balise fermante
+	\item \texttt{parseContent} : contenu (machine d'états donnée dans la Figure \ref{fig:pars_content})
+	\item \texttt{parseAttribute} : attribut (et sa valeur s'il y en a une) (machine d'états donnée dans la Figure \ref{ref:pars_opening})
+	\item \texttt{parseComment} : commentaire
+\end{itemize}
+\paragraph{}
+Ces méthodes sont coordonnées par les méthodes \texttt{parseTag} et \texttt{parseHTML}. La première, en fonction de la balise rencontrée, passe la main à \texttt{parseOpeningTag}, \texttt{parseClosingTag} ou \texttt{parseComment} et la seconde, en fonction du caractère, passe la main à \texttt{parseTag} ou \texttt{parseContent}.
+\paragraph{}
+A la fin de l'analyse, le parser a construit une liste de \texttt{HTMLElement} qui constitue notre représentation interne du code dans \texttt{HTMLPage}.
+\subsubsection{Filtre}
+\ttseek{html.filter}
+Le filtrage des liens nous a posé pas mal de problèmes. En effet, étant donné la permissivité du langage HTML, les liens peuvent être relatifs ou absolus, avec ou sans protocole,... De plus, il se peut que le contenu de la balise \texttt{href} ne soit pas un lien vers une page web mais un lien vers une adresse mail (\texttt{mailto:...}) ou vers une fonction javascript (\texttt{javascript:...}). Enfin, l'adresse de référence des liens relatifs peut être différente de la racine du serveur selon que la balise \texttt{<base ...>} ait été déclarée ou non à l'intérieur des balises \texttt{head}. 
+\paragraph{}
+Étant donnée la complexité du problème, il nous a semblé judicieux de créer une classe dédiée à sa résolution : la classe \texttt{LinkFilter}. En plus de reconstruire une url absolue sur base de l'adresse d'une page web et d'un lien, cette classe permet aussi d'encoder une url et de construire le lien complet dirigeant vers le \textit{gateway}. Cette classe est utilisée dans la classe \texttt{HTMLPageFilter}.
+\paragraph{}
+Cette dernière classe permet aussi de filtrer la page selon les critères précisés dans l'énoncé. Les différents états sont repris dans l'énumération \texttt{PageGatewayStatus}.
+\newpage
+\appendix
+\section{Machine d'états}
+\subsection{Parsing des balises ouvrantes}
+La représentation graphique est donnée à la Figure \ref{ref:pars_opening}.
 
+\begin{figure}[h]
+	\center
+	\includegraphics[scale=0.35]{parseOpeningTagFSM.png}
+	\caption{Parsing des balises ouvrantes}
+	\label{ref:pars_opening}
+\end{figure}
 
+\paragraph{}
+Les différents états :
+\begin{itemize}
+	\item \texttt{wait\_tag\_name} : en attente du début du nom de la balise 
+	\item \texttt{read\_tag\_name} : lecture du nom de la balise
+	\item \texttt{wait\_attr\_name} : en attente d'un nom d'attribut
+	\item \texttt{read\_attr\_name} : lecture du nom d'un attribut
+	\item \texttt{wait\_attr\_equal} : en attente du \texttt{=} suivant l'attribut
+	\item \texttt{wait\_attr\_val} : en attente de la valeur de l'attribut
+	\item \texttt{read\_attr\_val\_unquoted} : lecture d'un attribut sans apostrophe ou guillemet
+	\item \texttt{read\_attr\_val\_quoted} :  lecture d'un attribut avec apostrophe ou guillemet
+\end{itemize}
+\paragraph{}
+Ce modèle d'état ne prend pas en compte les cas où le nom d'attribut est entouré de guillemets (peut arriver pour certaines balises \texttt{!DOCTYPE}). Ce cas a néanmoins été pris en compte dans le code.
 
-
+\subsection{Parsing du contenu}
+La représentation est donnée à la Figure \ref{fig:pars_content}.
+\begin{figure}
+	\center
+	\includegraphics[scale=0.5]{parseContentFSM.png}
+	\caption{Parsing d'un contenu}
+	\label{fig:pars_content}
+\end{figure}
+\paragraph{}
+Les différents états :
+\begin{itemize}
+	\item \texttt{read\_content} : lecture du contenu
+	\item \texttt{check\_end} : dans le cas où le contenu est un code javascript (placé dans des balises \texttt{script}), il se peut que le chevron fermant ne soit pas le début de la balise fermante \texttt{</script>}. Il faut s'assurer que c'est bien le cas avant d'achever le parsing du contenu.
+\end{itemize}
 \end{document}

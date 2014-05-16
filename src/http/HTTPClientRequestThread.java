@@ -34,6 +34,14 @@ public class HTTPClientRequestThread extends Thread {
 	private WordList wordlist;
 	private int connection_number = 0;
 	
+	/**
+	 * Constructs the object for dealing with a client http request
+	 * @param connection_number the number of the thread
+	 * @param socket the socket connected to the client
+	 * @param msgQueue a msgQueue for sending message to the displayer thread
+	 * @param wordlist the list of the restricted keywords
+	 * @param cache the cache of html pages
+	 */
 	public HTTPClientRequestThread(int connection_number, Socket socket, LinkedBlockingQueue<DisplayerMessage> msgQueue, 
 									WordList wordlist, Cache<String, HTMLPage> cache)
 	{
@@ -44,6 +52,9 @@ public class HTTPClientRequestThread extends Thread {
 		this.connection_number = connection_number;
 	}
 	
+	/**
+	 * Main method of the thread
+	 */
 	public void run()
 	{
 		try 
@@ -66,7 +77,7 @@ public class HTTPClientRequestThread extends Thread {
 			GatewayRequestDecoder grd = new GatewayRequestDecoder(request);
 			
 			if(!grd.validRequest()) // if path is erroneous
-				throw new InvalidRequestException("path cannot be handled : " + grd.getUrl());
+				throw new InvalidRequestException("bad http path : " + request.getPath());
 			
 			if(!grd.fileTypeIsOk()) // checks if the file type can be managed by the gateway
 				throw new BadFileRequestException("file format can't be managed : " + grd.getUrl());
@@ -133,23 +144,23 @@ public class HTTPClientRequestThread extends Thread {
 			duration = System.currentTimeMillis() - begin;
 			msg("Start writing (" + duration + " ms)");
 	
-			new HTTPResponse(filtered_page).send(socket);
+			new HTTPResponse(filtered_page).send(socket, "GET");
 			
 			duration = System.currentTimeMillis() - begin;
-			msg("End writing (" + duration + " ms)\n");
+			msg("End writing (" + duration + " ms)");
 		}
 		catch (RequestParsingException e) // cannot parse client request
 		{
 			try { // bad request
-				new HTTPResponse(400).send(socket);
+				new HTTPResponse(400).send(socket, "GET");
 			} catch (IOException e1) { }
 			
-			error_msg("Error while parsing the http request");
+			error_msg("Error while parsing the http request\n");
 		}
 		catch (HTTPMethodNotSupportedException e)
 		{
 			try { // not implemented
-				new HTTPResponse(501).send(socket);
+				new HTTPResponse(501).send(socket, "GET");
 			} catch (IOException e1) { }
 			
 			error_msg(e.getMessage());
@@ -157,7 +168,7 @@ public class HTTPClientRequestThread extends Thread {
 		catch (InvalidRequestException e) // invalid request from client
 		{
 			try { // bad request
-				new HTTPResponse(400).send(socket);
+				new HTTPResponse(400).send(socket, "GET");
 			} catch (IOException e1) { }
 			
 			error_msg("Invalid request : " + e.getMessage()); 
@@ -165,10 +176,10 @@ public class HTTPClientRequestThread extends Thread {
 		catch (BadFileRequestException e) // file format requested cannot be handled
 		{
 			try { // not implemented
-				new HTTPResponse(501).send(socket);
+				new HTTPResponse(501).send(socket, "GET");
 			} catch (IOException e1) { }
 			
-			error_msg(e.getMessage());
+			error_msg(e.getMessage() + "\n");
 		}
 		catch (RemoteConnectionException e) // cannot get page from remote
 		{
@@ -178,20 +189,15 @@ public class HTTPClientRequestThread extends Thread {
 		catch (HTMLParsingException e) // error while parsing the html code
 		{
 			try { // internal error
-				new HTTPResponse(500).send(socket);
+				new HTTPResponse(500).send(socket, "GET");
 			} catch (IOException e1) { }
 			
 			error_msg("Error while parsing the html page " + e.getMessage());
 		}
-		catch (IOException e) 
-		{
-			e.printStackTrace();
-			error_msg("Error while getting the response page");
-		}
 		catch (Exception e)
 		{
-			try {
-				new HTTPResponse(HTTPResponse.INTERNAL_SERVER_ERROR_500).send(socket);
+			try { // internal error
+				new HTTPResponse(500).send(socket, "GET");
 			} catch (IOException e1) { }
 			
 			e.printStackTrace();
@@ -236,7 +242,7 @@ public class HTTPClientRequestThread extends Thread {
 			StringBuilder response = new StringBuilder();
 	 
 			while ((inputLine = in.readLine()) != null) 
-				response.append(inputLine + "\n");
+				response.append(inputLine + "\r\n");
 			
 			in.close();
 			isr.close();
@@ -247,7 +253,7 @@ public class HTTPClientRequestThread extends Thread {
 		catch(SocketTimeoutException e)
 		{
 			try { // Gateway Timeout
-				new HTTPResponse(504).send(socket);
+				new HTTPResponse(504).send(socket, "GET");
 				error_msg("Timeout from remote");
 			} catch (IOException e1) { }
 			

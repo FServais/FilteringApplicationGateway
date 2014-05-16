@@ -448,7 +448,9 @@ public class HTMLParser
 			{
 				int j = i + 1;
 				
-				while(html.charAt(j) == ' ') j++; // skip spaces
+				while(html.charAt(j) == ' ' 
+						|| html.charAt(j) == '\n'
+						|| html.charAt(j) == '\r') j++; // skip spaces
 
 				if(html.charAt(j) == '/') // char is a closing tag
 					break;
