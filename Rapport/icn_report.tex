@@ -93,6 +93,20 @@ Une instance de \texttt{Server} est créée au lancement de cette classe. Celle-
 La classe \texttt{HTTPServer} récupère les connexions entrantes et lance un thread (si possible par la thread-pool) pour chacune d'entre-elles par l'intermédiaire de la classe \texttt{HTTPClientRequestThread} et ce, après l'acceptation de connexion du socket.
 
 	\subsection{Gestion des requêtes}
+La classe \texttt{HTTPClientRequestThread} instancie un objet \texttt{HTTPRequest} en prenant le socket en argument. Celui-ci va récupérer la requête du navigateur et la parser pour en récupérer les différentes informations, notamment la méthode et le chemin.
+
+\paragraph{}
+
+On récupère alors l'adresse IP du Gateway qui va être utile lors du remplacement des liens, et l'on donne la requête récupérée à un nouvel objet de classe \texttt{GatewayRequestDecoder} qui va se charger de décoder la requête, c'est-à-dire récupérer l'adresse du site auquel l'utilisateur souhaite accéder et les éventuels paramètres (\texttt{forceRefresh}). On vérifie ensuite si l'adresse est correcte et que le format du fichier auquel on veut accéder est géré.
+
+\paragraph{}
+
+Pour le chemin donné, on regarde si la page est déjà contenue dans le cache et si celle-ci doit être rafraîchie dû au timeout ou à l'éventuel argument \texttt{forceRefresh}. Selon les cas, on va rechercher la page dans le cache ou sur le serveur distant. Dans ce cas-là, la méthode \texttt{getPageFromRemote(URL)} établit la connexion avec le serveur avec la classe \texttt{HttpURLConnection} et récupère le contenu de la page. Les liens de la page sont alors filtrés afin de les rediriger vers le Gateway. Les balises \texttt{img}, \texttt{link}, \texttt{frame} et \texttt{script} sont aussi filtrées afin de bypasser le Gateway. 
+
+\paragraph{}
+
+On clone ensuite la page récupérée (afin de ne pas altérer la page originale contenue dans le cache) puis on filtre la page en fonction des mots-clés interdits. Si la page doit être censurée, on renvoie une page informant d'utilisateur qu'il ne peut pas accéder à la page. Sinon, on envoie une réponse HTTP contenant la page voulue.
+
 
 
 

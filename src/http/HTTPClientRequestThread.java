@@ -111,7 +111,7 @@ public class HTTPClientRequestThread extends Thread {
 				msg("Page cached (" + duration + " ms)");
 			}	
 			
-			// clone des pages
+			// clone pages
 			duration = System.currentTimeMillis() - begin;
 			msg("Start cloning (" + duration + " ms)");
 			HTMLPage cloned_page = (HTMLPage) response_page.clone();
@@ -256,7 +256,7 @@ public class HTTPClientRequestThread extends Thread {
 		catch(IOException e)
 		{
 			try {
-				new HTTPResponse(502/*huc.getResponseCode()*/).send(socket, true);
+				new HTTPResponse(huc.getResponseCode()).send(socket, true);
 				error_msg("HTTP Error from remote : " + huc.getResponseCode());
 			} catch (IOException e1) { }	
 			
