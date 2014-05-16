@@ -148,7 +148,7 @@ public class GatewayRequestDecoder
 	 */
 	public boolean validRequest()
 	{
-		return remote_address != null;
+		return remote_address != null && !remote_address.equals("http://");
 	}
 	
 	/**
