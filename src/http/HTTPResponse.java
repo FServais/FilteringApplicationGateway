@@ -190,7 +190,8 @@ public class HTTPResponse {
 	}
 	
 	/**
-	 * Send an HTTP response through the socket, depending of the code of the response and the method of the HTTP request.
+	 * Send an HTTP response through the socket, depending of the code of the response. It will add the content or not 
+	 * depending on the flag with_content.
 	 * @param socket Socket through which the message has to be sent.
 	 * @param content Boolean that determine if the content as to be part of response or not
 	 * @throws IOException
