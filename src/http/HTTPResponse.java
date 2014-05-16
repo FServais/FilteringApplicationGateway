@@ -91,7 +91,8 @@ public class HTTPResponse {
 		return "<!DOCTYPE html><html><head><style type=\"text/css\">" +
 				"body{ background-color: #F7F7F7; font-family:\"Trebuchet MS\", Arial, Verdana, sans-serif; }"
 					+ "#error_head{color:rgba(214,60,54,1); text-align: center; margin-left:auto; margin-right:auto;"
-						+ "border: 1px solid rgba(214,60,54,0.6); font-size: 14px; margin-top: 20%; width:35%;}"
+						+ "border: 1px solid rgba(214,60,54,0.6); font-size: 14px; margin-top: 20%; width:35%;"
+						+ "padding-left:20px; padding-right:20px;}"
 					+ "p{margin-top: 20px;}"
 					+ "</style><meta charset=\"UTF-8\"/><title>";
 	} 

@@ -89,8 +89,9 @@ Année académique 2013-2014\\
 \tableofcontents
 \newpage
 \section{Software architecture}
-\subsection{Structure générale}
 Le problème a été divisé en différents sous-problèmes que nous allons expliciter dans leur ordre temporel.
+
+	\subsection{Vue globale de la solution}
 
 	\subsubsection{Initialisation du Gateway}
 Une instance de \texttt{Server} est créée au lancement de cette classe. Celle-ci crée une instance de \texttt{HTTPServer} et \texttt{ConfigurationServer} afin d'accepter les connexions entrantes vers le Gateway et la plate-forme de configuration. Elle récupère aussi le singleton \texttt{Displayer} servant à afficher des messages dans la console. Nous ne détaillerons pas la plate-forme de configuration.
@@ -99,7 +100,34 @@ Une instance de \texttt{Server} est créée au lancement de cette classe. Celle-
 La classe \texttt{HTTPServer} récupère les connexions entrantes et lance un thread (si possible par la thread-pool) pour chacune d'entre-elles par l'intermédiaire de la classe \texttt{HTTPClientRequestThread} et ce, après l'acceptation de connexion du socket.
 
 	\subsubsection{Gestion des requêtes}
+	La classe \texttt{HTTPClientRequestThread} instancie un objet \texttt{HTTPRequest} en prenant le socket en argument. Celui-ci va récupérer la requête du navigateur et la parser pour en récupérer les différentes informations, notamment la méthode et le chemin.
 
+\paragraph{}
+
+On récupère alors l'adresse IP du Gateway qui va être utile lors du remplacement des liens, et l'on donne la requête récupérée à un nouvel objet de classe \texttt{GatewayRequestDecoder} qui va se charger de décoder la requête, c'est-à-dire récupérer l'adresse du site auquel l'utilisateur souhaite accéder et les éventuels paramètres (\texttt{forceRefresh}). On vérifie ensuite si l'adresse est correcte et que le format du fichier auquel on veut accéder est géré.
+
+\paragraph{}
+
+Pour le chemin donné, on regarde si la page est déjà contenue dans le cache et si celle-ci doit être rafraîchie dû au timeout ou à l'éventuel argument \texttt{forceRefresh}. Selon les cas, on va rechercher la page dans le cache ou sur le serveur distant. Dans ce cas-là, la méthode \texttt{getPageFromRemote(URL)} établit la connexion avec le serveur avec la classe \texttt{HttpURLConnection} et récupère le contenu de la page. Les liens de la page sont alors filtrés afin de les rediriger vers le Gateway. Les balises \texttt{img}, \texttt{link}, \texttt{frame} et \texttt{script} sont aussi filtrées afin de bypasser le Gateway. 
+
+\paragraph{}
+
+On clone ensuite la page récupérée (afin de ne pas altérer la page originale contenue dans le cache) puis on filtre la page en fonction des mots-clés interdits. Cette étape est réalisée après la récupération de la page du cache ou du serveur distant. En effet, il est possible que la page ait été modifiée sur le serveur distant pendant le temps où celle-ci se trouvait dans le cache, amenant possiblement des mots-clés interdits et devant provoquer une censure, ce qui n'aurait alors pas été le cas, jusqu'au timeout dans le cache. Si la page doit être censurée, on renvoie une page informant d'utilisateur qu'il ne peut pas accéder à la page. Sinon, on envoie une réponse HTTP contenant la page voulue ou pas selon si on répond à une requête GET ou HEAD.
+
+
+
+	\subsection{Erreurs renvoyées par le Gateway}
+Voici une liste de différentes erreurs renvoyées par le Gateway ainsi que l'action qui les a déclenchées : 
+\begin{itemize}
+	\setlength{\itemsep}{6pt}
+	\item \textbf{Erreur 400 - Bad Request} : La requête du client n'a pu être lue (dû à la variable \texttt{s} manquante dans l'URL, argument de \texttt{s} vide,...)
+	\item \textbf{Erreur 500 - Internal Server Error} : Lorsqu'une erreur lors du parsage du code HTML a été rencontrée.
+	\item \textbf{Erreur 501 - Not Implemented} : La requête que l'on reçoit n'est ni GET ni HEAD ou lorsque le format de la page demandée n'est pas prise en charge.
+	\item \textbf{Erreur 502 - Bad Gateway} : Le serveur distant n'a pas pu être atteint.
+	\item \textbf{Erreur 504 - Gateway Timeout} : Le serveur distant a été trop lent à joindre ou à répondre.
+\end{itemize}
+\paragraph{}
+Lorsque le serveur distant répond et qu'il renvoie un code d'erreur HTTP, le Gateway transmet cette erreur au client.
 \subsection{Interaction avec le HTML}
 Nous avons voulu éviter, lors du traitement des liens et des mots clés, de devoir manipuler une longue chaîne de caractère contenant le code HTML. Ainsi faciliter ces manipulations, nous avons développé un package \texttt{html} contenant une série de classes utiles. 
 \subsubsection{Éléments HTML}
@@ -152,6 +180,14 @@ Le filtrage des liens nous a posé pas mal de problèmes. En effet, étant donn�
 Étant donnée la complexité du problème, il nous a semblé judicieux de créer une classe dédiée à sa résolution : la classe \texttt{LinkFilter}. En plus de reconstruire une url absolue sur base de l'adresse d'une page web et d'un lien, cette classe permet aussi d'encoder une url et de construire le lien complet dirigeant vers le \textit{gateway}. Cette classe est utilisée dans la classe \texttt{HTMLPageFilter}.
 \paragraph{}
 Cette dernière classe permet aussi de filtrer la page selon les critères précisés dans l'énoncé. Les différents états sont repris dans l'énumération \texttt{PageGatewayStatus}.
+
+\section{Multi-thread coordination}
+L'accès au cache est \textit{thread-safe}. En effet, le cache est implémenté avec la classe \texttt{ConcurrentHashMap} qui est \textit{thread-safe}. De plus, nous avons ajouté l'attribut \texttt{synchronized} aux méthodes de \texttt{Cache} agissant avec le cache. Si deux threads tentent d'accéder à une même page se trouvant dans le cache, ces deux threads recevront la même page, sans incohérence.
+\paragraph{}
+Le seul moment où le cache est modifié est lors l'insertion ou la mise à jour d'une page lorsqu'un utilisateur demande cette page. Supposons que deux utilisateurs souhaitent accéder à la même page ne se trouvant pas dans le cache. Les deux threads demanderont tous les deux au serveur distant après la page, filtreront les liens et attributs cités au point 1.1.3, et tenteront de l'insérer dans le cache. Un premier y parviendra avant l'autre, et ce deuxième ajout aura pour effet d'écraser la précédente. Cependant, ceci n'est pas un problème puisque l'on peut supposer que la page n'a pas changé entre les moments où les utilisateurs ont demandé la page, celle-ci est alors dans le même état pour chacun des threads.
+\paragraph{}
+On peut noter aussi que le clonage de l'élément contenu dans le cache ajoute un niveau de sécurité supplémentaire car, lorsque l'on modifie la page, le cache n'est pas modifié, cela n'a donc pas d'incidence sur les autres threads.
+
 \newpage
 \appendix
 \section{Machine d'états}
@@ -194,4 +230,5 @@ Les différents états :
 	\item \texttt{read\_content} : lecture du contenu
 	\item \texttt{check\_end} : dans le cas où le contenu est un code javascript (placé dans des balises \texttt{script}), il se peut que le chevron fermant ne soit pas le début de la balise fermante \texttt{</script>}. Il faut s'assurer que c'est bien le cas avant d'achever le parsing du contenu.
 \end{itemize}
+
 \end{document}
