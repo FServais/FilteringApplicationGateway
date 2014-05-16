@@ -12,6 +12,7 @@
 \usepackage{arydshln}
 %\usepackage{slashbox}
 \usepackage{subfigure}
+\usepackage{pdflscape}
 %\usepackage{cancel}
 %\usepackage[bookmarks = false]{hyperref}
 \usepackage[left=2cm, right=2cm, top=2cm, bottom=2cm]{geometry}
@@ -93,13 +94,6 @@ Le problème a été divisé en différents sous-problèmes que nous allons expl
 
 	\subsection{Vue globale de la solution}
 
-\begin{figure}
-	\center
-	\includegraphics[scale=0.85]{schema-general}
-	\caption{Schéma général de l'implémentation}
-	\label{fig:schema_general}
-\end{figure}
-
 	\subsubsection{Initialisation du \textit{Gateway}}
 Une instance de \texttt{Server} est créée au lancement de cette classe. Celle-ci crée une instance de \texttt{HTTPServer} et \texttt{ConfigurationServer} afin d'accepter les connexions entrantes vers le \textit{Gateway} et la plate-forme de configuration. Elle récupère aussi le singleton \texttt{Displayer} servant à afficher des messages dans la console. Nous ne détaillerons pas la plate-forme de configuration.
 
@@ -121,7 +115,14 @@ Pour le chemin donné, on regarde si la page est déjà contenue dans le cache e
 
 On clone ensuite la page récupérée (afin de ne pas altérer la page originale contenue dans le cache) puis on filtre la page en fonction des mots-clés interdits. Cette étape est réalisée après la récupération de la page du cache ou du serveur distant. En effet, il est possible que la page ait été modifiée sur le serveur distant pendant le temps où celle-ci se trouvait dans le cache, amenant possiblement des mots-clés interdits et devant provoquer une censure, ce qui n'aurait alors pas été le cas, jusqu'au timeout dans le cache. Si la page doit être censurée, on renvoie une page informant d'utilisateur qu'il ne peut pas accéder à la page. Sinon, on envoie une réponse HTTP contenant la page voulue ou pas selon si on répond à une requête GET ou HEAD.
 
-
+\begin{landscape}
+	\begin{figure}
+		\center
+		\includegraphics[scale=0.85]{schema-general}
+		\caption{Schéma général de l'implémentation}
+		\label{fig:schema_general}
+	\end{figure}
+\end{landscape}
 
 	\subsection{Erreurs renvoyées par le \textit{Gateway}}
 Voici une liste de différentes erreurs renvoyées par le \textit{Gateway} ainsi que l'action qui les a déclenchées : 
