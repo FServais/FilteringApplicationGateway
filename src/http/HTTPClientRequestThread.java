@@ -144,7 +144,7 @@ public class HTTPClientRequestThread extends Thread {
 			duration = System.currentTimeMillis() - begin;
 			msg("Start writing (" + duration + " ms)");
 
-			new HTTPResponse(filtered_page).send(socket, "GET");
+			new HTTPResponse(filtered_page).send(socket, true);
 
 			duration = System.currentTimeMillis() - begin;
 			msg("End writing (" + duration + " ms)");

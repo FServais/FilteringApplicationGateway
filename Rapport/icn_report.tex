@@ -93,8 +93,15 @@ Le problème a été divisé en différents sous-problèmes que nous allons expl
 
 	\subsection{Vue globale de la solution}
 
-	\subsubsection{Initialisation du Gateway}
-Une instance de \texttt{Server} est créée au lancement de cette classe. Celle-ci crée une instance de \texttt{HTTPServer} et \texttt{ConfigurationServer} afin d'accepter les connexions entrantes vers le Gateway et la plate-forme de configuration. Elle récupère aussi le singleton \texttt{Displayer} servant à afficher des messages dans la console. Nous ne détaillerons pas la plate-forme de configuration.
+\begin{figure}
+	\center
+	\includegraphics[scale=0.85]{schema-general}
+	\caption{Schéma général de l'implémentation}
+	\label{fig:schema_general}
+\end{figure}
+
+	\subsubsection{Initialisation du \textit{Gateway}}
+Une instance de \texttt{Server} est créée au lancement de cette classe. Celle-ci crée une instance de \texttt{HTTPServer} et \texttt{ConfigurationServer} afin d'accepter les connexions entrantes vers le \textit{Gateway} et la plate-forme de configuration. Elle récupère aussi le singleton \texttt{Displayer} servant à afficher des messages dans la console. Nous ne détaillerons pas la plate-forme de configuration.
 
 	\subsubsection{Récupération des connexions entrantes}
 La classe \texttt{HTTPServer} récupère les connexions entrantes et lance un thread (si possible par la thread-pool) pour chacune d'entre-elles par l'intermédiaire de la classe \texttt{HTTPClientRequestThread} et ce, après l'acceptation de connexion du socket.
@@ -104,11 +111,11 @@ La classe \texttt{HTTPServer} récupère les connexions entrantes et lance un th
 
 \paragraph{}
 
-On récupère alors l'adresse IP du Gateway qui va être utile lors du remplacement des liens, et l'on donne la requête récupérée à un nouvel objet de classe \texttt{GatewayRequestDecoder} qui va se charger de décoder la requête, c'est-à-dire récupérer l'adresse du site auquel l'utilisateur souhaite accéder et les éventuels paramètres (\texttt{forceRefresh}). On vérifie ensuite si l'adresse est correcte et que le format du fichier auquel on veut accéder est géré.
+On récupère alors l'adresse IP du \textit{Gateway} qui va être utile lors du remplacement des liens, et l'on donne la requête récupérée à un nouvel objet de classe \texttt{GatewayRequestDecoder} qui va se charger de décoder la requête, c'est-à-dire récupérer l'adresse du site auquel l'utilisateur souhaite accéder et les éventuels paramètres (\texttt{forceRefresh}). On vérifie ensuite si l'adresse est correcte et que le format du fichier auquel on veut accéder est géré.
 
 \paragraph{}
 
-Pour le chemin donné, on regarde si la page est déjà contenue dans le cache et si celle-ci doit être rafraîchie dû au timeout ou à l'éventuel argument \texttt{forceRefresh}. Selon les cas, on va rechercher la page dans le cache ou sur le serveur distant. Dans ce cas-là, la méthode \texttt{getPageFromRemote(URL)} établit la connexion avec le serveur avec la classe \texttt{HttpURLConnection} et récupère le contenu de la page. Les liens de la page sont alors filtrés afin de les rediriger vers le Gateway. Les balises \texttt{img}, \texttt{link}, \texttt{frame} et \texttt{script} sont aussi filtrées afin de bypasser le Gateway. 
+Pour le chemin donné, on regarde si la page est déjà contenue dans le cache et si celle-ci doit être rafraîchie dû au timeout ou à l'éventuel argument \texttt{forceRefresh}. Selon les cas, on va rechercher la page dans le cache ou sur le serveur distant. Dans ce cas-là, la méthode \texttt{getPageFromRemote(URL)} établit la connexion avec le serveur avec la classe \texttt{HttpURLConnection} et récupère le contenu de la page. Les liens de la page sont alors filtrés afin de les rediriger vers le \textit{Gateway}. Les balises \texttt{img}, \texttt{link}, \texttt{frame} et \texttt{script} sont aussi filtrées afin de bypasser le \textit{Gateway}. 
 
 \paragraph{}
 
@@ -116,8 +123,8 @@ On clone ensuite la page récupérée (afin de ne pas altérer la page originale
 
 
 
-	\subsection{Erreurs renvoyées par le Gateway}
-Voici une liste de différentes erreurs renvoyées par le Gateway ainsi que l'action qui les a déclenchées : 
+	\subsection{Erreurs renvoyées par le \textit{Gateway}}
+Voici une liste de différentes erreurs renvoyées par le \textit{Gateway} ainsi que l'action qui les a déclenchées : 
 \begin{itemize}
 	\setlength{\itemsep}{6pt}
 	\item \textbf{Erreur 400 - Bad Request} : La requête du client n'a pu être lue (dû à la variable \texttt{s} manquante dans l'URL, argument de \texttt{s} vide,...)
@@ -127,7 +134,7 @@ Voici une liste de différentes erreurs renvoyées par le Gateway ainsi que l'ac
 	\item \textbf{Erreur 504 - Gateway Timeout} : Le serveur distant a été trop lent à joindre ou à répondre.
 \end{itemize}
 \paragraph{}
-Lorsque le serveur distant répond et qu'il renvoie un code d'erreur HTTP, le Gateway transmet cette erreur au client.
+Lorsque le serveur distant répond et qu'il renvoie un code d'erreur HTTP, le \textit{Gateway} transmet cette erreur au client.
 \subsection{Interaction avec le HTML}
 Nous avons voulu éviter, lors du traitement des liens et des mots clés, de devoir manipuler une longue chaîne de caractère contenant le code HTML. Ainsi faciliter ces manipulations, nous avons développé un package \texttt{html} contenant une série de classes utiles. 
 \subsubsection{Éléments HTML}
@@ -154,14 +161,14 @@ Ensuite, nous avons développé une classe abstraite \texttt{HTMLElement} pour r
 	\caption{Classification des \texttt{HTMLElement}}
 	\label{tab:htmlelement}
 \end{table}
-\paragraph{} Ces classes définissent toutes des méthodes permettant de consulter ou de modifier leurs différentes caractéristiques. Par exemple, la classe \texttt{HTMLContent} définit une méthode permettant de remplacer chaque caractère d'un mot donné par un autre caractère. Ou encore, la classe \texttt{HTMLPage} définit une méthode permettant de récupérer toutes les balises ouvrantes ayant le même nom.
+\paragraph{} Ces classes définissent toutes les méthodes permettant de consulter ou de modifier leurs différentes caractéristiques. Par exemple, la classe \texttt{HTMLContent} définit une méthode permettant de remplacer chaque caractère d'un mot donné par un autre caractère. Ou encore, la classe \texttt{HTMLPage} définit une méthode permettant de récupérer toutes les balises ouvrantes ayant le même nom.
 \paragraph{}
 Notre représentation interne d'une page est une liste d'objets \texttt{HTMLElement}.
 \subsubsection{Parser}
 \ttseek{html.parser}
 Afin de pouvoir exploiter les outils définis précédemment, il est nécessaire de convertir un code HTML en objets. Pour ce faire nous avons développé la classe \texttt{HTMLParser} permettant de pratiquer une analyse lexicale du code sur base d'une machine d'états finie.
 \paragraph{}
-La classe est composée, entre autres, de plusieurs méthode chacune chargée de parser un élément HTML particulier (voir Table \ref{tab:htmlelement}) :
+La classe est composée, entre autres, de plusieurs méthodes chacune chargée de parser un élément HTML particulier (voir Table \ref{tab:htmlelement}) :
 \begin{itemize}
 	\item \texttt{parseOpeningTag} : balise ouvrante (machine d'états donnée dans la Figure \ref{ref:pars_opening})
 	\item \texttt{parseClosingTag} : balise fermante
@@ -177,7 +184,7 @@ A la fin de l'analyse, le parser a construit une liste de \texttt{HTMLElement} q
 \ttseek{html.filter}
 Le filtrage des liens nous a posé pas mal de problèmes. En effet, étant donné la permissivité du langage HTML, les liens peuvent être relatifs ou absolus, avec ou sans protocole,... De plus, il se peut que le contenu de la balise \texttt{href} ne soit pas un lien vers une page web mais un lien vers une adresse mail (\texttt{mailto:...}) ou vers une fonction javascript (\texttt{javascript:...}). Enfin, l'adresse de référence des liens relatifs peut être différente de la racine du serveur selon que la balise \texttt{<base ...>} ait été déclarée ou non à l'intérieur des balises \texttt{head}. 
 \paragraph{}
-Étant donnée la complexité du problème, il nous a semblé judicieux de créer une classe dédiée à sa résolution : la classe \texttt{LinkFilter}. En plus de reconstruire une url absolue sur base de l'adresse d'une page web et d'un lien, cette classe permet aussi d'encoder une url et de construire le lien complet dirigeant vers le \textit{gateway}. Cette classe est utilisée dans la classe \texttt{HTMLPageFilter}.
+Étant donnée la complexité du problème, il nous a semblé judicieux de créer une classe dédiée à sa résolution : la classe \texttt{LinkFilter}. En plus de reconstruire une url absolue sur base de l'adresse d'une page web et d'un lien, cette classe permet aussi d'encoder une url et de construire le lien complet dirigeant vers le \textit{Gateway}. Cette classe est utilisée dans la classe \texttt{HTMLPageFilter}.
 \paragraph{}
 Cette dernière classe permet aussi de filtrer la page selon les critères précisés dans l'énoncé. Les différents états sont repris dans l'énumération \texttt{PageGatewayStatus}.
 
