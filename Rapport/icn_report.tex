@@ -86,13 +86,15 @@ Année académique 2013-2014\\
 \section{Software architecture}
 Le problème a été divisé en différents sous-problèmes que nous allons expliciter dans leur ordre temporel.
 
-	\subsection{Initialisation du Gateway}
+	\subsection{Vue globale de la solution}
+
+	\subsubsection{Initialisation du Gateway}
 Une instance de \texttt{Server} est créée au lancement de cette classe. Celle-ci crée une instance de \texttt{HTTPServer} et \texttt{ConfigurationServer} afin d'accepter les connexions entrantes vers le Gateway et la plate-forme de configuration. Elle récupère aussi le singleton \texttt{Displayer} servant à afficher des messages dans la console. Nous ne détaillerons pas la plate-forme de configuration.
 
-	\subsection{Récupération des connexions entrantes}
+	\subsubsection{Récupération des connexions entrantes}
 La classe \texttt{HTTPServer} récupère les connexions entrantes et lance un thread (si possible par la thread-pool) pour chacune d'entre-elles par l'intermédiaire de la classe \texttt{HTTPClientRequestThread} et ce, après l'acceptation de connexion du socket.
 
-	\subsection{Gestion des requêtes}
+	\subsubsection{Gestion des requêtes}
 La classe \texttt{HTTPClientRequestThread} instancie un objet \texttt{HTTPRequest} en prenant le socket en argument. Celui-ci va récupérer la requête du navigateur et la parser pour en récupérer les différentes informations, notamment la méthode et le chemin.
 
 \paragraph{}
@@ -105,9 +107,26 @@ Pour le chemin donné, on regarde si la page est déjà contenue dans le cache e
 
 \paragraph{}
 
-On clone ensuite la page récupérée (afin de ne pas altérer la page originale contenue dans le cache) puis on filtre la page en fonction des mots-clés interdits. Si la page doit être censurée, on renvoie une page informant d'utilisateur qu'il ne peut pas accéder à la page. Sinon, on envoie une réponse HTTP contenant la page voulue.
+On clone ensuite la page récupérée (afin de ne pas altérer la page originale contenue dans le cache) puis on filtre la page en fonction des mots-clés interdits. Cette étape est réalisée après la récupération de la page du cache ou du serveur distant. En effet, il est possible que la page ait été modifiée sur le serveur distant pendant le temps où celle-ci se trouvait dans le cache, amenant possiblement des mots-clés interdits et devant provoquer une censure, ce qui n'aurait alors pas été le cas, jusqu'au timeout dans le cache. Si la page doit être censurée, on renvoie une page informant d'utilisateur qu'il ne peut pas accéder à la page. Sinon, on envoie une réponse HTTP contenant la page voulue ou pas selon si on répond à une requête GET ou HEAD.
 
 
+
+	\subsection{Erreurs renvoyées par le Gateway}
+Voici une liste de différentes erreurs renvoyées par le Gateway ainsi que l'action qui les a déclenchées : 
+\begin{itemize}
+	\setlength{\itemsep}{5pt}
+	\item \textbf{Erreur 400 - Bad Request} : La requête du client n'a pu être lue (dû à la variable \texttt{s} manquante dans l'URL, argument de \texttt{s} vide,...)
+	\item \textbf{Erreur 501 - Not Implemented} : Lorsque la requête que l'on reçoit n'est ni GET ni HEAD ou lorsque le format de la page demandée n'est pas prise en charge.
+	\item 
+
+\end{itemize}
+
+\section{Multi-thread coordination}
+L'accès au cache est \textit{thread-safe}. En effet, le cache est implémenté avec la classe \texttt{ConcurrentHashMap} qui est \textit{thread-safe}. De plus, nous avons ajouté l'attribut \texttt{synchronized} aux méthodes de \texttt{Cache} agissant avec le cache. Si deux threads tentent d'accéder à une même page se trouvant dans le cache, ces deux threads recevront la même page, sans incohérence.
+\paragraph{}
+Le seul moment où le cache est modifié est lors l'insertion ou la mise à jour d'une page lorsqu'un utilisateur demande cette page. Supposons que deux utilisateurs souhaitent accéder à la même page ne se trouvant pas dans le cache. Les deux threads demanderont tous les deux au serveur distant après la page, filtreront les liens et attributs cités au point 1.1.3, et tenteront de l'insérer dans le cache. Un premier y parviendra avant l'autre, et ce deuxième ajout aura pour effet d'écraser la précédente. Cependant, ceci n'est pas un problème puisque l'on peut supposer que la page n'a pas changé entre les moments où les utilisateurs ont demandé la page, celle-ci est alors dans le même état pour chacun des threads.
+\paragraph{}
+On peut noter aussi que le clonage de l'élément contenu dans le cache ajoute un niveau de sécurité supplémentaire car, lorsque l'on modifie la page, le cache n'est pas modifié, cela n'a donc pas d'incidence sur les autres threads.
 
 
 
