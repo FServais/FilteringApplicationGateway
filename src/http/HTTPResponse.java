@@ -192,10 +192,10 @@ public class HTTPResponse {
 	/**
 	 * Send an HTTP response through the socket, depending of the code of the response and the method of the HTTP request.
 	 * @param socket Socket through which the message has to be sent.
-	 * @param method Method of the HTTP request
+	 * @param content Boolean that determine if the content as to be part of response or not
 	 * @throws IOException
 	 */
-	public void send(Socket socket, String method) throws IOException
+	public void send(Socket socket, boolean with_content) throws IOException
 	{
 		StringBuilder sb = new StringBuilder();
 		PrintWriter out = new PrintWriter(socket.getOutputStream()); 
@@ -226,7 +226,7 @@ public class HTTPResponse {
 		
 		sb.append(LINEBREAK);
 		
-		if(method.equals("GET"))
+		if(with_content)
 		{
 			sb.append(content);
 			sb.append(LINEBREAK);
