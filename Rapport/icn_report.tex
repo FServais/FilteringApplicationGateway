@@ -114,12 +114,15 @@ On clone ensuite la page récupérée (afin de ne pas altérer la page originale
 	\subsection{Erreurs renvoyées par le Gateway}
 Voici une liste de différentes erreurs renvoyées par le Gateway ainsi que l'action qui les a déclenchées : 
 \begin{itemize}
-	\setlength{\itemsep}{5pt}
+	\setlength{\itemsep}{6pt}
 	\item \textbf{Erreur 400 - Bad Request} : La requête du client n'a pu être lue (dû à la variable \texttt{s} manquante dans l'URL, argument de \texttt{s} vide,...)
-	\item \textbf{Erreur 501 - Not Implemented} : Lorsque la requête que l'on reçoit n'est ni GET ni HEAD ou lorsque le format de la page demandée n'est pas prise en charge.
-	\item 
-
+	\item \textbf{Erreur 500 - Internal Server Error} : Lorsqu'une erreur lors du parsage du code HTML a été rencontrée.
+	\item \textbf{Erreur 501 - Not Implemented} : La requête que l'on reçoit n'est ni GET ni HEAD ou lorsque le format de la page demandée n'est pas prise en charge.
+	\item \textbf{Erreur 502 - Bad Gateway} : Le serveur distant n'a pas pu être atteint.
+	\item \textbf{Erreur 504 - Gateway Timeout} : Le serveur distant a été trop lent à joindre ou à répondre.
 \end{itemize}
+\paragraph{}
+Lorsque le serveur distant répond et qu'il renvoie un code d'erreur HTTP, le Gateway transmet cette erreur au client.
 
 \section{Multi-thread coordination}
 L'accès au cache est \textit{thread-safe}. En effet, le cache est implémenté avec la classe \texttt{ConcurrentHashMap} qui est \textit{thread-safe}. De plus, nous avons ajouté l'attribut \texttt{synchronized} aux méthodes de \texttt{Cache} agissant avec le cache. Si deux threads tentent d'accéder à une même page se trouvant dans le cache, ces deux threads recevront la même page, sans incohérence.
