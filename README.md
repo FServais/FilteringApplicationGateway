@@ -10,5 +10,5 @@ The goal is to create a Java HTML filtering Gateway. The project has made realis
 - create a page when the requested page is not valid
 - manage the problematic responses from remote server
 
-## limitations
+## Limitations
 Wrong HTML formatting.
