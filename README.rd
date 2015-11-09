@@ -1,21 +1,14 @@
-# Known bugs
+# FilteringApplicationGateway
+The goal is to create a Java HTML filtering Gateway. The project has made realised in the context of the course of "Introduction to computer networking" at ULg.
 
-## HTMLPageFilter
-### filterLinks/filterImg
-- Filter CSS and script
-- Links rebuild sometimes fails
+## Authors 
+(2014)
+- Romain Mormont
+- Fabrice Servais
 
-## HTMLPage
-### parsing  
-- error with javascript <
-
-## HTTP parsing
-- seems OK
-
-
-# Further developement
+## Further developement
 - create a page when the requested page is not valid
 - manage the problematic responses from remote server
 
-
-limitations : mauvais formatage du code html
+## limitations
+Wrong HTML formatting.
